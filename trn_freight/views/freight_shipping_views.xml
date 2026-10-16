@@ -1,0 +1,172 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- ==================== LIST VIEW ==================== -->
+    <record id="view_freight_shipping_list" model="ir.ui.view">
+        <field name="name">freight.shipping.list</field>
+        <field name="model">freight.shipping</field>
+        <field name="arch" type="xml">
+            <list string="Freight Order">
+                <field name="name" string="Name"/>
+                <field name="order_type" string="Import/Export"/>
+                <field name="transport" string="Transport"/>
+                <field name="loading_port" string="Loading Port"/>
+                <field name="discharge_port_id" string="Discharging Port"/>
+                <field name="shipper_id" optional="hide"/>
+                <field name="consignee_id" optional="hide"/>
+                <field name="order_date" optional="hide"/>
+                <field name="expected_date" optional="hide"/>
+                <field name="state" optional="hide"/>
+            </list>
+        </field>
+    </record>
+
+    <!-- ==================== FORM VIEW ==================== -->
+    <record id="view_freight_shipping_form" model="ir.ui.view">
+        <field name="name">freight.shipping.form</field>
+        <field name="model">freight.shipping</field>
+        <field name="arch" type="xml">
+            <form string="Freight Order">
+                <!-- Header Buttons & Statusbar -->
+                <header>
+                    <button name="action_submit" string="Submit" type="object" class="btn-primary"
+                            invisible="state != 'draft'"/>
+                    <button name="action_confirm" string="Confirm" type="object" class="btn-primary"
+                            invisible="state != 'submitted'"/>
+                    <button name="action_invoice" string="Invoice" type="object" class="btn-primary"
+                            invisible="state != 'confirmed'"/>
+                    <button name="action_tracking" string="Tracking" type="object" class="btn-primary"
+                            invisible="state not in ('confirmed', 'invoiced')"/>
+                    <button name="action_done" string="Done" type="object" class="btn-primary"
+                            invisible="state not in ('confirmed', 'invoiced')"/>
+                    <button name="action_cancel" string="Cancel" type="object"
+                            invisible="state not in ('draft', 'submitted', 'confirmed')"/>
+                    <field name="state" widget="statusbar"
+                           statusbar_visible="draft,submitted,confirmed,invoiced,done,cancelled"/>
+                </header>
+
+                <sheet>
+                    <!-- Smart Buttons -->
+                    <div class="oe_button_box" name="button_box">
+                        <button name="action_view_clearance" type="object" class="oe_stat_button" icon="fa-id-card-o">
+                            <field name="clearance_count" widget="statinfo" string="Clearance"/>
+                        </button>
+                        <button name="action_view_invoices" type="object" class="oe_stat_button" icon="fa-pencil-square-o">
+                            <field name="invoice_count" widget="statinfo" string="Invoice"/>
+                        </button>
+                    </div>
+
+                    <!-- Title Area -->
+                    <div class="oe_title">
+                        <h1>
+                            <field name="name"/>
+                        </h1>
+                    </div>
+
+                    <field name="port_domain" invisible="1"/>
+
+                    <!-- Main Groups (2 columns without group titles, matching screenshot) -->
+                    <group>
+                        <!-- Left Column -->
+                        <group>
+                            <field name="shipper_id" readonly="state != 'draft'"/>
+                            <field name="consignee_id" readonly="state != 'draft'"/>
+                            <field name="order_date" readonly="state != 'draft'"/>
+                            <field name="loading_port" domain="port_domain" readonly="state != 'draft'"/>
+                            <field name="agent_id" readonly="state != 'draft'"/>
+                        </group>
+
+                        <!-- Right Column -->
+                        <group>
+                            <field name="order_type" readonly="state != 'draft'"/>
+                            <field name="transport" readonly="state != 'draft'"/>
+                            <field name="land_type" invisible="transport != 'land'"
+                                   required="transport == 'land'" readonly="state != 'draft'"/>
+                            <field name="sea_type" invisible="transport != 'water'"
+                                   required="transport == 'water'" readonly="state != 'draft'"/>
+                            <field name="discharge_port_id" domain="port_domain" readonly="state != 'draft'"/>
+                            <field name="expected_date" readonly="state != 'draft'"/>
+                        </group>
+                    </group>
+
+                    <!-- Notebook Section (4 Tabs) -->
+                    <notebook>
+                        <!-- Tab 1: Order (Cargo) -->
+                        <page string="Order" name="cargo">
+                            <field name="cargo_ids">
+                                <list editable="bottom">
+                                    <field name="container_id" domain="[('state', '=', 'available')]"/>
+                                    <field name="product_id"/>
+                                    <field name="billing_on"/>
+                                    <field name="pricing_id"/>
+                                    <field name="volume"/>
+                                    <field name="weight"/>
+                                    <field name="unit_price"/>
+                                    <field name="total_price"/>
+                                </list>
+                            </field>
+                            <group class="oe_subtotal_footer">
+                                <field name="total_volume"/>
+                                <field name="total_weight"/>
+                                <field name="cargo_total"/>
+                            </group>
+                        </page>
+
+                        <!-- Tab 2: Routes -->
+                        <page string="Routes" name="routes">
+                            <field name="route_ids">
+                                <list editable="bottom">
+                                    <field name="route_id" string="Routes"/>
+                                    <field name="source_port_id" string="Source Location"/>
+                                    <field name="destination_port_id" string="Destination Location"/>
+                                    <field name="transport" string="Transport"/>
+                                    <field name="sale" string="Sale"/>
+                                </list>
+                            </field>
+                            <group class="oe_subtotal_footer">
+                                <field name="routes_total"/>
+                            </group>
+                        </page>
+
+                        <!-- Tab 3: Services -->
+                        <page string="Services" name="services">
+                            <field name="service_ids">
+                                <list editable="bottom">
+                                    <field name="vendor_id" string="Vendor"/>
+                                    <field name="service_id" string="Service"/>
+                                    <field name="qty" string="Quantity"/>
+                                    <field name="sale" string="Sale"/>
+                                    <field name="total_sale" string="Total Sale"/>
+                                </list>
+                            </field>
+                            <group class="oe_subtotal_footer">
+                                <field name="service_total_sale"/>
+                            </group>
+                        </page>
+
+                        <!-- Tab 4: Track -->
+                        <page string="Track" name="track">
+                            <field name="track_ids">
+                                <list editable="bottom">
+                                    <field name="source_location_id" string="Source Location"/>
+                                    <field name="destination_location_id" string="Destination Location"/>
+                                    <field name="transport" string="Transport"/>
+                                    <field name="date" string="Date"/>
+                                    <field name="status" string="Received/Delivered"/>
+                                </list>
+                            </field>
+                        </page>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- ==================== WINDOW ACTION ==================== -->
+    <record id="action_freight_order" model="ir.actions.act_window">
+        <field name="name">Freight Order</field>
+        <field name="res_model">freight.shipping</field>
+        <field name="view_mode">list,form</field>
+    </record>
+
+</odoo>

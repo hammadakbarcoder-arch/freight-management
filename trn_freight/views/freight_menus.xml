@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <menuitem id="menu_freight_root" name="Freight" web_icon="trn_freight,static/description/icon.png"/>
+    <menuitem id="menu_freight_shipping" name="Shipping" parent="menu_freight_root" action="action_freight_order" sequence="10"/>
+    <menuitem id="menu_freight_configuration" name="Configuration" parent="menu_freight_root" sequence="100"/>
+
+    <menuitem id="menu_freight_port" name="Freight Port" parent="menu_freight_configuration" action="action_freight_port" sequence="10"/>
+    <menuitem id="menu_freight_container" name="Containers" parent="menu_freight_configuration" action="action_freight_container" sequence="20"/>
+    <menuitem id="menu_freight_price" name="Freight Price" parent="menu_freight_configuration" action="action_freight_price" sequence="25"/>
+    <menuitem id="menu_freight_routes" name="Routes" parent="menu_freight_configuration" action="action_freight_routes" sequence="30"/>
+    <menuitem id="menu_freight_service" name="Services" parent="menu_freight_configuration" action="action_freight_service" sequence="40"/>
+</odoo>
