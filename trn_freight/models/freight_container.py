@@ -23,4 +23,4 @@ class FreightContainer(models.Model):
     ], string='Status', default='available', required=True)
 
     active = fields.Boolean(string='Active', default=True, help='If unchecked, it will allow you to hide the container without removing it.')
-   # company_id = fields.Many2one('res.company', string='Company', default=lambda self: self.env.company)
+    company_id = fields.Many2one('res.company', string='Company', default=lambda self: self.env.company)

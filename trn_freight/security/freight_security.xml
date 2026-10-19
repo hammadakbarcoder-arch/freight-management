@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="module_category_freight" model="ir.module.category">
+        <field name="name">Freight</field>
+        <field name="sequence">20</field>
+    </record>
+
+    <record id="res_groups_privilege_freight" model="res.groups.privilege">
+        <field name="name">Freight</field>
+        <field name="category_id" ref="module_category_freight"/>
+    </record>
+
+    <record id="group_freight_manager" model="res.groups">
+        <field name="name">Freight Manager</field>
+        <field name="privilege_id" ref="res_groups_privilege_freight"/>
+        <field name="implied_ids" eval="[(4, ref('base.group_user'))]"/>
+    </record>
+    <!--port-->
+    <record id="freight_port_comp_rule" model="ir.rule">
+        <field name="name">Freight Port Multi-Company</field>
+        <field name="model_id" ref="model_freight_port"/>
+        <field name="domain_force">['|', ('company_id', '=', False), ('company_id', 'in', company_ids)]</field>
+    </record>
+    <!--containers-->
+        <record id="freight_container_comp_rule" model="ir.rule">
+        <field name="name">Freight Container Multi-Company</field>
+        <field name="model_id" ref="model_freight_container"/>
+        <field name="domain_force">['|', ('company_id', '=', False), ('company_id', 'in', company_ids)]</field>
+    </record>
+    <!--price-->
+        <record id="freight_price_comp_rulr" model="ir.rule">
+            <field name="name">Freight Price Multi_company</field>
+            <field name="model_id" ref="model_freight_price"/>
+            <field name="domain_force">['|', ('company_id', '=', False), ('company_id', 'in', company_ids)]</field>
+        </record>
+    <!--routes-->
+    <record id="freight_route_comp_rulr" model="ir.rule">
+            <field name="name">Freight Route Multi_company</field>
+            <field name="model_id" ref="model_freight_price"/>
+            <field name="domain_force">['|', ('company_id', '=', False), ('company_id', 'in', company_ids)]</field>
+        </record>
+    <!--services-->
+    <record id="freight_services_comp_rulr" model="ir.rule">
+            <field name="name">Freight Services Multi_company</field>
+            <field name="model_id" ref="model_freight_price"/>
+            <field name="domain_force">['|', ('company_id', '=', False), ('company_id', 'in', company_ids)]</field>
+        </record>
+</odoo>

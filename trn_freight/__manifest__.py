@@ -8,6 +8,7 @@
     'license': 'LGPL-3',
     'depends': ['base', 'web', 'uom', 'mail', 'product'],
     'data': [
+        'security/freight_security.xml',
         'security/ir.model.access.csv',
         'data/ir_sequence_data.xml',
         'views/freight_port_views.xml',
