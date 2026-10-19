@@ -6,18 +6,16 @@ PORT_FLAG = {'land': 'is_land', 'air': 'is_air', 'water': 'is_water'}
 TRANSPORT_LABEL = {'land': 'Land', 'air': 'Air', 'water': 'Water'}
 
 
-# =====================================================================
 # Main Model: Freight Shipping
-# =====================================================================
 class FreightShipping(models.Model):
     _name = 'freight.shipping'
     _description = 'Freight Order'
     _inherit = ['mail.thread', 'mail.activity.mixin']
 
-    # Header / Sequence Number
+    # Header
     name = fields.Char(string="Name", default="New", readonly=True, copy=False)
 
-    # Left Column Fields
+    # Left
     shipper_id = fields.Many2one(
         'res.partner', string="Shipper", required=True, tracking=True, copy=False,
         help="The party that sends the goods (Sender/Exporter).")
