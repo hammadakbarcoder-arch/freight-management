@@ -14,6 +14,9 @@ class FreightShipping(models.Model):
 
     # Header
     name = fields.Char(string="Name", default="New", readonly=True, copy=False)
+    company_id = fields.Many2one(
+        'res.company', string='Company', required=True,
+        default=lambda self: self.env.company)
 
     # Left
     shipper_id = fields.Many2one(
@@ -125,6 +128,17 @@ class FreightShipping(models.Model):
         self.loading_port = False
         self.discharge_port_id = False
 
+    @api.constrains('loading_port', 'discharge_port_id', 'transport')
+    def _check_order_ports_transport(self):
+        for rec in self:
+            flag = PORT_FLAG.get(rec.transport)
+            if not flag:
+                continue
+            for port in (rec.loading_port | rec.discharge_port_id):
+                if port and not port[flag]:
+                    raise ValidationError(
+                        f"Port '{port.name}' does not handle {TRANSPORT_LABEL[rec.transport]} transport.")
+
     def _ensure_state(self, allowed, action):
         labels = dict(self._fields['state'].selection)
         for rec in self:
@@ -141,6 +155,7 @@ class FreightShipping(models.Model):
     def action_confirm(self):
         self._ensure_state(['submitted'], 'confirmed')
         self.write({'state': 'confirmed'})
+        self.cargo_ids.mapped('container_id').write({'state': 'reserved'})
 
     def action_invoice(self):
         self._ensure_state(['confirmed'], 'invoiced')
@@ -149,10 +164,17 @@ class FreightShipping(models.Model):
     def action_done(self):
         self._ensure_state(['confirmed', 'invoiced'], 'marked as done')
         self.write({'state': 'done'})
+        self.cargo_ids.mapped('container_id').write({'state': 'available'})
 
     def action_cancel(self):
         self._ensure_state(['draft', 'submitted', 'confirmed'], 'cancelled')
         self.write({'state': 'cancelled'})
+
+    @api.ondelete(at_uninstall=False)
+    def _unlink_except_confirmed(self):
+        for rec in self:
+            if rec.state not in ('draft', 'cancelled'):
+                raise UserError("You cannot delete a submitted or confirmed order.")
 
     def action_view_clearance(self):
         return True
@@ -185,6 +207,7 @@ class FreightOrderCargo(models.Model):
     _description = 'Freight Order Cargo Line'
 
     order_id = fields.Many2one('freight.shipping', required=True, ondelete='cascade')
+    company_id = fields.Many2one('res.company', related='order_id.company_id', store=True, readonly=True)
     container_id = fields.Many2one('freight.container', string='Container', required=True)
     product_id = fields.Many2one('product.product', string='Goods', required=True)
     billing_on = fields.Selection(
@@ -224,6 +247,7 @@ class FreightOrderRoute(models.Model):
     _description = 'Freight Order Route Line'
 
     order_id = fields.Many2one('freight.shipping', required=True, ondelete='cascade')
+    company_id = fields.Many2one('res.company', related='order_id.company_id', store=True, readonly=True)
     route_id = fields.Many2one('freight.routes', string='Route', required=True)
     source_port_id = fields.Many2one('freight.port', string='Source Location', required=True)
     destination_port_id = fields.Many2one('freight.port', string='Destination Location', required=True)
@@ -257,6 +281,7 @@ class FreightOrderService(models.Model):
     _description = 'Freight Order Service Line'
 
     order_id = fields.Many2one('freight.shipping', required=True, ondelete='cascade')
+    company_id = fields.Many2one('res.company', related='order_id.company_id', store=True, readonly=True)
     vendor_id = fields.Many2one('res.partner', string='Vendor', required=True)
     service_id = fields.Many2one('freight.service', string='Service', required=True)
     qty = fields.Float(string='Quantity', default=1.0)
@@ -285,6 +310,7 @@ class FreightOrderTrack(models.Model):
     _description = 'Freight Order Track Line'
 
     order_id = fields.Many2one('freight.shipping', required=True, ondelete='cascade')
+    company_id = fields.Many2one('res.company', related='order_id.company_id', store=True, readonly=True)
     source_location_id = fields.Many2one('freight.port', string='Source Location', required=True)
     destination_location_id = fields.Many2one('freight.port', string='Destination Location', required=True)
     transport = fields.Selection(
