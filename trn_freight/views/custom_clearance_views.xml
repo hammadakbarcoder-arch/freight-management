@@ -1,0 +1,126 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- ==================== 1. CUSTOM CLEARANCE LIST VIEW ==================== -->
+    <record id="view_custom_clearance_list" model="ir.ui.view">
+        <field name="name">custom.clearance.list</field>
+        <field name="model">custom.clearance</field>
+        <field name="arch" type="xml">
+            <list string="Custom Clearance">
+                <field name="name" string="Name"/>
+                <field name="freight_id" string="Freight Order"/>
+            </list>
+        </field>
+    </record>
+
+    <!-- ==================== 2. CUSTOM CLEARANCE FORM VIEW ==================== -->
+    <record id="view_custom_clearance_form" model="ir.ui.view">
+        <field name="name">custom.clearance.form</field>
+        <field name="model">custom.clearance</field>
+        <field name="arch" type="xml">
+            <form string="Custom Clearance">
+                <header>
+                    <button name="action_confirm" string="Confirm" type="object"
+                            class="btn-primary" invisible="state != 'draft'"/>
+                    <button name="action_done" string="Done" type="object"
+                            class="btn-primary" invisible="state != 'confirmed'"/>
+                    <button name="action_open_revision_wizard" string="Revision" type="object"
+                            class="btn-primary" invisible="state == 'done'"/>
+                    <field name="state" widget="statusbar" statusbar_visible="draft,confirmed,done"/>
+                </header>
+                <sheet>
+                    <div class="oe_button_box" name="button_box">
+                        <button name="action_view_revisions" type="object"
+                                class="oe_stat_button" icon="fa-bars">
+                            <field name="revision_count" widget="statinfo" string="Revisions"/>
+                        </button>
+                    </div>
+
+                    <group>
+                        <group>
+                            <field name="name"/>
+                            <field name="freight_id" readonly="state != 'draft'"/>
+                            <field name="date" readonly="state != 'draft'"/>
+                            <field name="agent_id" readonly="state != 'draft'"/>
+                        </group>
+                        <group>
+                            <field name="loading_port_id" readonly="state != 'draft'"/>
+                            <field name="discharge_port_id" readonly="state != 'draft'"/>
+                        </group>
+                    </group>
+
+                    <notebook>
+                        <page string="Custom Clearance" name="documents">
+                            <field name="line_ids" readonly="state == 'done'">
+                                <list editable="bottom">
+                                    <field name="name" string="Document Name"/>
+                                    <field name="document" string="File" filename="file_name"/>
+                                    <field name="file_name" column_invisible="1"/>
+                                </list>
+                            </field>
+                        </page>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- ==================== 3. REVISION LIST & FORM VIEW ==================== -->
+    <record id="view_clearance_revision_list" model="ir.ui.view">
+        <field name="name">clearance.revision.list</field>
+        <field name="model">clearance.revision</field>
+        <field name="arch" type="xml">
+            <list string="Clearance Revisions">
+                <field name="name"/>
+                <field name="clearance_id"/>
+                <field name="reason"/>
+                <field name="note"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_clearance_revision_form" model="ir.ui.view">
+        <field name="name">clearance.revision.form</field>
+        <field name="model">clearance.revision</field>
+        <field name="arch" type="xml">
+            <form string="Clearance Revision">
+                <sheet>
+                    <group>
+                        <field name="name" readonly="1"/>
+                        <field name="clearance_id" readonly="1"/>
+                        <field name="reason" readonly="1"/>
+                        <field name="note" readonly="1"/>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- ==================== 4. REVISION WIZARD FORM VIEW ==================== -->
+    <record id="view_custom_clearance_revision_wizard_form" model="ir.ui.view">
+        <field name="name">custom.clearance.revision.wizard.form</field>
+        <field name="model">custom.clearance.revision</field>
+        <field name="arch" type="xml">
+            <form string="Clearance Revision">
+                <group>
+                    <field name="clearance_id" invisible="1"/>
+                    <field name="reason" placeholder="Enter revision reason..."/>
+                    <field name="note" placeholder="Additional notes..."/>
+                </group>
+                <footer>
+                    <button name="action_create_revision" string="Create Revision"
+                            type="object" class="btn-primary"/>
+                    <button string="Cancel" class="btn-secondary" special="cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+    <!-- ==================== 5. WINDOW ACTION ==================== -->
+    <record id="action_custom_clearance" model="ir.actions.act_window">
+        <field name="name">Custom Clearance</field>
+        <field name="res_model">custom.clearance</field>
+        <field name="view_mode">list,form</field>
+    </record>
+
+</odoo>

@@ -2,7 +2,7 @@
 {
     'name': 'Freight Management System',
     'version': '19.0.1.0.0',
-    'summary': 'Manage Freight Ports, Containers, Prices, Routes, and Services',
+    'summary': 'Manage Freight Ports, Containers, Prices, Routes, Services, and Customs Clearance',
     'category': 'Logistics',
     'author': 'Hammad',
     'license': 'LGPL-3',
@@ -17,6 +17,7 @@
         'views/freight_service_views.xml',
         'views/freight_routes_views.xml',
         'views/freight_shipping_views.xml',
+        'views/custom_clearance_views.xml',
         'views/freight_menus.xml',
     ],
     'installable': True,

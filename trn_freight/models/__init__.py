@@ -4,3 +4,4 @@ from . import freight_price
 from . import freight_service
 from . import freight_routes
 from . import freight_shipping
+from . import custom_clearance

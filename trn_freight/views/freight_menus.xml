@@ -1,7 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
-    <menuitem id="menu_freight_root" name="Freight" web_icon="trn_freight,static/description/icon.png"/>
+    <menuitem id="menu_freight_root" name="Freight Management" web_icon="trn_freight,static/description/icon.png"/>
     <menuitem id="menu_freight_shipping" name="Shipping" parent="menu_freight_root" action="action_freight_order" sequence="10"/>
+
+    <menuitem id="menu_freight_custom_root" name="Custom" parent="menu_freight_root" sequence="20"/>
+    <menuitem id="menu_custom_clearance" name="Custom Clearance" parent="menu_freight_custom_root" action="action_custom_clearance" sequence="10"/>
+
     <menuitem id="menu_freight_configuration" name="Configuration" parent="menu_freight_root" sequence="100"/>
 
     <menuitem id="menu_freight_port" name="Freight Port" parent="menu_freight_configuration" action="action_freight_port" sequence="10"/>

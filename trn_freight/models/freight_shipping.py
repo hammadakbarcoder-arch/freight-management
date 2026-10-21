@@ -68,8 +68,15 @@ class FreightShipping(models.Model):
         default='draft', required=True, tracking=True, copy=False)
 
     # Smart Button Counters
-    clearance_count = fields.Integer(string="Clearance Count", default=0)
+    clearance_ids = fields.One2many('custom.clearance', 'freight_id', string='Clearances')
+    clearance_count = fields.Integer(
+        string="Clearance Count", compute='_compute_clearance_count')
     invoice_count = fields.Integer(string="Invoice Count", default=0)
+
+    @api.depends('clearance_ids')
+    def _compute_clearance_count(self):
+        for rec in self:
+            rec.clearance_count = len(rec.clearance_ids)
 
     # Child Lines Relations
     cargo_ids = fields.One2many('freight.order.cargo', 'order_id', string='Cargo')
@@ -154,6 +161,11 @@ class FreightShipping(models.Model):
 
     def action_confirm(self):
         self._ensure_state(['submitted'], 'confirmed')
+        for rec in self:
+            if not rec.clearance_ids:
+                raise UserError("Cannot confirm order: No Customs Clearance found for this order.")
+            if any(c.state == 'draft' for c in rec.clearance_ids):
+                raise UserError("Cannot confirm order: Customs Clearance is still in Draft state.")
         self.write({'state': 'confirmed'})
         self.cargo_ids.mapped('container_id').write({'state': 'reserved'})
 
@@ -175,10 +187,50 @@ class FreightShipping(models.Model):
         for rec in self:
             if rec.state not in ('draft', 'cancelled'):
                 raise UserError("You cannot delete a submitted or confirmed order.")
+            if any(c.state in ('confirmed', 'done') for c in rec.clearance_ids):
+                raise UserError("You cannot delete an order with a confirmed clearance.")
+
+    def action_create_clearance(self):
+        self.ensure_one()
+        clearance = self.clearance_ids[:1]
+        if not clearance:
+            clearance = self.env['custom.clearance'].create({
+                'freight_id': self.id,
+                'date': self.order_date,
+                'agent_id': self.agent_id.id,
+                'loading_port_id': self.loading_port.id,
+                'discharge_port_id': self.discharge_port_id.id,
+                'company_id': self.company_id.id,
+            })
+        return {
+            'name': 'Custom Clearance',
+            'type': 'ir.actions.act_window',
+            'res_model': 'custom.clearance',
+            'res_id': clearance.id,
+            'view_mode': 'form',
+            'target': 'current',
+        }
 
     def action_view_clearance(self):
-        return True
-
+        self.ensure_one()
+        clearance = self.clearance_ids[:1]
+        if len(self.clearance_ids) == 1:
+            return {
+                'name': 'Custom Clearance',
+                'type': 'ir.actions.act_window',
+                'res_model': 'custom.clearance',
+                'res_id': clearance.id,
+                'view_mode': 'form',
+                'target': 'current',
+            }
+        return {
+            'name': 'Custom Clearances',
+            'type': 'ir.actions.act_window',
+            'res_model': 'custom.clearance',
+            'view_mode': 'list,form',
+            'domain': [('freight_id', '=', self.id)],
+            'context': {'default_freight_id': self.id},
+        }
     def action_view_invoices(self):
         return True
 
@@ -197,7 +249,6 @@ class FreightShipping(models.Model):
                 'default_transport': self.transport,
             }
         }
-
 
 # =====================================================================
 # Child Model 1: Cargo Lines (TAB 1: Order)

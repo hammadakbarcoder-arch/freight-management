@@ -57,12 +57,20 @@ class TestFreightOrder(TransactionCase):
         return self.env['freight.shipping'].create({
             'shipper_id': self.partner.id,
             'consignee_id': self.partner.id,
+            'agent_id': self.partner.id,
             'order_type': 'export',
             'transport': 'land',
             'land_type': 'ftl',
             'loading_port': self.land_port_1.id,
             'discharge_port_id': self.land_port_2.id,
         })
+
+    def _create_and_confirm_clearance(self, order):
+        """Helper to create and confirm customs clearance for an order."""
+        order.action_create_clearance()
+        clearance = order.clearance_ids[:1]
+        clearance.action_confirm()
+        return clearance
 
     def test_01_totals_calculated_correctly(self):
         """Test 1: Totals are calculated correctly."""
@@ -115,6 +123,9 @@ class TestFreightOrder(TransactionCase):
         order.action_submit()
         self.assertEqual(order.state, 'submitted')
 
+        # Confirm clearance first as required by Task 6
+        self._create_and_confirm_clearance(order)
+
         order.action_confirm()
         self.assertEqual(order.state, 'confirmed')
         self.assertNotEqual(self.container.state, 'available')
@@ -138,7 +149,78 @@ class TestFreightOrder(TransactionCase):
         """Test 4: Deleting a confirmed order is refused."""
         order = self._create_order()
         order.action_submit()
+        self._create_and_confirm_clearance(order)
         order.action_confirm()
 
         with self.assertRaises(UserError):
             order.unlink()
+
+    def test_05_order_confirm_requires_confirmed_clearance(self):
+        """Task 6: Order Confirm refuses if no clearance or clearance is still Draft."""
+        order = self._create_order()
+        order.action_submit()
+
+        # 1. Refused when no clearance exists
+        with self.assertRaises(UserError):
+            order.action_confirm()
+
+        # 2. Create clearance (still in 'draft') -> Order Confirm still refused
+        action = order.action_create_clearance()
+        clearance = self.env['custom.clearance'].browse(action['res_id'])
+        self.assertEqual(clearance.state, 'draft')
+        self.assertEqual(order.clearance_count, 1)
+
+        # Calling action_create_clearance again opens the existing clearance (does not duplicate)
+        action_again = order.action_create_clearance()
+        self.assertEqual(action_again['res_id'], clearance.id)
+        self.assertEqual(order.clearance_count, 1)
+
+        with self.assertRaises(UserError):
+            order.action_confirm()
+
+        # 3. Upload document, confirm clearance -> Order Confirm succeeds
+        self.env['custom.clearance.line'].create({
+            'clearance_id': clearance.id,
+            'name': 'Bill of Lading',
+            'document': b'dGVzdCBpdf==',
+        })
+        clearance.action_confirm()
+        self.assertEqual(clearance.state, 'confirmed')
+
+        order.action_confirm()
+        self.assertEqual(order.state, 'confirmed')
+
+    def test_06_clearance_revision_wizard(self):
+        """Task 6: The revision wizard creates a revision with the reason."""
+        order = self._create_order()
+        order.action_create_clearance()
+        clearance = order.clearance_ids[:1]
+
+        self.assertEqual(clearance.revision_count, 0)
+
+        wizard = self.env['custom.clearance.revision'].create({
+            'clearance_id': clearance.id,
+            'reason': 'HS Code correction',
+            'note': 'Updated tariff heading on line 2',
+        })
+        wizard.action_create_revision()
+
+        self.assertEqual(clearance.revision_count, 1)
+        self.assertEqual(clearance.revision_ids.reason, 'HS Code correction')
+
+    def test_07_delete_order_clearance_rules(self):
+        """Task 6: Deleting Draft order deletes Draft clearance; confirmed clearance refuses order deletion."""
+        # Case A: Draft order + Draft clearance -> both deleted
+        order_draft = self._create_order()
+        order_draft.action_create_clearance()
+        draft_clearance = order_draft.clearance_ids[:1]
+        self.assertTrue(draft_clearance.exists())
+
+        order_draft.unlink()
+        self.assertFalse(draft_clearance.exists())
+
+        # Case B: Draft order + Confirmed clearance -> unlink refused
+        order_with_conf_cc = self._create_order()
+        self._create_and_confirm_clearance(order_with_conf_cc)
+        with self.assertRaises(UserError):
+            order_with_conf_cc.unlink()
