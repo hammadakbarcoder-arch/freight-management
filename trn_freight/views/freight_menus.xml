@@ -9,8 +9,8 @@
     <menuitem id="menu_freight_configuration" name="Configuration" parent="menu_freight_root" sequence="100"/>
 
     <menuitem id="menu_freight_port" name="Freight Port" parent="menu_freight_configuration" action="action_freight_port" sequence="10"/>
-    <menuitem id="menu_freight_container" name="Containers" parent="menu_freight_configuration" action="action_freight_container" sequence="20"/>
-    <menuitem id="menu_freight_price" name="Freight Price" parent="menu_freight_configuration" action="action_freight_price" sequence="25"/>
-    <menuitem id="menu_freight_routes" name="Routes" parent="menu_freight_configuration" action="action_freight_routes" sequence="30"/>
+    <menuitem id="menu_freight_container" name="Containers" parent="menu_freight_configuration" action="action_freight_container" sequence="25"/>
+    <menuitem id="menu_freight_price" name="Freight Price" parent="menu_freight_configuration" action="action_freight_price" sequence="15"/>
+    <menuitem id="menu_freight_routes" name="Routes" parent="menu_freight_configuration" action="action_freight_routes" sequence="20"/>
     <menuitem id="menu_freight_service" name="Services" parent="menu_freight_configuration" action="action_freight_service" sequence="40"/>
 </odoo>
