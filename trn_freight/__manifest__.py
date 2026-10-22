@@ -6,7 +6,7 @@
     'category': 'Logistics',
     'author': 'Hammad',
     'license': 'LGPL-3',
-    'depends': ['base', 'web', 'uom', 'mail', 'product'],
+    'depends': ['base', 'web', 'uom', 'mail', 'product','account'],
     'data': [
         'security/freight_security.xml',
         'security/ir.model.access.csv',

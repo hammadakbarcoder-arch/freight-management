@@ -1,16 +1,104 @@
 import json
-from odoo import api, fields, models
+from markupsafe import Markup
+from odoo import Command, api, fields, models
 from odoo.exceptions import UserError, ValidationError
 
 PORT_FLAG = {'land': 'is_land', 'air': 'is_air', 'water': 'is_water'}
 TRANSPORT_LABEL = {'land': 'Land', 'air': 'Air', 'water': 'Water'}
 
 
+# =====================================================================
 # Main Model: Freight Shipping
+# =====================================================================
 class FreightShipping(models.Model):
     _name = 'freight.shipping'
     _description = 'Freight Order'
     _inherit = ['mail.thread', 'mail.activity.mixin']
+
+    def _notify_partners(self, action_name):
+        for rec in self:
+            partners = (rec.shipper_id | rec.consignee_id | rec.agent_id).ids
+            if partners:
+                msg = Markup(f"Freight Order <b>{rec.name}</b> has been <b>{action_name}</b>.")
+                rec.message_post(
+                    body=msg,
+                    partner_ids=partners,
+                    subtype_xmlid='mail.mt_comment'
+                )
+
+    def action_create_invoice(self):
+        self._ensure_state(['confirmed'], 'invoiced')
+        for rec in self:
+            invoice_lines = []
+
+            # 1. Cargo Lines add karein
+            for cargo in rec.cargo_ids:
+                qty = cargo.weight if cargo.billing_on == 'weight' else cargo.volume
+                price = cargo.unit_price
+                invoice_lines.append(Command.create({
+                    'name': f"Cargo: {cargo.product_id.display_name} ({cargo.container_id.name})",
+                    'product_id': cargo.product_id.id,
+                    'quantity': qty or 1.0,
+                    'price_unit': price,
+                    'tax_ids': [Command.clear()],
+                }))
+
+            # 2. Route Lines add karein
+            for route in rec.route_ids:
+                invoice_lines.append(Command.create({
+                    'name': f"Route: {route.route_id.name} ({route.source_port_id.name} -> {route.destination_port_id.name})",
+                    'quantity': 1.0,
+                    'price_unit': route.sale,
+                    'tax_ids': [Command.clear()],
+                }))
+
+            # 3. Service Lines add karein
+            for srv in rec.service_ids:
+                invoice_lines.append(Command.create({
+                    'name': f"Service: {srv.service_id.name} (Vendor: {srv.vendor_id.name})",
+                    'quantity': srv.qty,
+                    'price_unit': srv.sale,
+                    'tax_ids': [Command.clear()],
+                }))
+
+            # 4. Customer Invoice Create karein
+            move = self.env['account.move'].create({
+                'move_type': 'out_invoice',
+                'partner_id': rec.shipper_id.id,
+                'invoice_origin': rec.name,
+                'company_id': rec.company_id.id,
+                'invoice_date': fields.Date.context_today(self),
+                'invoice_line_ids': invoice_lines,
+            })
+
+            # 5. Order ko Invoiced state par move karein aur invoice link karein
+            rec.write({
+                'state': 'invoiced',
+                'invoice_ids': [Command.link(move.id)],
+            })
+
+        return self.action_view_invoices()
+
+    def action_view_invoices(self):
+        self.ensure_one()
+        invoices = self.invoice_ids
+        action = {
+            'name': 'Customer Invoices',
+            'type': 'ir.actions.act_window',
+            'res_model': 'account.move',
+            'context': {'default_move_type': 'out_invoice'},
+        }
+        if len(invoices) == 1:
+            action.update({
+                'view_mode': 'form',
+                'res_id': invoices.id,
+            })
+        else:
+            action.update({
+                'view_mode': 'list,form',
+                'domain': [('id', 'in', invoices.ids)],
+            })
+        return action
 
     # Header
     name = fields.Char(string="Name", default="New", readonly=True, copy=False)
@@ -71,7 +159,14 @@ class FreightShipping(models.Model):
     clearance_ids = fields.One2many('custom.clearance', 'freight_id', string='Clearances')
     clearance_count = fields.Integer(
         string="Clearance Count", compute='_compute_clearance_count')
-    invoice_count = fields.Integer(string="Invoice Count", default=0)
+
+    invoice_ids = fields.Many2many('account.move', string='Invoices', copy=False)
+    invoice_count = fields.Integer(string="Invoice Count", compute='_compute_invoice_count')
+
+    @api.depends('invoice_ids')
+    def _compute_invoice_count(self):
+        for rec in self:
+            rec.invoice_count = len(rec.invoice_ids)
 
     @api.depends('clearance_ids')
     def _compute_clearance_count(self):
@@ -158,6 +253,7 @@ class FreightShipping(models.Model):
     def action_submit(self):
         self._ensure_state(['draft'], 'submitted')
         self.write({'state': 'submitted'})
+        self._notify_partners('submitted')
 
     def action_confirm(self):
         self._ensure_state(['submitted'], 'confirmed')
@@ -168,6 +264,7 @@ class FreightShipping(models.Model):
                 raise UserError("Cannot confirm order: Customs Clearance is still in Draft state.")
         self.write({'state': 'confirmed'})
         self.cargo_ids.mapped('container_id').write({'state': 'reserved'})
+        self._notify_partners('confirmed')
 
     def action_invoice(self):
         self._ensure_state(['confirmed'], 'invoiced')
@@ -177,6 +274,7 @@ class FreightShipping(models.Model):
         self._ensure_state(['confirmed', 'invoiced'], 'marked as done')
         self.write({'state': 'done'})
         self.cargo_ids.mapped('container_id').write({'state': 'available'})
+        self._notify_partners('Done')
 
     def action_cancel(self):
         self._ensure_state(['draft', 'submitted', 'confirmed'], 'cancelled')
@@ -231,15 +329,13 @@ class FreightShipping(models.Model):
             'domain': [('freight_id', '=', self.id)],
             'context': {'default_freight_id': self.id},
         }
-    def action_view_invoices(self):
-        return True
 
     def action_tracking(self):
         self.ensure_one()
         return {
             'name': 'Track Order',
             'type': 'ir.actions.act_window',
-            'res_model': 'freight.order.track.wizard',
+            'res_model': 'freight.order.track',
             'view_mode': 'form',
             'target': 'new',
             'context': {
@@ -249,6 +345,7 @@ class FreightShipping(models.Model):
                 'default_transport': self.transport,
             }
         }
+
 
 # =====================================================================
 # Child Model 1: Cargo Lines (TAB 1: Order)
@@ -269,6 +366,27 @@ class FreightOrderCargo(models.Model):
     volume = fields.Float(string='Volume')
     unit_price = fields.Float(compute='_compute_prices', store=True, string='Unit Price')
     total_price = fields.Float(compute='_compute_prices', store=True, string='Total Price')
+
+    @api.model_create_multi
+    def create(self, vals_list):
+        for vals in vals_list:
+            if vals.get('order_id'):
+                order = self.env['freight.shipping'].browse(vals['order_id'])
+                if order.state in ('confirmed', 'invoiced', 'done'):
+                    raise UserError("You cannot add cargo lines to a confirmed or completed order.")
+        return super().create(vals_list)
+
+    def write(self, vals):
+        for line in self:
+            if line.order_id.state in ('confirmed', 'invoiced', 'done'):
+                raise UserError("You cannot modify cargo lines on a confirmed or completed order.")
+        return super().write(vals)
+
+    def unlink(self):
+        for line in self:
+            if line.order_id.state in ('confirmed', 'invoiced', 'done'):
+                raise UserError("You cannot delete cargo lines from a confirmed or completed order.")
+        return super().unlink()
 
     @api.depends('billing_on', 'pricing_id.weight_price', 'pricing_id.volume_price',
                  'weight', 'volume')
@@ -305,6 +423,27 @@ class FreightOrderRoute(models.Model):
     transport = fields.Selection(related='order_id.transport', store=True, string='Transport')
     sale = fields.Float(compute='_compute_sale', store=True, string='Sale')
 
+    @api.model_create_multi
+    def create(self, vals_list):
+        for vals in vals_list:
+            if vals.get('order_id'):
+                order = self.env['freight.shipping'].browse(vals['order_id'])
+                if order.state in ('invoiced', 'done'):
+                    raise UserError("You cannot add route lines to an invoiced or completed order.")
+        return super().create(vals_list)
+
+    def write(self, vals):
+        for line in self:
+            if line.order_id.state in ('invoiced', 'done'):
+                raise UserError("You cannot modify route lines on an invoiced or completed order.")
+        return super().write(vals)
+
+    def unlink(self):
+        for line in self:
+            if line.order_id.state in ('invoiced', 'done'):
+                raise UserError("You cannot delete route lines from an invoiced or completed order.")
+        return super().unlink()
+
     @api.depends('route_id', 'transport',
                  'route_id.land_price', 'route_id.air_price', 'route_id.water_price')
     def _compute_sale(self):
@@ -339,6 +478,27 @@ class FreightOrderService(models.Model):
     sale = fields.Float(string='Sale')
     total_sale = fields.Float(compute='_compute_total_sale', store=True, string='Total Sale')
 
+    @api.model_create_multi
+    def create(self, vals_list):
+        for vals in vals_list:
+            if vals.get('order_id'):
+                order = self.env['freight.shipping'].browse(vals['order_id'])
+                if order.state in ('invoiced', 'done'):
+                    raise UserError("You cannot add service lines to an invoiced or completed order.")
+        return super().create(vals_list)
+
+    def write(self, vals):
+        for line in self:
+            if line.order_id.state in ('invoiced', 'done'):
+                raise UserError("You cannot modify service lines on an invoiced or completed order.")
+        return super().write(vals)
+
+    def unlink(self):
+        for line in self:
+            if line.order_id.state in ('invoiced', 'done'):
+                raise UserError("You cannot delete service lines from an invoiced or completed order.")
+        return super().unlink()
+
     @api.onchange('service_id', 'vendor_id')
     def _onchange_service_id(self):
         if self.service_id:
@@ -371,3 +531,21 @@ class FreightOrderTrack(models.Model):
     status = fields.Selection(
         [('received', 'Received'), ('delivered', 'Delivered')],
         string='Received/Delivered', required=True)
+
+    @api.model_create_multi
+    def create(self, vals_list):
+        records = super().create(vals_list)
+        for rec in records:
+            if rec.order_id:
+                partners = (rec.order_id.shipper_id | rec.order_id.consignee_id | rec.order_id.agent_id).ids
+                status_label = dict(rec._fields['status'].selection).get(rec.status, rec.status)
+                msg = Markup(
+                    f"<b>Tracking Update:</b> Shipment status changed to <b>{status_label}</b> "
+                    f"from {rec.source_location_id.name} to {rec.destination_location_id.name} on {rec.date}."
+                )
+                rec.order_id.message_post(
+                    body=msg,
+                    partner_ids=partners,
+                    subtype_xmlid='mail.mt_comment'
+                )
+        return records

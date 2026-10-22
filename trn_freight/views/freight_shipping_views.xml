@@ -21,6 +21,29 @@
         </field>
     </record>
 
+
+    <record id="view_freight_order_track_form" model="ir.ui.view">
+        <field name="name">freight.order.track.form</field>
+        <field name="model">freight.order.track</field>
+        <field name="arch" type="xml">
+            <form string="Track Order">
+                <sheet>
+                    <group>
+                        <group>
+                            <field name="order_id" invisible="1"/>
+                            <field name="source_location_id"/>
+                            <field name="destination_location_id"/>
+                        </group>
+                        <group>
+                            <field name="transport"/>
+                            <field name="date"/>
+                            <field name="status"/>
+                        </group>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
     <!-- ==================== FORM VIEW ==================== -->
     <record id="view_freight_shipping_form" model="ir.ui.view">
         <field name="name">freight.shipping.form</field>
@@ -35,7 +58,7 @@
                             invisible="state != 'draft'"/>
                     <button name="action_confirm" string="Confirm" type="object" class="btn-primary"
                             invisible="state != 'submitted'"/>
-                    <button name="action_invoice" string="Invoice" type="object" class="btn-primary"
+                    <button name="action_create_invoice" string="Create Invoice" type="object" class="btn-primary"
                             invisible="state != 'confirmed'"/>
                     <button name="action_tracking" string="Tracking" type="object" class="btn-primary"
                             invisible="state not in ('confirmed', 'invoiced')"/>
@@ -53,7 +76,8 @@
                         <button name="action_view_clearance" type="object" class="oe_stat_button" icon="fa-id-card-o">
                             <field name="clearance_count" widget="statinfo" string="Clearance"/>
                         </button>
-                        <button name="action_view_invoices" type="object" class="oe_stat_button" icon="fa-pencil-square-o">
+                        <button name="action_view_invoices" type="object" class="oe_stat_button"
+                                icon="fa-pencil-square-o">
                             <field name="invoice_count" widget="statinfo" string="Invoice"/>
                         </button>
                     </div>
@@ -160,6 +184,7 @@
                         </page>
                     </notebook>
                 </sheet>
+                <chatter/>
             </form>
         </field>
     </record>

@@ -220,3 +220,96 @@ Yeh document Freight Management System (`trn_freight`) ke tamam tasks (Task 1 se
               vals['name'] = self.env['ir.sequence'].next_by_code('freight.order') or 'New'
       return super().create(vals_list)
   ```
+
+---
+
+## 💰 Section 3: Task 7 - Invoicing Engine, Tracking & Data Integrity
+
+---
+
+### Q16: Odoo 19 mein Freight Lines ko Customer Invoice (`account.move`) mein kaise convert karte hain?
+
+* **⚡ 1-Liner Answer:** 
+  > **`action_create_invoice()` method mein `Command.create()` pattern ke sath Cargo, Route, aur Service lines ko map kar ke `account.move` (type `out_invoice`) create karte hain aur new invoice ko `invoice_ids` se link karte hain.**
+* **🔬 In-Depth Explanation:**
+  * Odoo 19 mein relational records create karne ke liye tuple `(0, 0, vals)` ke bajaye modern **`Command.create(vals)`** use hota hai.
+  * Invoicing Engine 3 categories ko convert karta hai:
+    1. **Cargo:** Weight vs Volume billing check karta hai; quantity aur rate set karta hai.
+    2. **Routes:** Route name, ports, quantity 1.0 aur route sale price.
+    3. **Services:** Service name, vendor name, quantity aur vendor/service price.
+  * Taxes ko reset karne ke liye `tax_ids: [Command.clear()]` lagaya jata hai.
+  * Invoice create hone ke baad:
+    ```python
+    rec.write({
+        'state': 'invoiced',
+        'invoice_ids': [Command.link(move.id)],
+    })
+    ```
+
+---
+
+### Q17: Dynamic Cargo Billing (Weight vs Volume) Invoicing mein kaise handle hoti hai?
+
+* **⚡ 1-Liner Answer:** 
+  > **Cargo line ki `billing_on` field evaluate ki jati hai: agar `weight` ho to quantity `cargo.weight` banti hai, agar `volume` ho to quantity `cargo.volume` banti hai.**
+* **🔬 Implementation:**
+  ```python
+  for cargo in rec.cargo_ids:
+      qty = cargo.weight if cargo.billing_on == 'weight' else cargo.volume
+      price = cargo.unit_price
+      invoice_lines.append(Command.create({
+          'name': f"Cargo: {cargo.product_id.display_name} ({cargo.container_id.name})",
+          'product_id': cargo.product_id.id,
+          'quantity': qty or 1.0,
+          'price_unit': price,
+          'tax_ids': [Command.clear()],
+      }))
+  ```
+
+---
+
+### Q18: Line Locks (Data Integrity) Python-level par kaise lagaye jatay hain aur kyun zaroori hain?
+
+* **⚡ 1-Liner Answer:** 
+  > **Child models (`freight.order.cargo`, `freight.order.route`, `freight.order.service`) ke `create`, `write`, aur `unlink` methods ko override kar ke parent order ki state check ki jati hai aur locked states par `UserError` raise kiya jata hai.**
+* **🔬 Rules:**
+  * **Cargo Lines:** Jab order `confirmed`, `invoiced`, ya `done` ho to add, edit ya delete block hota hai (kyunki container reserve aur custom clearance ho chuki hoti hai).
+  * **Route aur Service Lines:** Jab order `invoiced` ya `done` ho to add, edit ya delete block hota hai (kyunki invoice ban chuki hoti hai aur amounts mismatch nahi honi chahiye).
+* **⚠️ Senior Trap:** Locks hamesha Child Model par lagte hain kyunki child ke paas `order_id` hota hai. Agar ghalti se Parent Model par `line.order_id` check kiya jaye to `AttributeError` aye ga.
+
+---
+
+### Q19: Mail Chatter Notifications aur `Markup` ka kya taluq hai?
+
+* **⚡ 1-Liner Answer:** 
+  > **Odoo 19 mein HTML formatting (jaise `<b>...</b>`) ko escape hone se bachane ke liye `Markup(msg)` wrap kiya jata hai, aur `message_post(body=Markup(msg), partner_ids=...)` se specific partners ko notify kiya jata hai.**
+* **🔬 Implementation:**
+  ```python
+  partners = (rec.shipper_id | rec.consignee_id | rec.agent_id).ids
+  msg = Markup(f"Freight Order <b>{rec.name}</b> has been <b>{action_name}</b>.")
+  rec.message_post(body=msg, partner_ids=partners, subtype_xmlid='mail.mt_comment')
+  ```
+
+---
+
+### Q20: Stat Button Navigation Pattern (`action_view_invoices`): Single vs Multiple records kaise handle hotay hain?
+
+* **⚡ 1-Liner Answer:** 
+  > **Agar `len(invoices) == 1` ho to action direct `form` view with `res_id` return karta hai, agar multiple hon to `list,form` view with domain `[('id', 'in', invoices.ids)]` return karta hai.**
+* **🔬 Implementation:**
+  ```python
+  def action_view_invoices(self):
+      self.ensure_one()
+      invoices = self.invoice_ids
+      action = {
+          'name': 'Customer Invoices',
+          'type': 'ir.actions.act_window',
+          'res_model': 'account.move',
+          'context': {'default_move_type': 'out_invoice'},
+      }
+      if len(invoices) == 1:
+          action.update({'view_mode': 'form', 'res_id': invoices.id})
+      else:
+          action.update({'view_mode': 'list,form', 'domain': [('id', 'in', invoices.ids)]})
+      return action
+  ```

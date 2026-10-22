@@ -37,7 +37,9 @@ A comprehensive, modular Freight Management System (FMS) built for **Odoo 19** t
 - **Smart Container Tracking**: Auto-reserves containers when order is confirmed (`available` ➔ `reserved`), and frees them when completed (`reserved` ➔ `available`).
 - **Customs Clearance Gatekeeper**: Shipments cannot be confirmed without an approved Customs Clearance.
 - **Audit Revision Wizard**: Interactive popup wizard for customs revisions (`REV-01`, `REV-02`) with reason logging.
-- **Milestone Tracking**: Checkpoint logging with source, destination, transport mode, and status (`Received` / `Delivered`).
+- **Integrated Invoicing Engine**: Automated generation of Odoo Customer Invoices (`account.move`) from confirmed shipments with line-item conversion (Cargo, Routes, Services).
+- **Backend Data Integrity Locks**: Python-level restrictions blocking add/edit/delete of cargo on confirmed orders, and routes/services on invoiced orders.
+- **Live Milestone Tracking & Chatter Notifications**: Checkpoint logging with source, destination, transport mode, and status (`Received` / `Delivered`) with automated chatter updates to Shipper, Consignee, and Agent.
 - **Multi-Company Compliant**: Built from the ground up with `res.company` record rules and stored related company fields.
 
 ---
@@ -154,6 +156,9 @@ Automated test suites ensure regression-free stability:
   * Container state reservation and auto-release.
   * Customs clearance requirement enforcement on order confirmation.
   * Order and clearance deletion constraints.
+  * Customer invoice creation and financial reconciliation (`amount_untaxed` = order totals).
+  * Backend line locks enforcement (`create`, `write`, `unlink` refusal on locked states).
+  * Live tracking line creation and chatter notification posting.
 * **`test_security.py`**:
   * Multi-company record rule isolation across different company environments.
 

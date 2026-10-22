@@ -224,3 +224,143 @@ class TestFreightOrder(TransactionCase):
         self._create_and_confirm_clearance(order_with_conf_cc)
         with self.assertRaises(UserError):
             order_with_conf_cc.unlink()
+
+    def test_08_invoice_creation_and_totals_match(self):
+        """Task 7: Invoice is created from confirmed order and totals match."""
+        order = self._create_order()
+        self.env['freight.order.cargo'].create({
+            'order_id': order.id,
+            'container_id': self.container.id,
+            'product_id': self.product.id,
+            'billing_on': 'weight',
+            'pricing_id': self.pricing.id,
+            'weight': 50.0,
+        })
+        self.env['freight.order.route'].create({
+            'order_id': order.id,
+            'route_id': self.route.id,
+            'source_port_id': self.land_port_1.id,
+            'destination_port_id': self.land_port_2.id,
+        })
+        self.env['freight.order.service'].create({
+            'order_id': order.id,
+            'vendor_id': self.partner.id,
+            'service_id': self.service.id,
+            'qty': 2.0,
+            'sale': 150.0,
+        })
+
+        order.action_submit()
+        self._create_and_confirm_clearance(order)
+        order.action_confirm()
+
+        # Invoice create karein
+        order.action_create_invoice()
+        self.assertEqual(order.state, 'invoiced')
+        self.assertEqual(order.invoice_count, 1)
+
+        invoice = order.invoice_ids[:1]
+        self.assertEqual(invoice.move_type, 'out_invoice')
+        self.assertEqual(invoice.partner_id, order.shipper_id)
+        self.assertEqual(invoice.invoice_origin, order.name)
+
+        # Expected total: Cargo (50*10=500) + Route (500) + Service (2*150=300) = 1300
+        expected_total = order.cargo_total + order.routes_total + order.service_total_sale
+        self.assertEqual(invoice.amount_untaxed, expected_total)
+        self.assertEqual(expected_total, 1300.0)
+
+    def test_09_line_locks_enforced(self):
+        """Task 7: Locks prevent creating, writing, or deleting lines on confirmed/invoiced orders."""
+        order = self._create_order()
+        cargo = self.env['freight.order.cargo'].create({
+            'order_id': order.id,
+            'container_id': self.container.id,
+            'product_id': self.product.id,
+            'billing_on': 'weight',
+            'pricing_id': self.pricing.id,
+            'weight': 10.0,
+        })
+        route = self.env['freight.order.route'].create({
+            'order_id': order.id,
+            'route_id': self.route.id,
+            'source_port_id': self.land_port_1.id,
+            'destination_port_id': self.land_port_2.id,
+        })
+        service = self.env['freight.order.service'].create({
+            'order_id': order.id,
+            'vendor_id': self.partner.id,
+            'service_id': self.service.id,
+            'qty': 1.0,
+            'sale': 100.0,
+        })
+
+        order.action_submit()
+        self._create_and_confirm_clearance(order)
+        order.action_confirm()
+
+        # 1. Cargo lines locked on Confirmed
+        with self.assertRaises(UserError):
+            cargo.write({'weight': 20.0})
+
+        with self.assertRaises(UserError):
+            cargo.unlink()
+
+        with self.assertRaises(UserError):
+            self.env['freight.order.cargo'].create({
+                'order_id': order.id,
+                'container_id': self.container.id,
+                'product_id': self.product.id,
+                'billing_on': 'weight',
+                'pricing_id': self.pricing.id,
+                'weight': 5.0,
+            })
+
+        # Order invoice karein
+        order.action_create_invoice()
+        self.assertEqual(order.state, 'invoiced')
+
+        # 2. Route lines locked on Invoiced
+        with self.assertRaises(UserError):
+            route.write({'sale': 600.0})
+
+        with self.assertRaises(UserError):
+            route.unlink()
+
+        with self.assertRaises(UserError):
+            self.env['freight.order.route'].create({
+                'order_id': order.id,
+                'route_id': self.route.id,
+                'source_port_id': self.land_port_1.id,
+                'destination_port_id': self.land_port_2.id,
+            })
+
+        # 3. Service lines locked on Invoiced
+        with self.assertRaises(UserError):
+            service.write({'qty': 5.0})
+
+        with self.assertRaises(UserError):
+            service.unlink()
+
+        with self.assertRaises(UserError):
+            self.env['freight.order.service'].create({
+                'order_id': order.id,
+                'vendor_id': self.partner.id,
+                'service_id': self.service.id,
+                'qty': 1.0,
+                'sale': 100.0,
+            })
+
+    def test_10_tracking_line_and_chatter_notification(self):
+        """Task 7: Creating tracking line posts a notification in order chatter."""
+        order = self._create_order()
+        track = self.env['freight.order.track'].create({
+            'order_id': order.id,
+            'source_location_id': self.land_port_1.id,
+            'destination_location_id': self.land_port_2.id,
+            'transport': 'land',
+            'status': 'received',
+        })
+        self.assertIn(track, order.track_ids)
+        # Check chatter has a message containing Tracking Update
+        messages = order.message_ids.mapped('body')
+        self.assertTrue(any("Tracking Update" in msg for msg in messages))
