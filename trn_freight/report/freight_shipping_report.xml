@@ -1,0 +1,242 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<odoo>
+    <!-- ========================================================= -->
+    <!-- 1. FREIGHT ORDER REPORT ACTION (Print Menu)              -->
+    <!-- ========================================================= -->
+    <record id="action_report_freight_shipping" model="ir.actions.report">
+        <field name="name">Freight Order</field>
+        <field name="model">freight.shipping</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">trn_freight.report_freight_shipping_document</field>
+        <field name="report_file">trn_freight.report_freight_shipping_document</field>
+        <field name="print_report_name">'Freight Order - %s' % (object.name)</field>
+        <field name="binding_model_id" ref="model_freight_shipping"/>
+        <field name="binding_type">report</field>
+    </record>
+
+    <!-- ========================================================= -->
+    <!-- 2. FREIGHT ORDER QWEB TEMPLATE                            -->
+    <!-- ========================================================= -->
+    <template id="report_freight_shipping_document">
+        <t t-call="web.html_container">
+            <t t-foreach="docs" t-as="doc">
+                <t t-call="web.external_layout">
+                    <div class="page">
+                        <!-- Order Title -->
+                        <div class="row mb-4">
+                            <div class="col-12">
+                                <h2>
+                                    <span>Freight Order: </span>
+                                    <span t-field="doc.name"/>
+                                </h2>
+                            </div>
+                        </div>
+
+                        <!-- Header Details: 2 Columns Grid -->
+                        <div class="row mb-4" style="font-size: 14px; text-align: left; padding: 6px;">
+                            <!-- LEFT SIDE: Transport & Port Details -->
+                            <div class="col-6">
+                                <strong>Transport Mode:</strong> <span t-field="doc.transport"/><br/>
+                                <strong>Loading Port:</strong> <span t-field="doc.loading_port.name"/><br/>
+                                <strong>Discharge Port:</strong> <span t-field="doc.discharge_port_id.name"/><br/>
+                                <strong>Expected Date:</strong> <span t-field="doc.expected_date"/>
+                            </div>
+                            <!-- RIGHT SIDE: Parties & Order Info -->
+                            <div class="col-6">
+                                <strong>Shipper:</strong> <span t-field="doc.shipper_id.name"/><br/>
+                                <strong>Consignee:</strong> <span t-field="doc.consignee_id.name"/><br/>
+                                <strong>Agent:</strong> <span t-field="doc.agent_id.name"/><br/>
+                                <strong>Order Date:</strong> <span t-field="doc.order_date"/>
+                            </div>
+                        </div>
+
+                        <!-- 1. CARGO LINES TABLE -->
+                        <h4 class="mt-4">Cargo Details</h4>
+                        <table class="table table-sm table-bordered mt-2">
+                            <thead class="table-light" style="display: table-header-group;">
+                                <tr>
+                                    <th>Container</th>
+                                    <th>Goods</th>
+                                    <th>Billing On</th>
+                                    <th class="text-end">Weight (KG)</th>
+                                    <th class="text-end">Volume (CBM)</th>
+                                    <th class="text-end">Unit Price</th>
+                                    <th class="text-end">Total Price</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr t-foreach="doc.cargo_ids" t-as="cargo">
+                                    <td><span t-field="cargo.container_id.name"/></td>
+                                    <td><span t-field="cargo.product_id.display_name"/></td>
+                                    <td><span t-field="cargo.billing_on"/></td>
+                                    <td class="text-end"><span t-field="cargo.weight"/></td>
+                                    <td class="text-end"><span t-field="cargo.volume"/></td>
+                                    <td class="text-end"><span t-field="cargo.unit_price" t-options='{"widget": "monetary", "display_currency": doc.company_id.currency_id}'/></td>
+                                    <td class="text-end"><span t-field="cargo.total_price" t-options='{"widget": "monetary", "display_currency": doc.company_id.currency_id}'/></td>
+                                </tr>
+                            </tbody>
+                        </table>
+
+                        <!-- 2. ROUTE LINES TABLE -->
+                        <t t-if="doc.route_ids">
+                            <h4 class="mt-4">Route Details</h4>
+                            <table class="table table-sm table-bordered mt-2">
+                                <thead class="table-light" style="display: table-header-group;">
+                                    <tr>
+                                        <th>Route</th>
+                                        <th>Source Port</th>
+                                        <th>Destination Port</th>
+                                        <th>Transport</th>
+                                        <th class="text-end">Sale Price</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr t-foreach="doc.route_ids" t-as="route">
+                                        <td><span t-field="route.route_id.name"/></td>
+                                        <td><span t-field="route.source_port_id.name"/></td>
+                                        <td><span t-field="route.destination_port_id.name"/></td>
+                                        <td><span t-field="route.transport"/></td>
+                                        <td class="text-end"><span t-field="route.sale" t-options='{"widget": "monetary", "display_currency": doc.company_id.currency_id}'/></td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </t>
+
+                        <!-- 3. SERVICE LINES TABLE -->
+                        <t t-if="doc.service_ids">
+                            <h4 class="mt-4">Service Details</h4>
+                            <table class="table table-sm table-bordered mt-2">
+                                <thead class="table-light" style="display: table-header-group;">
+                                    <tr>
+                                        <th>Service</th>
+                                        <th>Vendor</th>
+                                        <th class="text-end">Qty</th>
+                                        <th class="text-end">Rate</th>
+                                        <th class="text-end">Total</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr t-foreach="doc.service_ids" t-as="srv">
+                                        <td><span t-field="srv.service_id.name"/></td>
+                                        <td><span t-field="srv.vendor_id.name"/></td>
+                                        <td class="text-end"><span t-field="srv.qty"/></td>
+                                        <td class="text-end"><span t-field="srv.sale" t-options='{"widget": "monetary", "display_currency": doc.company_id.currency_id}'/></td>
+                                        <td class="text-end"><span t-field="srv.total_sale" t-options='{"widget": "monetary", "display_currency": doc.company_id.currency_id}'/></td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </t>
+
+                        <!-- 4. TOTALS SECTION -->
+                        <div class="row justify-content-end mt-4">
+                            <div class="col-5">
+                                <table class="table table-sm table-borderless">
+                                    <tr>
+                                        <td><strong>Cargo Total:</strong></td>
+                                        <td class="text-end"><span t-field="doc.cargo_total" t-options='{"widget": "monetary", "display_currency": doc.company_id.currency_id}'/></td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>Routes Total:</strong></td>
+                                        <td class="text-end"><span t-field="doc.routes_total" t-options='{"widget": "monetary", "display_currency": doc.company_id.currency_id}'/></td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>Services Total:</strong></td>
+                                        <td class="text-end"><span t-field="doc.service_total_sale" t-options='{"widget": "monetary", "display_currency": doc.company_id.currency_id}'/></td>
+                                    </tr>
+                                    <tr class="border-top border-dark">
+                                        <td><strong>Grand Total:</strong></td>
+                                        <td class="text-end">
+                                            <strong>
+                                                <span t-out="doc.cargo_total + doc.routes_total + doc.service_total_sale"
+                                                      t-options='{"widget": "monetary", "display_currency": doc.company_id.currency_id}'/>
+                                            </strong>
+                                        </td>
+                                    </tr>
+                                </table>
+                            </div>
+                        </div>
+
+                    </div>
+                </t>
+            </t>
+        </t>
+    </template>
+
+<!--  tracking action-->
+    <record id="action_report_freight_tracking" model="ir.actions.report">
+        <field name="name">Tracking Report</field>
+        <field name="model">freight.shipping</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">trn_freight.report_freight_tracking_document</field>
+        <field name="report_file">trn_freight.report_freight_tracking_document</field>
+        <field name="print_report_name">'Tracking - %s' % (object.name)</field>
+        <field name="binding_model_id" ref="model_freight_shipping"/>
+        <field name="binding_type">report</field>
+    </record>
+
+   <!--tracking-->
+    <template id="report_freight_tracking_document">
+        <t t-call="web.html_container">
+            <t t-foreach="docs" t-as="doc">
+                <t t-call="web.external_layout">
+                    <div class="page">
+                        <!-- Tracking Title -->
+                        <div class="row mb-4">
+                            <div class="col-12">
+                                <h2>
+                                    <span>Shipment Tracking: </span>
+                                    <span t-field="doc.name"/>
+                                </h2>
+                            </div>
+                        </div>
+
+                        <!-- Order Summary Card -->
+                        <div class="row mb-4 p-3 border rounded bg-light" style="font-size: 14px;">
+                            <div class="col-6">
+                                <strong>Transport Mode:</strong> <span t-field="doc.transport"/><br/>
+                                <strong>Loading Port:</strong> <span t-field="doc.loading_port.name"/><br/>
+                                <strong>Discharge Port:</strong> <span t-field="doc.discharge_port_id.name"/><br/>
+                                <strong>Expected Date:</strong> <span t-field="doc.expected_date"/>
+                            </div>
+                            <div class="col-6">
+                                <strong>Shipper:</strong> <span t-field="doc.shipper_id.name"/><br/>
+                                <strong>Consignee:</strong> <span t-field="doc.consignee_id.name"/><br/>
+                                <strong>Order Date:</strong> <span t-field="doc.order_date"/><br/>
+                                <strong>Status:</strong> <span t-field="doc.state"/>
+                            </div>
+                        </div>
+
+                        <!-- Tracking Timeline Table -->
+                        <h4 class="mt-4">Tracking Timeline</h4>
+                        <t t-if="doc.track_ids">
+                            <table class="table table-sm table-bordered mt-2">
+                                <thead class="table-light" style="display: table-header-group;">
+                                    <tr>
+                                        <th>Date</th>
+                                        <th>Status</th>
+                                        <th>Source Location</th>
+                                        <th>Destination Location</th>
+                                        <th>Transport</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr t-foreach="doc.track_ids" t-as="track">
+                                        <td><span t-field="track.date"/></td>
+                                        <td><span t-field="track.status"/></td>
+                                        <td><span t-field="track.source_location_id.name"/></td>
+                                        <td><span t-field="track.destination_location_id.name"/></td>
+                                        <td><span t-field="track.transport"/></td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </t>
+                        <t t-else="">
+                            <p class="text-muted mt-3"><em>No tracking updates recorded for this shipment yet.</em></p>
+                        </t>
+
+                    </div>
+                </t>
+            </t>
+        </t>
+    </template>
+</odoo>

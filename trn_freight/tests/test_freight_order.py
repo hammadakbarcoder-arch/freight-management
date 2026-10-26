@@ -364,3 +364,29 @@ class TestFreightOrder(TransactionCase):
         # Check chatter has a message containing Tracking Update
         messages = order.message_ids.mapped('body')
         self.assertTrue(any("Tracking Update" in msg for msg in messages))
+
+    def test_11_freight_pdf_reports(self):
+        """Task 8: Freight Order & Tracking PDF reports render cleanly."""
+        order = self._create_order()
+        # Add tracking line
+        self.env['freight.order.track'].create({
+            'order_id': order.id,
+            'source_location_id': self.land_port_1.id,
+            'destination_location_id': self.land_port_2.id,
+            'transport': 'land',
+            'status': 'received',
+        })
+
+        # 1. Test Freight Order Report renders cleanly
+        pdf_content, _ = self.env['ir.actions.report']._render_qweb_pdf(
+            'trn_freight.action_report_freight_shipping', res_ids=order.ids
+        )
+        self.assertTrue(pdf_content)
+        self.assertGreater(len(pdf_content), 0)
+
+        # 2. Test Tracking Report renders cleanly
+        pdf_tracking_content, _ = self.env['ir.actions.report']._render_qweb_pdf(
+            'trn_freight.action_report_freight_tracking', res_ids=order.ids
+        )
+        self.assertTrue(pdf_tracking_content)
+        self.assertGreater(len(pdf_tracking_content), 0)

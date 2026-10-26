@@ -313,3 +313,78 @@ Yeh document Freight Management System (`trn_freight`) ke tamam tasks (Task 1 se
           action.update({'view_mode': 'list,form', 'domain': [('id', 'in', invoices.ids)]})
       return action
   ```
+
+---
+
+## 📄 Section 4: Task 8 - PDF Reports & QWeb Templating
+
+### Q21: `t-field` vs `t-esc` / `t-out` mein kya farq hai?
+
+* **⚡ 1-Liner Answer:** 
+  > **`t-field` model field ki type ke mutabiq automatic formatting (currency widget, user timezone date/time, float precision) apply karta hai, jabke `t-out` / `t-esc` raw Python expressions ya calculated values print karne ke liye use hota hai.**
+* **🔬 Detail & Best Practice:**
+  * `t-field` sirf direct record fields par chalta hai (e.g. `doc.order_date`, `cargo.total_price`). Yeh monetary symbols aur date formats automatically locale ke mutabiq render karta hai.
+  * Computed / compound expressions (e.g. `doc.cargo_total + doc.routes_total`) par `t-field` kaam nahi karta, is liye wahan `t-out` ke sath `t-options='{"widget": "monetary", ...}'` use kiya jata hai.
+  * Odoo 19 mein `t-out` recommended hai kyunki yeh XSS injection se protect karta hai jab tak `Markup` explicitly na diya gaya ho.
+
+---
+
+### Q22: PDF Report ke header mein Company Logo aur Address kahan se aate hain?
+
+* **⚡ 1-Liner Answer:** 
+  > **`web.external_layout` layout template Odoo standard report engine se call hota hai, jo current document ke `company_id` (ya user company) se logo, address, vat number, aur footer fetch karta hai.**
+* **🔬 Architecture:**
+  * Jab hum report template ke andar `<t t-call="web.external_layout">` likhte hain, Odoo `doc.company_id` ko read karke `web.address_layout` aur header header/footer blocks inject karta hai.
+  * Is wajah se har report par manual logo ya address likhne ki zaroorat nahi rehti aur multi-company reporting fully seamless rehti hai.
+
+---
+
+### Q23: PDF Report ko Form View ke "Print" menu ke sath kaise bind kiya jata hai?
+
+* **⚡ 1-Liner Answer:** 
+  > **`ir.actions.report` record mein `binding_model_id="model_freight_shipping"` aur `binding_type="report"` set karne se yeh report automatic form view ke Print dropdown mein show ho jata hai.**
+* **🔬 Code Reference:**
+  ```xml
+  <record id="action_report_freight_shipping" model="ir.actions.report">
+      <field name="name">Freight Order</field>
+      <field name="model">freight.shipping</field>
+      <field name="report_type">qweb-pdf</field>
+      <field name="report_name">trn_freight.report_freight_shipping_document</field>
+      <field name="report_file">trn_freight.report_freight_shipping_document</field>
+      <field name="binding_model_id" ref="model_freight_shipping"/>
+      <field name="binding_type">report</field>
+  </record>
+  ```
+
+---
+
+### Q24: Multi-page PDF reports mein table headers repeating aur clean pagination kaise ensure ki jati hai?
+
+* **⚡ 1-Liner Answer:** 
+  > **Tables ke `thead` element par inline style `display: table-header-group;` aur `tr` par `page-break-inside: avoid;` set karne se Wkhtmltopdf har new page par table headers automatically repeat karta hai.**
+* **🔬 Implementation:**
+  ```xml
+  <table class="table table-sm table-bordered mt-2">
+      <thead class="table-light" style="display: table-header-group;">
+          <tr><th>Container</th><th>Goods</th>...</tr>
+      </thead>
+      <tbody>...</tbody>
+  </table>
+  ```
+
+---
+
+### Q25: Automated Tests mein PDF report generation ko bina browser UI ke kaise test kiya jata hai?
+
+* **⚡ 1-Liner Answer:** 
+  > **`self.env['ir.actions.report']._render_qweb_pdf('report_xml_id', res_ids=order.ids)` call karke return hone wale binary content ki validity check ki jati hai.**
+* **🔬 Test Implementation (`test_freight_order.py`):**
+  ```python
+  def test_11_freight_pdf_reports(self):
+      order = self._create_order()
+      pdf_content, _ = self.env['ir.actions.report']._render_qweb_pdf(
+          'trn_freight.action_report_freight_shipping', res_ids=order.ids
+      )
+      self.assertTrue(pdf_content)
+      self.assertGreater(len(pdf_content), 0)
+  ```

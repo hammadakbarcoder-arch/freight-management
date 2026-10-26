@@ -40,6 +40,7 @@ A comprehensive, modular Freight Management System (FMS) built for **Odoo 19** t
 - **Integrated Invoicing Engine**: Automated generation of Odoo Customer Invoices (`account.move`) from confirmed shipments with line-item conversion (Cargo, Routes, Services).
 - **Backend Data Integrity Locks**: Python-level restrictions blocking add/edit/delete of cargo on confirmed orders, and routes/services on invoiced orders.
 - **Live Milestone Tracking & Chatter Notifications**: Checkpoint logging with source, destination, transport mode, and status (`Received` / `Delivered`) with automated chatter updates to Shipper, Consignee, and Agent.
+- **QWeb PDF Reports**: Printable, multi-page ready Freight Order summary and Tracking Timeline reports with dynamic currency formatting and repeating table headers accessible directly from the Print action menu.
 - **Multi-Company Compliant**: Built from the ground up with `res.company` record rules and stored related company fields.
 
 ---
@@ -159,6 +160,7 @@ Automated test suites ensure regression-free stability:
   * Customer invoice creation and financial reconciliation (`amount_untaxed` = order totals).
   * Backend line locks enforcement (`create`, `write`, `unlink` refusal on locked states).
   * Live tracking line creation and chatter notification posting.
+  * Freight Order and Tracking PDF report QWeb generation rendering.
 * **`test_security.py`**:
   * Multi-company record rule isolation across different company environments.
 

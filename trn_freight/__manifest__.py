@@ -19,6 +19,7 @@
         'views/freight_shipping_views.xml',
         'views/custom_clearance_views.xml',
         'views/freight_menus.xml',
+        'report/freight_shipping_report.xml'
     ],
     'installable': True,
     'application': True,
