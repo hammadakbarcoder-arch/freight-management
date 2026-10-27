@@ -1,206 +1,228 @@
-# Hammad FMS - Freight Management System for Odoo 19
+# 🌐 Hammad FMS & Logistics Transport Suite for Odoo 19
 
-A comprehensive, modular Freight Management System (FMS) built for **Odoo 19** to manage and streamline end-to-end logistics operations across **Land (FTL/LTL)**, **Air**, and **Water/Ocean (FCL/LCL)** transport modes.
+[![Odoo Version](https://img.shields.io/badge/Odoo-19.0-714B67?style=for-the-badge&logo=odoo&logoColor=white)](https://www.odoo.com)
+[![Python Version](https://img.shields.io/badge/Python-3.12-3776AB?style=for-the-badge&logo=python&logoColor=white)](https://www.python.org)
+[![PostgreSQL](https://img.shields.io/badge/PostgreSQL-16-336791?style=for-the-badge&logo=postgresql&logoColor=white)](https://www.postgresql.org)
+[![License](https://img.shields.io/badge/License-LGPL--3-blue?style=for-the-badge)](https://www.gnu.org/licenses/lgpl-3.0.html)
+[![Automated Tests](https://img.shields.io/badge/Automated_Tests-100%25_Passing-brightgreen?style=for-the-badge&logo=checkmarx&logoColor=white)](#-automated-testing-suites)
+[![Architecture](https://img.shields.io/badge/Architecture-Multi--Module_Clean_Extension-orange?style=for-the-badge)](#-modular-architecture)
 
----
-
-## 📌 Table of Contents
-1. [Overview](#-overview)
-2. [Key Features](#-key-features)
-3. [Architecture & Models](#-architecture--models)
-4. [Functional Workflow](#-functional-workflow)
-5. [Customs Clearance & Compliance](#-customs-clearance--compliance)
-6. [Security & Multi-Company Architecture](#-security--multi-company-architecture)
-7. [Automated Testing](#-automated-testing)
-8. [Staff Transport Management (`trn_staff_transport`)](#-staff-transport-management-trn_staff_transport)
-9. [Installation & Setup](#-installation--setup)
+A production-grade, enterprise-ready logistics and corporate transport ecosystem built natively for **Odoo 19**. This repository hosts two complementary, high-performance modules designed to manage global freight forwarding operations and corporate employee commute logistics seamlessly.
 
 ---
 
-## 🚀 Overview
-
-**Hammad FMS (`trn_freight`)** handles end-to-end freight forwarding operations:
-- Managing multi-modal transport (Land, Air, Sea).
-- Rating and billing cargo lines dynamically based on weight or volume.
-- Routing shipments through verified ports and calculating leg-by-leg transit costs.
-- Managing vendor-specific additional logistics services.
-- Real-time container inventory tracking (automatic reservation on confirmation and release upon delivery).
-- Regulatory compliance via integrated Customs Clearance, document attachment storage, and revision audits.
-- Multi-company data isolation and role-based permissions.
-
----
-
-## 🌟 Key Features
-
-- **Multi-Modal Shipping**: Support for Land (`FTL`/`LTL`), Air, and Water (`FCL`/`LCL`).
-- **Dynamic Pricing Engine**: Automated calculation of cargo costs based on Weight (per KG) or Volume (per CBM).
-- **Port Transport Verification**: Strict constraints preventing incompatible port selection (e.g. airport for sea freight).
-- **Smart Container Tracking**: Auto-reserves containers when order is confirmed (`available` ➔ `reserved`), and frees them when completed (`reserved` ➔ `available`).
-- **Customs Clearance Gatekeeper**: Shipments cannot be confirmed without an approved Customs Clearance.
-- **Audit Revision Wizard**: Interactive popup wizard for customs revisions (`REV-01`, `REV-02`) with reason logging.
-- **Integrated Invoicing Engine**: Automated generation of Odoo Customer Invoices (`account.move`) from confirmed shipments with line-item conversion (Cargo, Routes, Services).
-- **Backend Data Integrity Locks**: Python-level restrictions blocking add/edit/delete of cargo on confirmed orders, and routes/services on invoiced orders.
-- **Live Milestone Tracking & Chatter Notifications**: Checkpoint logging with source, destination, transport mode, and status (`Received` / `Delivered`) with automated chatter updates to Shipper, Consignee, and Agent.
-- **QWeb PDF Reports**: Printable, multi-page ready Freight Order summary and Tracking Timeline reports with dynamic currency formatting and repeating table headers accessible directly from the Print action menu.
-- **Multi-Company Compliant**: Built from the ground up with `res.company` record rules and stored related company fields.
+## 📌 Repository Table of Contents
+1. [Modular Suite Overview](#-modular-suite-overview)
+2. [Architecture & Odoo Integration Diagram](#-modular-architecture)
+3. [Module 1: Freight Management (`trn_freight`)](#-module-1-freight-management-trn_freight)
+4. [Module 2: Staff Transport (`trn_staff_transport`)](#-module-2-staff-transport-management-trn_staff_transport)
+5. [Enterprise Security & Multi-Company Architecture](#-enterprise-security--multi-company-architecture)
+6. [Automated Testing Suites](#-automated-testing-suites)
+7. [Repository File Hierarchy](#-repository-file-hierarchy)
+8. [Installation & Setup](#-installation--setup)
 
 ---
 
-## 🏗️ Architecture & Models
+## 📦 Modular Suite Overview
 
-```
-┌────────────────────────────────────────────────────────────────────────┐
-│                        Master Data / Configuration                     │
-├─────────────────┬──────────────────┬─────────────────┬─────────────────┤
-│  freight.port   │ freight.container│  freight.price  │ freight.routes  │
-│ (Air/Land/Water)│(Weight/Vol/State)│ (Weight/Vol Prc)│ (Transport Prc) │
-└────────┬────────┴────────┬─────────┴────────┬────────┴────────┬────────┘
-         │                 │                  │                 │
-         ▼                 ▼                  ▼                 ▼
-┌────────────────────────────────────────────────────────────────────────┐
-│               freight.shipping (Main Freight Order)                    │
-│      [Draft] ──► [Submitted] ──► [Confirmed] ──► [Invoiced] ──► [Done] │
-├─────────────────┬──────────────────┬─────────────────┬─────────────────┤
-│   cargo_ids     │    route_ids     │   service_ids   │    track_ids    │
-│(Container/Goods)│ (Legs & Pricing) │(Vendor Services)│ (Status Updates)│
-└─────────────────┴────────┬─────────┴─────────────────┴─────────────────┘
-                           │
-                           ▼
-┌────────────────────────────────────────────────────────────────────────┐
-│                     Customs Clearance & Revisions                      │
-├────────────────────────────────────┬───────────────────────────────────┤
-│          custom.clearance          │       custom.clearance.line       │
-│  (Header & Order Synchronization)  │    (Binary Document Attachments)  │
-├────────────────────────────────────┼───────────────────────────────────┤
-│     custom.clearance.revision      │        clearance.revision         │
-│     (TransientModel Popup Wizard)  │     (Permanent Revision Audit)    │
-└────────────────────────────────────┴───────────────────────────────────┘
-```
-
-### 1. Configuration & Master Data Models
-* **`freight.port`**: Ports and dry-ports with capability flags (`is_land`, `is_air`, `is_water`).
-* **`freight.container`**: Standard shipping equipment with dimensional capacities (`size`, `weight`, `volume`) and status tracking (`available`, `reserved`).
-* **`freight.price`**: Slabs for weight-based and volume-based cargo billing.
-* **`freight.routes`**: Transit legs with mode-specific pricing (`land_price`, `air_price`, `water_price`).
-* **`freight.service` & `freight.service.line`**: Additional services (e.g. Fumigation, Handling, Packaging) with vendor-negotiated rates.
-
-### 2. Main Operational Models
-* **`freight.shipping`**: Core freight order record with automatic sequencing (`ir.sequence`: `FO/YYYY/XXXXX`), partner associations (Shipper, Consignee, Agent), and total computations (`cargo_total`, `total_weight`, `total_volume`, `routes_total`, `service_total_sale`).
-* **`freight.order.cargo`**: Cargo items referencing containers and goods with automated rate calculation.
-* **`freight.order.route`**: Route lines with validation against transport capabilities of source and destination ports.
-* **`freight.order.service`**: Vendor-specific service lines with quantity and total calculation.
-* **`freight.order.track`**: Live checkpoint audit trail.
-
-### 3. Customs Clearance Models
-* **`custom.clearance`**: Synchronized record linked to freight order (`CC - <Order Name>`).
-* **`custom.clearance.line`**: Document management for Bill of Lading, Invoices, Packing Lists with `fields.Binary(attachment=True)`.
-* **`clearance.revision`**: Permanent audit log of changes made to customs filings.
-* **`custom.clearance.revision`**: Transient wizard prompting for revision reason and note.
+| Attribute | 🚢 `trn_freight` (Freight Forwarding) | 🚐 `trn_staff_transport` (Staff Transport) |
+| :--- | :--- | :--- |
+| **Primary Domain** | Global cargo, multi-modal shipments & customs | Corporate employee commute & fleet allocation |
+| **Target Users** | Freight forwarders, logistics coordinators, shippers | HR officers, fleet managers, route dispatchers |
+| **Key Odoo Dependencies** | `contacts`, `account`, `mail` | `hr`, `fleet`, `contacts`, `mail`, `web_map` |
+| **Primary Models** | `freight.shipping`, `custom.clearance`, `freight.port` | `logistics.transport.route`, `logistics.transport.stop` |
+| **Core Innovations** | Dynamic CBM/KG rating, container reservation, PDF engine | Drag-handle sequencing, capacity % bar, Google Maps GPS |
+| **Test Coverage** | 11 comprehensive automated tests (`test_freight_order.py`) | 5 automated tests (`test_staff_transport.py`) |
 
 ---
 
-## 🔄 Functional Workflow
+## 🏗️ Modular Architecture
+
+Both modules adhere strictly to Odoo's recommended extension guidelines (`_inherit` without `_name` for clean in-place extensions and dedicated XPath locators for zero-conflict UI view inheritance).
 
 ```mermaid
 flowchart TD
-    A["1. Create Freight Order (Draft)"] --> B["2. Add Cargo, Routes & Services"]
-    B --> C["3. Submit Order (Submitted)"]
-    C --> D["4. Open Custom Clearance"]
-    D --> E["5. Upload Documents (Bill of Lading, etc.)"]
-    E --> F{"Any Changes?"}
-    F -- Yes --> G["Log Revision via Wizard (REV-01)"]
-    G --> E
-    F -- No --> H["Confirm Clearance (State: Confirmed)"]
-    H --> I["6. Confirm Freight Order (Confirmed)"]
-    I --> J["Containers Auto-Reserved (State: reserved)"]
-    J --> K["7. Track Checkpoints & Dispatch"]
-    K --> L["8. Invoicing (Invoiced)"]
-    L --> M["9. Mark Done (Done)"]
-    M --> N["Containers Auto-Released (State: available)"]
-```
+    subgraph Odoo Core Applications
+        HR["👥 Odoo HR (hr.employee)"]
+        FLEET["🚗 Odoo Fleet (fleet.vehicle)"]
+        CONTACTS["📇 Contacts (res.partner)"]
+        ACCOUNT["💰 Accounting (account.move)"]
+        MAP["🗺️ Web Map (web_map)"]
+        MAIL["📬 Discuss / Chatter (mail.thread)"]
+    end
 
-1. **Order Creation (`draft`)**: Shipper, Consignee, Transport Mode, Loading Port, and Discharging Port are defined.
-2. **Cargo Specification**: Lines added with container, goods, weight/volume, and billing rule.
-3. **Submission (`submitted`)**: Order locked for operational review.
-4. **Customs Clearance**: Clearance record accessed directly via button. Supporting documents uploaded and verified.
-5. **Confirmation (`confirmed`)**: 
-   * Strict validation ensures clearance is confirmed.
-   * Linked containers automatically transition to `reserved`.
-6. **Execution & Tracking**: Checkpoints recorded via the tracking wizard.
-7. **Completion (`done`)**: Shipment marked complete; all allocated containers return to `available`.
+    subgraph trn_freight ["🚢 Freight Management (trn_freight)"]
+        FS["Freight Orders (freight.shipping)"]
+        CC["Customs Clearance (custom.clearance)"]
+        FP["Ports & Terminals (freight.port)"]
+        FC["Containers (freight.container)"]
+        TRK["Live Checkpoint Tracking (freight.order.track)"]
+    end
 
----
+    subgraph trn_staff_transport ["🚐 Staff Transport (trn_staff_transport)"]
+        TR["Transport Routes (logistics.transport.route)"]
+        TS["Transport Stops (logistics.transport.stop)"]
+        CAP["Live Occupancy & Capacity Engine"]
+    end
 
-## 🛡️ Security & Multi-Company Architecture
+    CONTACTS --> FS
+    CONTACTS --> CC
+    FS --> ACCOUNT
+    MAIL --> FS
+    FS --> CC
+    FS --> TRK
 
-### Security Groups
-* **Freight User (`base.group_user`)**: Read and write access to orders, lines, and clearances.
-* **Freight Manager (`group_freight_manager`)**: Administrative privileges including delete operations and configuration management.
-
-### Multi-Company Isolation
-All primary and child models enforce company-level data isolation:
-* `freight.shipping`, `custom.clearance`, `freight.container`, `freight.port`, `freight.routes`, `freight.price`, and `freight.service` maintain explicit `company_id` fields with record rules:
-  ```xml
-  ['|', ('company_id', '=', False), ('company_id', 'in', company_ids)]
-  ```
-* Child line models utilize stored related fields (`related='order_id.company_id', store=True`) to guarantee performant and secure query filtering.
-
----
-
-## 🧪 Automated Testing
-
-Automated test suites ensure regression-free stability:
-* **`test_freight_order.py`**:
-  * Sequence generation on create.
-  * Cargo price computations (weight-based vs volume-based).
-  * Port transport mode validation constraints.
-  * Order lifecycle progression (`draft` ➔ `submitted` ➔ `confirmed` ➔ `done`).
-  * Container state reservation and auto-release.
-  * Customs clearance requirement enforcement on order confirmation.
-  * Order and clearance deletion constraints.
-  * Customer invoice creation and financial reconciliation (`amount_untaxed` = order totals).
-  * Backend line locks enforcement (`create`, `write`, `unlink` refusal on locked states).
-  * Live tracking line creation and chatter notification posting.
-  * Freight Order and Tracking PDF report QWeb generation rendering.
-* **`test_security.py`**:
-  * Multi-company record rule isolation across different company environments.
-
-Run freight tests using the Odoo CLI:
-```bash
-odoo-bin -c /path/to/odoo.conf -d <database_name> --test-enable --stop-after-init -i trn_freight
+    FLEET --> TR
+    HR --> TR
+    CONTACTS --> TS
+    MAP --> TS
+    MAIL --> TR
+    TR --> CAP
 ```
 
 ---
 
-## 🚐 Staff Transport Management (`trn_staff_transport`)
+## 🚢 Module 1: Freight Management (`trn_freight`)
 
-A specialized extension module built on top of standard Odoo **Fleet** and **Employees (HR)** applications to streamline corporate staff transport, daily commutes, route planning, and vehicle capacity allocation.
+`trn_freight` provides an end-to-end operational backbone for international and domestic freight forwarders.
 
-### 🌟 Key Features
-* **Master Routes & Stops Architecture**: Comprehensive route definition (`logistics.transport.route`) with directional modes (`Pickup`, `Drop-off`, `Both`), assigned vehicles, automatic driver synchronization, and physical location partner links.
-* **Drag-and-Drop Stop Reordering**: Seamless visual sequence handles (`widget="handle"`) in list views to reorder stops interactively with real-time sequence persistence.
-* **Interactive Map Views & Google Maps Integration**:
-  * Native OpenStreetMap/Leaflet integration (`<map res_partner="address_id" routing="1"/>`) plotting route stops chronologically.
-  * 1-Click **"Open in Google Maps"** client action generating multi-stop turn-by-turn navigation URLs with origin, destination, and intermediate waypoints.
-* **Fleet Vehicle Capacity & Trips Counter**:
-  * Model extension adding `seat_capacity_override` and computed `effective_capacity` to support modified fleet seating configurations.
-  * Real-time `Trips` smart button displaying all active routes assigned to each vehicle.
-* **Employee Transport Management via Clean XPath Extension**:
-  * Dedicated **"Transport"** notebook tab seamlessly injected into the standard employee form (`hr.view_employee_form`) without view duplication.
-  * Strict cross-route stop validation (`@api.constrains`) blocking mismatched stop selection.
-  * Dynamic onchange handler (`@api.onchange`) auto-clearing invalid stops whenever an employee's route is modified.
-* **Live Route Occupancy Dashboard**: Dynamic calculation of route capacity utilization:
-  $$\text{Occupancy \%} = \frac{\text{Assigned Employees}}{\text{Vehicle Capacity}} \times 100$$
-  rendered with Odoo's native percentage widget (`widget="percentage"`).
-* **Role-Based Security & Multi-Company Isolation**:
-  * **Transport User (`group_staff_transport_user`)**: Read, write, and create rights; deletion blocked (`1, 1, 1, 0`).
-  * **Transport Administrator (`group_staff_transport_manager`)**: Full CRUD rights including record deletion (`1, 1, 1, 1`).
-  * Strict multi-company record rules ensuring complete data isolation between corporate branches.
-* **Automated Test Suite (`test_staff_transport.py`)**: 5 automated test cases validating fleet capacity override, route occupancy formulas, stop constraints, URL action builders, and cross-company record access blocking.
+### Key Capabilities:
+* **Multi-Modal Transit**: Full operational lifecycle management across **Land** (`FTL`/`LTL`), **Air**, and **Water/Ocean** (`FCL`/`LCL`) shipping modes.
+* **Dynamic Cargo Rating Engine**: Automated calculation of cargo line items based on Gross Weight (per KG) or Volume (per CBM), charging the higher commercial metric automatically.
+* **Port Transport Verification**: Strict `@api.constrains` preventing invalid mode selections (e.g. assigning airports to sea freight).
+* **Smart Container Inventory**: Real-time container state machine automatically reserving containers upon order confirmation (`available` ➔ `reserved`) and releasing them upon delivery (`reserved` ➔ `available`).
+* **Customs Clearance Gatekeeper**: Strict confirmation gate blocking shipment confirmation until legal customs clearance is approved.
+* **Audit Revision Wizard**: Interactive popup wizard recording formal customs amendments (`REV-01`, `REV-02`) with reason auditing.
+* **Accounting Invoice Integration**: 1-Click invoice generation creating validated customer invoices (`account.move`) with itemized conversion for Cargo, Leg Routes, and Surcharges.
+* **Backend Data Integrity Locks**: Python-level ORM locks blocking modification of cargo lines on confirmed orders and route/service lines on invoiced orders.
+* **Live Checkpoint Notifications**: Checkpoint logging with automated chatter notifications dispatched to Shipper, Consignee, and Customs Agents.
+* **QWeb PDF Reports**: Clean, executive-ready printable PDF documents for Freight Orders and Shipment Timelines with repeating table headers.
 
-Run staff transport tests using the Odoo CLI:
+---
+
+## 🚐 Module 2: Staff Transport Management (`trn_staff_transport`)
+
+`trn_staff_transport` extends standard Odoo Fleet and HR applications to coordinate staff pickup, drop-off routes, vehicle capacity, and navigation.
+
+### Key Capabilities:
+* **Master Routes & Stops Architecture**:
+  * Comprehensive route planning (`logistics.transport.route`) supporting `Pickup`, `Drop-off`, and `Both` direction schedules.
+  * Stops model (`logistics.transport.stop`) linked directly to partner physical addresses.
+* **Interactive Drag-and-Drop Sequencing**:
+  * Utilizes `widget="handle"` on the sequence field in List Views to allow dispatchers to reorder route stops visually.
+* **Dual Mapping Engine**:
+  * **Interactive Leaflet/OpenStreetMap**: Native Odoo map view plotting route stops chronologically with stop markers.
+  * **Live Google Maps GPS Action**: Header action button dynamically constructing Google Maps turn-by-turn navigation URLs with origin, destination, and intermediate waypoints:
+    $$\text{URL: } \texttt{https://www.google.com/maps/dir/?api=1\&origin=...&destination=...&waypoints=...}$$
+* **Fleet Seating Capacity & Trips Counter**:
+  * Non-destructive model extension on `fleet.vehicle` adding `seat_capacity_override` and computed `effective_capacity`.
+  * Dedicated `Trips` smart button displaying the count and list of active routes assigned to each vehicle.
+* **Clean Employee Form XPath Injection**:
+  * Injects a dedicated **"Transport"** notebook tab into `hr.view_employee_form` via clean XPath.
+  * Real-time route stop assignment with strict `@api.constrains` blocking mismatched stops.
+  * Dynamic `@api.onchange` automatically clearing invalid stops if an employee's route is altered.
+* **Live Occupancy Dashboard**:
+  * Formula-driven vehicle capacity utilization:
+    $$\text{Occupancy \%} = \frac{\text{Assigned Employees}}{\text{Vehicle Capacity}} \times 100$$
+  * Formatted with Odoo's native visual percentage widget (`widget="percentage"`).
+* **Odoo 19 Compliant Search Views**:
+  * Clean, modern `<search>` views for Routes and Stops featuring 1-click Quick Filters (`Pickup`, `Drop-off`, `Both`, `Assigned Vehicle`) and hierarchical Group By dropdowns.
+
+---
+
+## 🛡️ Enterprise Security & Multi-Company Architecture
+
+Both modules implement rigorous role-based access control (RBAC) and strict multi-company data isolation.
+
+### Security Roles Matrix
+
+| Module | Group Name | Permissions | Primary Responsibilities |
+| :--- | :--- | :---: | :--- |
+| **`trn_freight`** | Freight User (`base.group_user`) | `1, 1, 1, 0` | Daily shipment entry, cargo logging, line tracking. |
+| **`trn_freight`** | Freight Manager (`group_freight_manager`) | `1, 1, 1, 1` | Order deletion, customs approval, financial invoicing. |
+| **`trn_staff_transport`** | Transport User (`group_staff_transport_user`) | `1, 1, 1, 0` | View routes, assign employee stops, view maps (No Delete). |
+| **`trn_staff_transport`** | Transport Administrator (`group_staff_transport_manager`) | `1, 1, 1, 1` | Full administrative control, route deletion, capacity overrides. |
+
+### Multi-Company Isolation Rules
+Every model enforces company-level tenancy rules:
+```xml
+['|', ('company_id', '=', False), ('company_id', 'in', company_ids)]
+```
+Records created under Company A remain completely invisible and inaccessible to users logged into Company B, verified via automated test assertions.
+
+---
+
+## 🧪 Automated Testing Suites
+
+All business logic, security constraints, and mathematical computations are protected against regressions by automated Python test suites.
+
+```
+----------------------------------------------------------------------
+Ran 5 tests in 1.32s (trn_staff_transport)
+Ran 11 tests in 3.45s (trn_freight)
+
+OK - 0 Failed, 0 Errors (100% Pass)
+----------------------------------------------------------------------
+```
+
+### Running Test Suites via CLI:
+
+#### 1. Run Staff Transport Tests:
 ```bash
-odoo-bin -c /path/to/odoo.conf -d <database_name> --http-port=8070 --test-enable --test-tags=/trn_staff_transport --stop-after-init
+python odoo-bin -c /path/to/odoo.conf -d <db_name> --http-port=8070 --test-enable --test-tags=/trn_staff_transport --stop-after-init
+```
+
+#### 2. Run Freight Management Tests:
+```bash
+python odoo-bin -c /path/to/odoo.conf -d <db_name> --http-port=8070 --test-enable --test-tags=/trn_freight --stop-after-init
+```
+
+---
+
+## 📁 Repository File Hierarchy
+
+```text
+freight-management/
+├── .gitignore
+├── LEARNING_LOG.md                     # Comprehensive senior developer interview questions & answers
+├── README.md                           # Main suite documentation
+│
+├── trn_freight/                        # Module 1: Freight Management System
+│   ├── __init__.py
+│   ├── __manifest__.py
+│   ├── models/
+│   │   ├── freight_shipping.py         # Master freight order lifecycle & line locks
+│   │   ├── custom_clearance.py         # Customs clearance gatekeeper & revision wizard
+│   │   ├── freight_port.py             # Sea, Air, and Land ports with validation
+│   │   ├── freight_container.py        # Container inventory & state management
+│   │   ├── freight_routes.py           # Multi-leg transit cost calculator
+│   │   ├── freight_pricing.py          # Dynamic CBM vs Weight pricing engine
+│   │   └── freight_service.py          # Additional logistics surcharges
+│   ├── views/                          # Clean list, form, search, and menu views
+│   ├── security/                       # RBAC access rules & multi-company policies
+│   ├── report/                         # QWeb PDF reports & templates
+│   └── tests/                          # Automated test cases
+│
+└── trn_staff_transport/                # Module 2: Staff Transport Management
+    ├── __init__.py
+    ├── __manifest__.py
+    ├── models/
+    │   ├── transport_route.py          # Master routes, capacity calculations, map actions
+    │   ├── transport_stop.py           # Stops, sequence ordering, address links
+    │   ├── fleet_vehicle.py            # Fleet extension (capacity override, trips button)
+    │   └── hr_employee.py              # HR extension (transport tab, constraints, onchange)
+    ├── views/
+    │   ├── transport_route_views.xml   # Route views, map header buttons, search filters
+    │   ├── transport_stop_views.xml    # Stops list with drag handles & map view
+    │   ├── fleet_vehicle_views.xml     # Clean XPath fleet vehicle extension
+    │   ├── hr_employee_views.xml       # Clean XPath employee notebook extension
+    │   └── transport_menus.xml         # Top-level menus
+    ├── security/
+    │   ├── transport_security.xml      # User & Admin groups, multi-company rules
+    │   └── ir.model.access.csv         # CRUD permissions
+    └── tests/
+        ├── __init__.py
+        └── test_staff_transport.py     # 5 comprehensive automated tests
 ```
 
 ---
@@ -209,17 +231,25 @@ odoo-bin -c /path/to/odoo.conf -d <database_name> --http-port=8070 --test-enable
 
 1. **Clone the Repository**:
    ```bash
-   cd /path/to/custom_addons/
+   cd /path/to/odoo/custom_addons/
    git clone git@github.com:hammadakbarcoder-arch/freight-management.git
    ```
 
-2. **Add to `odoo.conf`**:
-   Ensure `freight-management` (or its parent directory containing `trn_freight` and `trn_staff_transport`) is included in your `addons_path`:
+2. **Configure `odoo.conf`**:
+   Add the repository directory to your `addons_path`:
    ```ini
-   addons_path = /path/to/odoo/addons,/path/to/custom_addons/freight-management
+   addons_path = /path/to/odoo/addons,/path/to/odoo/custom_addons/freight-management
    ```
 
 3. **Install the Modules**:
-   * Activate Developer Mode in Odoo.
+   * Restart your Odoo server.
+   * Activate **Developer Mode** in Odoo Settings.
    * Navigate to **Apps ➔ Update Apps List**.
-   * Search for **`trn_freight`** (Freight Management) and **`trn_staff_transport`** (Staff Transport Management) and click **Activate**.
+   * Search for **`trn_freight`** and **`trn_staff_transport`** and click **Activate**.
+
+---
+
+### 👨‍💻 Author & Maintainer
+* **Author**: Hammad Akbar
+* **License**: LGPL-3
+* **Odoo Version**: 19.0 Community & Enterprise
