@@ -12,7 +12,8 @@ A comprehensive, modular Freight Management System (FMS) built for **Odoo 19** t
 5. [Customs Clearance & Compliance](#-customs-clearance--compliance)
 6. [Security & Multi-Company Architecture](#-security--multi-company-architecture)
 7. [Automated Testing](#-automated-testing)
-8. [Installation & Setup](#-installation--setup)
+8. [Staff Transport Management (`trn_staff_transport`)](#-staff-transport-management-trn_staff_transport)
+9. [Installation & Setup](#-installation--setup)
 
 ---
 
@@ -164,9 +165,42 @@ Automated test suites ensure regression-free stability:
 * **`test_security.py`**:
   * Multi-company record rule isolation across different company environments.
 
-Run tests using the Odoo CLI:
+Run freight tests using the Odoo CLI:
 ```bash
 odoo-bin -c /path/to/odoo.conf -d <database_name> --test-enable --stop-after-init -i trn_freight
+```
+
+---
+
+## 🚐 Staff Transport Management (`trn_staff_transport`)
+
+A specialized extension module built on top of standard Odoo **Fleet** and **Employees (HR)** applications to streamline corporate staff transport, daily commutes, route planning, and vehicle capacity allocation.
+
+### 🌟 Key Features
+* **Master Routes & Stops Architecture**: Comprehensive route definition (`logistics.transport.route`) with directional modes (`Pickup`, `Drop-off`, `Both`), assigned vehicles, automatic driver synchronization, and physical location partner links.
+* **Drag-and-Drop Stop Reordering**: Seamless visual sequence handles (`widget="handle"`) in list views to reorder stops interactively with real-time sequence persistence.
+* **Interactive Map Views & Google Maps Integration**:
+  * Native OpenStreetMap/Leaflet integration (`<map res_partner="address_id" routing="1"/>`) plotting route stops chronologically.
+  * 1-Click **"Open in Google Maps"** client action generating multi-stop turn-by-turn navigation URLs with origin, destination, and intermediate waypoints.
+* **Fleet Vehicle Capacity & Trips Counter**:
+  * Model extension adding `seat_capacity_override` and computed `effective_capacity` to support modified fleet seating configurations.
+  * Real-time `Trips` smart button displaying all active routes assigned to each vehicle.
+* **Employee Transport Management via Clean XPath Extension**:
+  * Dedicated **"Transport"** notebook tab seamlessly injected into the standard employee form (`hr.view_employee_form`) without view duplication.
+  * Strict cross-route stop validation (`@api.constrains`) blocking mismatched stop selection.
+  * Dynamic onchange handler (`@api.onchange`) auto-clearing invalid stops whenever an employee's route is modified.
+* **Live Route Occupancy Dashboard**: Dynamic calculation of route capacity utilization:
+  $$\text{Occupancy \%} = \frac{\text{Assigned Employees}}{\text{Vehicle Capacity}} \times 100$$
+  rendered with Odoo's native percentage widget (`widget="percentage"`).
+* **Role-Based Security & Multi-Company Isolation**:
+  * **Transport User (`group_staff_transport_user`)**: Read, write, and create rights; deletion blocked (`1, 1, 1, 0`).
+  * **Transport Administrator (`group_staff_transport_manager`)**: Full CRUD rights including record deletion (`1, 1, 1, 1`).
+  * Strict multi-company record rules ensuring complete data isolation between corporate branches.
+* **Automated Test Suite (`test_staff_transport.py`)**: 5 automated test cases validating fleet capacity override, route occupancy formulas, stop constraints, URL action builders, and cross-company record access blocking.
+
+Run staff transport tests using the Odoo CLI:
+```bash
+odoo-bin -c /path/to/odoo.conf -d <database_name> --http-port=8070 --test-enable --test-tags=/trn_staff_transport --stop-after-init
 ```
 
 ---
@@ -180,12 +214,12 @@ odoo-bin -c /path/to/odoo.conf -d <database_name> --test-enable --stop-after-ini
    ```
 
 2. **Add to `odoo.conf`**:
-   Ensure `freight-management` (or its parent directory containing `trn_freight`) is included in your `addons_path`:
+   Ensure `freight-management` (or its parent directory containing `trn_freight` and `trn_staff_transport`) is included in your `addons_path`:
    ```ini
    addons_path = /path/to/odoo/addons,/path/to/custom_addons/freight-management
    ```
 
-3. **Install the Module**:
+3. **Install the Modules**:
    * Activate Developer Mode in Odoo.
    * Navigate to **Apps ➔ Update Apps List**.
-   * Search for **`trn_freight`** (Freight Management) and click **Activate**.
+   * Search for **`trn_freight`** (Freight Management) and **`trn_staff_transport`** (Staff Transport Management) and click **Activate**.

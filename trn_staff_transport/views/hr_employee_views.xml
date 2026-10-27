@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_employee_form_inherit_transport" model="ir.ui.view">
+        <field name="name">hr.employee.form.inherit.transport</field>
+        <field name="model">hr.employee</field>
+        <field name="inherit_id" ref="hr.view_employee_form"/>
+        <field name="arch" type="xml">
+
+            <xpath expr="//notebook" position="inside">
+                <page string="Transport" name="transport">
+                    <group>
+                        <group string="Transport Settings">
+                            <field name="is_transport_enabled"/>
+                            <field name="transport_route_id" invisible="not is_transport_enabled"/>
+                            <field name="transport_direction" invisible="not is_transport_enabled"/>
+                        </group>
+                        <group string="Assigned Vehicle &amp; Driver" invisible="not is_transport_enabled">
+                            <field name="transport_vehicle_id" readonly="1"/>
+                            <field name="transport_driver_id" readonly="1"/>
+                        </group>
+                    </group>
+                    <group string="Stops" invisible="not is_transport_enabled">
+                        <group>
+                            <field name="pickup_stop_id"
+                                   domain="[('route_id', '=', transport_route_id)]"
+                                   invisible="transport_direction == 'drop_off'"/>
+                        </group>
+                        <group>
+                            <field name="drop_off_stop_id"
+                                   domain="[('route_id', '=', transport_route_id)]"
+                                   invisible="transport_direction == 'pickup'"/>
+                        </group>
+                    </group>
+                </page>
+            </xpath>
+
+        </field>
+    </record>
+</odoo>

@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- 1. Category: Settings mein kis heading ke neeche show hoga -->
+    <record id="module_category_staff_transport" model="ir.module.category">
+        <field name="name">Staff Transport</field>
+        <field name="sequence">25</field>
+    </record>
+
+    <!-- 2. Privilege: Odoo 19 ka standard rule -->
+    <record id="res_groups_privilege_staff_transport" model="res.groups.privilege">
+        <field name="name">Staff Transport</field>
+        <field name="category_id" ref="module_category_staff_transport"/>
+    </record>
+
+    <!-- 3. Normal User Group -->
+    <record id="group_staff_transport_user" model="res.groups">
+        <field name="name">User</field>
+        <field name="privilege_id" ref="res_groups_privilege_staff_transport"/>
+        <field name="implied_ids" eval="[(4, ref('base.group_user'))]"/>
+    </record>
+
+    <!-- 4. Manager / Administrator Group -->
+    <record id="group_staff_transport_manager" model="res.groups">
+        <field name="name">Administrator</field>
+        <field name="privilege_id" ref="res_groups_privilege_staff_transport"/>
+        <field name="implied_ids" eval="[(4, ref('group_staff_transport_user'))]"/>
+        <field name="user_ids" eval="[(4, ref('base.user_root')), (4, ref('base.user_admin'))]"/>
+    </record>
+
+    <!-- 5. Multi-Company Rule for Routes -->
+    <record id="transport_route_comp_rule" model="ir.rule">
+        <field name="name">Transport Route Multi-Company</field>
+        <field name="model_id" ref="model_logistics_transport_route"/>
+        <field name="domain_force">['|', ('company_id', '=', False), ('company_id', 'in', company_ids)]</field>
+    </record>
+
+    <!-- 6. Multi-Company Rule for Stops -->
+    <record id="transport_stop_comp_rule" model="ir.rule">
+        <field name="name">Transport Stop Multi-Company</field>
+        <field name="model_id" ref="model_logistics_transport_stop"/>
+        <field name="domain_force">['|', ('company_id', '=', False), ('company_id', 'in', company_ids)]</field>
+    </record>
+</odoo>

@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Stop List View (with Drag Handle) -->
+    <record id="view_logistics_transport_stop_list" model="ir.ui.view">
+        <field name="name">logistics.transport.stop.list</field>
+        <field name="model">logistics.transport.stop</field>
+        <field name="arch" type="xml">
+            <list string="Transport Stops">
+                <field name="sequence" widget="handle"/>
+                <field name="name"/>
+                <field name="route_id"/>
+                <field name="address_id"/>
+                <field name="stop_type"/>
+                <field name="planned_time" widget="float_time"/>
+            </list>
+        </field>
+    </record>
+    <!-- Stop Map View -->
+    <record id="view_logistics_transport_stop_map" model="ir.ui.view">
+        <field name="name">logistics.transport.stop.map</field>
+        <field name="model">logistics.transport.stop</field>
+        <field name="arch" type="xml">
+            <map res_partner="address_id" default_order="sequence" routing="1"/>
+        </field>
+    </record>
+
+    <!-- Stop Form View -->
+    <record id="view_logistics_transport_stop_form" model="ir.ui.view">
+        <field name="name">logistics.transport.stop.form</field>
+        <field name="model">logistics.transport.stop</field>
+        <field name="arch" type="xml">
+            <form string="Transport Stop">
+                <sheet>
+                    <group>
+                        <group>
+                            <field name="name"/>
+                            <field name="route_id"/>
+                            <field name="address_id"/>
+                        </group>
+                        <group>
+                            <field name="sequence"/>
+                            <field name="stop_type"/>
+                            <field name="planned_time" widget="float_time"/>
+                            <field name="company_id" groups="base.group_multi_company"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Notes">
+                            <field name="notes" placeholder="Stop instructions, landmark, etc..."/>
+                        </page>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- Stop Search View with Filters & Group By -->
+    <record id="view_logistics_transport_stop_search" model="ir.ui.view">
+        <field name="name">logistics.transport.stop.search</field>
+        <field name="model">logistics.transport.stop</field>
+        <field name="arch" type="xml">
+            <search string="Search Stops">
+                <field name="name"/>
+                <field name="route_id"/>
+                <field name="address_id"/>
+
+                <separator/>
+                <filter string="Pickup" name="filter_pickup" domain="[('stop_type', '=', 'pickup')]"/>
+                <filter string="Drop-off" name="filter_dropoff" domain="[('stop_type', '=', 'drop_off')]"/>
+                <filter string="Both" name="filter_both" domain="[('stop_type', '=', 'both')]"/>
+
+                <!-- Group By -->
+                <group>
+                    <filter string="Route" name="group_route" context="{'group_by': 'route_id'}"/>
+                    <filter string="Stop Type" name="group_stop_type" context="{'group_by': 'stop_type'}"/>
+                    <filter string="Company" name="group_company" context="{'group_by': 'company_id'}" groups="base.group_multi_company"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <!-- Stop Action -->
+    <record id="action_logistics_transport_stop" model="ir.actions.act_window">
+        <field name="name">Transport Stops</field>
+        <field name="res_model">logistics.transport.stop</field>
+        <field name="view_mode">list,map,form</field>
+        <field name="search_view_id" ref="view_logistics_transport_stop_search"/>
+    </record>
+</odoo>

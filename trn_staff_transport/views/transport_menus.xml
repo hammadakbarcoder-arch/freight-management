@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Top-Level Main App Menu -->
+    <menuitem id="menu_staff_transport_root"
+              name="Staff Transport"
+              sequence="55"
+              web_icon="trn_staff_transport,static/description/icon.png"/>
+
+    <!-- Planning Menu (Dropdown) -->
+    <menuitem id="menu_staff_transport_planning"
+              name="Planning"
+              parent="menu_staff_transport_root"
+              sequence="10"/>
+
+    <!-- Planning -> Routes -->
+    <menuitem id="menu_logistics_transport_route"
+              name="Routes"
+              parent="menu_staff_transport_planning"
+              action="action_logistics_transport_route"
+              sequence="10"/>
+
+    <!-- Planning -> Stops -->
+    <menuitem id="menu_logistics_transport_stop"
+              name="Stops"
+              parent="menu_staff_transport_planning"
+              action="action_logistics_transport_stop"
+              sequence="20"/>
+</odoo>

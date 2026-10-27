@@ -388,3 +388,128 @@ Yeh document Freight Management System (`trn_freight`) ke tamam tasks (Task 1 se
       self.assertTrue(pdf_content)
       self.assertGreater(len(pdf_content), 0)
   ```
+
+---
+
+## 🚐 Section 5: Task 9 - Staff Transport Management & Odoo App Extensions
+
+### Q26: `_inherit` without `_name` vs with a new `_name` mein kya farq hai?
+
+* **⚡ 1-Liner Answer:** 
+  > **Without `_name` existing database table ko in-place extend karta hai (naye columns aur methods add karta hai), jabke with new `_name` ek bilkul nayi database table banata hai jo parent model ki fields aur methods copy karti hai (Prototype Inheritance).**
+* **🔬 Architecture & Best Practice:**
+  * **In-Place Extension (`_inherit = 'fleet.vehicle'`):**
+    * Koi nayi table nahi banti. Odoo `fleet_vehicle` table mein hi naye columns (`seat_capacity_override`, `effective_capacity`) add karta hai.
+    * Use Case: Jab standard Odoo app (jaise Fleet ya Employees) mein naye features add karne hon.
+  * **Prototype Inheritance (`_name = 'custom.vehicle'`, `_inherit = 'fleet.vehicle'`):**
+    * Ek nayi table `custom_vehicle` banti hai. Parent table ka schema aur logic copy hota hai lekin data isolated rehta hai.
+    * Use Case: Jab standard model ka template use karke ek nayi business entity banani ho.
+
+---
+
+### Q27: Standard view copy karne ke bajaye `xpath` kyun use karte hain?
+
+* **⚡ 1-Liner Answer:** 
+  > **`xpath` standard view ko bina modify kiye usme dynamically naye elements inject karta hai, jo Odoo updates/upgrades ke doraan merge conflicts se bachata hai aur modularity preserve karta hai.**
+* **🔬 Detail:**
+  * Agar hum standard view copy kar lein aur upstream Odoo koi naya button, security attribute, ya UI fix release kare, toh copied view outdated ho jayegi aur code maintain karna impossible ho jayega.
+  * `xpath` locator (e.g. `<xpath expr="//notebook" position="inside">` ya `<xpath expr="//field[@name='seats']" position="after">`) sirf target node ko point karta hai aur clean diff provide karta hai.
+
+---
+
+### Q28: Field par `tracking=True` lagane se kya hota hai aur iske prerequisites kya hain?
+
+* **⚡ 1-Liner Answer:** 
+  > **Jab model `mail.thread` inherit karta hai, toh `tracking=True` wali field ki har value change (before ➔ after) user ke naam aur timestamp ke sath automatically record ke Chatter mein log ho jati hai.**
+* **🔬 Implementation Checklist:**
+  1. Python model mein `_inherit = ['mail.thread', 'mail.activity.mixin']` hona zaroori hai.
+  2. Target field par `tracking=True` set ho (e.g. `transport_route_id = fields.Many2one(..., tracking=True)`).
+  3. XML form view ke end par `<chatter/>` widget placed ho.
+  4. Jab user field change karke Save karega, Odoo audit log note generate kar dega.
+
+---
+
+### Q29: Drag-and-Drop Sequence reordering Odoo List Views mein kaise implement ki jati hai?
+
+* **⚡ 1-Liner Answer:** 
+  > **Model mein `sequence = fields.Integer(default=10)` aur `_order = 'sequence, id'` define karke List view ke field par `widget="handle"` lagaya jata hai.**
+* **🔬 Technical Mechanism:**
+  * Model level par:
+    ```python
+    _order = 'sequence, id'
+    sequence = fields.Integer(string='Sequence', default=10)
+    ```
+  * View level par:
+    ```xml
+    <list string="Transport Stops">
+        <field name="sequence" widget="handle"/>
+        <field name="name"/>
+    </list>
+    ```
+  * User jab mouse se handle ko drag karke chorta hai, Odoo ka web client background mein `write()` RPC call karke saare affected records ke `sequence` integers update kar deta hai.
+
+---
+
+### Q30: Google Maps URL multiple waypoints ke sath Odoo action se kaise generate aur open kiya jata hai?
+
+* **⚡ 1-Liner Answer:** 
+  > **Stops ke partner addresses ko URL parameters (`origin`, `destination`, `waypoints`) mein format karke `ir.actions.act_url` dictionary return ki jati hai.**
+* **🔬 Implementation (`transport_route.py`):**
+  ```python
+  def action_open_google_maps(self):
+      self.ensure_one()
+      params = {
+          'api': '1',
+          'origin': self.start_address_id.street or self.stop_ids[0].name,
+          'destination': self.end_address_id.street or self.stop_ids[-1].name,
+          'waypoints': '|'.join([s.address_id.street for s in self.stop_ids[1:-1]])
+      }
+      url = f"https://www.google.com/maps/dir/?{urllib.parse.urlencode(params)}"
+      return {
+          'type': 'ir.actions.act_url',
+          'url': url,
+          'target': 'new',
+      }
+  ```
+
+---
+
+### Q31: Odoo 19 RelaxNG Search View requirements mein legacy Odoo se kya farq hai?
+
+* **⚡ 1-Liner Answer:** 
+  > **Odoo 19 RelaxNG validator `<search>` view ke andar `<group>` element par legacy attributes `expand="0"` aur `string="Group By"` strictly disallow karta hai; sirf plain `<group>` tags use hote hain.**
+* **🔬 Syntax Comparison:**
+  * **❌ Legacy (Odoo 14-16):**
+    ```xml
+    <group expand="0" string="Group By">
+        <filter string="Route" name="group_route" context="{'group_by': 'route_id'}"/>
+    </group>
+    ```
+  * **✅ Modern Odoo 19 Standard:**
+    ```xml
+    <group>
+        <filter string="Route" name="group_route" context="{'group_by': 'route_id'}"/>
+    </group>
+    ```
+
+---
+
+### Q32: Automated Testing mein `@api.constrains` vs `@api.onchange` ko kaise test kiya jata hai?
+
+* **⚡ 1-Liner Answer:** 
+  > **`@api.constrains` ko invalid database assignment karke `with self.assertRaises(ValidationError)` se test kiya jata hai, jabke `@api.onchange` ko memory record (`env[model].new(...)`) par direct method call karke assert kiya jata hai taake premature DB flush na ho.**
+* **🔬 Test Implementation (`test_staff_transport.py`):**
+  ```python
+  # 1. Constrains Validation Test (Raises ValidationError on DB write):
+  with self.assertRaises(ValidationError):
+      self.employee.pickup_stop_id = stop_from_other_route.id
+
+  # 2. Onchange Reset Test (In-memory virtual record):
+  emp_temp = self.env['hr.employee'].new({
+      'transport_route_id': route_a.id,
+      'pickup_stop_id': stop_a.id,
+  })
+  emp_temp.transport_route_id = route_b.id
+  emp_temp._onchange_transport_route_id()
+  self.assertFalse(emp_temp.pickup_stop_id)
+  ```

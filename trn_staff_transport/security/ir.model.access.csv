@@ -1,0 +1,5 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_logistics_transport_route_user,logistics.transport.route.user,model_logistics_transport_route,group_staff_transport_user,1,1,1,1
+access_logistics_transport_route_manager,logistics.transport.route.manager,model_logistics_transport_route,group_staff_transport_manager,1,1,1,1
+access_logistics_transport_stop_user,logistics.transport.stop.user,model_logistics_transport_stop,group_staff_transport_user,1,1,1,1
+access_logistics_transport_stop_manager,logistics.transport.stop.manager,model_logistics_transport_stop,group_staff_transport_manager,1,1,1,1
