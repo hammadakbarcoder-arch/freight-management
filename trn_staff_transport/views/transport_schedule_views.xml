@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- 1. List View -->
+    <record id="view_logistics_transport_schedule_list" model="ir.ui.view">
+        <field name="name">logistics.transport.schedule.list</field>
+        <field name="model">logistics.transport.schedule</field>
+        <field name="arch" type="xml">
+            <list string="Transport Schedules">
+                <field name="name"/>
+                <field name="route_id"/>
+                <field name="direction"/>
+                <field name="departure_time" widget="float_time"/>
+                <field name="arrival_time" widget="float_time"/>
+                <field name="vehicle_id" optional="show"/>
+                <field name="driver_id" optional="show"/>
+                <field name="active" widget="boolean_toggle"/>
+            </list>
+        </field>
+    </record>
+
+    <!-- 2. Form View -->
+    <record id="view_logistics_transport_schedule_form" model="ir.ui.view">
+        <field name="name">logistics.transport.schedule.form</field>
+        <field name="model">logistics.transport.schedule</field>
+        <field name="arch" type="xml">
+            <form string="Transport Schedule">
+                <sheet>
+                    <div class="oe_title">
+                        <h1>
+                            <field name="name" placeholder="Schedule Name..."/>
+                        </h1>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="route_id"/>
+                            <field name="direction"/>
+                            <field name="active"/>
+                        </group>
+                        <group>
+                            <field name="departure_time" widget="float_time"/>
+                            <field name="arrival_time" widget="float_time"/>
+                            <field name="vehicle_id"/>
+                            <field name="driver_id"/>
+                            <field name="company_id" groups="base.group_multi_company"/>
+                        </group>
+                    </group>
+                    <separator string="OPERATING DAYS"/>
+                    <group col="3">
+                        <group>
+                            <field name="mon"/>
+                            <field name="tue"/>
+                            <field name="wed"/>
+                            <field name="thu"/>
+                        </group>
+                        <group>
+                            <field name="fri"/>
+                            <field name="sat"/>
+                            <field name="sun"/>
+                        </group>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- 3. Search View -->
+    <record id="view_logistics_transport_schedule_search" model="ir.ui.view">
+        <field name="name">logistics.transport.schedule.search</field>
+        <field name="model">logistics.transport.schedule</field>
+        <field name="arch" type="xml">
+            <search string="Search Schedules">
+                <field name="name"/>
+                <field name="route_id"/>
+                <field name="vehicle_id"/>
+                <field name="driver_id"/>
+                <separator/>
+                <filter string="Pickup" name="pickup" domain="[('direction', '=', 'pickup')]"/>
+                <filter string="Drop-off" name="drop_off" domain="[('direction', '=', 'drop_off')]"/>
+                <separator/>
+                <filter string="Archived" name="inactive" domain="[('active', '=', False)]"/>
+                <group>
+                    <filter string="Route" name="group_route" context="{'group_by': 'route_id'}"/>
+                    <filter string="Direction" name="group_direction" context="{'group_by': 'direction'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <!-- 4. Action -->
+    <record id="action_logistics_transport_schedule" model="ir.actions.act_window">
+        <field name="name">Schedules</field>
+        <field name="res_model">logistics.transport.schedule</field>
+        <field name="view_mode">list,form</field>
+        <field name="search_view_id" ref="view_logistics_transport_schedule_search"/>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Create a new Transport Schedule
+            </p>
+            <p>
+                Define recurring daily schedules for staff transport routes.
+            </p>
+        </field>
+    </record>
+</odoo>

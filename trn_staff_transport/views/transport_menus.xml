@@ -19,10 +19,42 @@
               action="action_logistics_transport_route"
               sequence="10"/>
 
+    <!-- Planning -> Schedules -->
+    <menuitem id="menu_logistics_transport_schedule"
+              name="Schedules"
+              parent="menu_staff_transport_planning"
+              action="action_logistics_transport_schedule"
+              sequence="15"/>
+
     <!-- Planning -> Stops -->
     <menuitem id="menu_logistics_transport_stop"
               name="Stops"
               parent="menu_staff_transport_planning"
               action="action_logistics_transport_stop"
               sequence="20"/>
+        <!-- Operations Menu -->
+    <menuitem id="menu_staff_transport_operations"
+              name="Operations"
+              parent="menu_staff_transport_root"
+              sequence="5"/>
+
+    <!-- Operations -> Trips -->
+    <menuitem id="menu_logistics_transport_trip"
+              name="Trips"
+              parent="menu_staff_transport_operations"
+              action="action_logistics_transport_trip"
+              sequence="10"/>
+        <!-- Operations -> Generate Trips -->
+    <menuitem id="menu_generate_daily_trips_wizard"
+              name="Generate Trips"
+              parent="menu_staff_transport_operations"
+              action="action_generate_daily_trips_wizard"
+              sequence="20"/>
+
+    <!-- Operations -> Vehicle Requests -->
+    <menuitem id="menu_logistics_transport_vehicle_request"
+              name="Vehicle Requests"
+              parent="menu_staff_transport_operations"
+              action="action_logistics_transport_vehicle_request"
+              sequence="30"/>
 </odoo>

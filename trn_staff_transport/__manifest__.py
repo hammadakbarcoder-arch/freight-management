@@ -26,8 +26,13 @@ Extends Fleet and HR modules to manage:
     'data': [
         'security/transport_security.xml',
         'security/ir.model.access.csv',
+        'data/transport_sequence.xml',
         'views/transport_route_views.xml',
         'views/transport_stop_views.xml',
+        'views/transport_schedule_views.xml',
+        'views/transport_trip_views.xml',
+        'views/generate_daily_trips_wizard_views.xml',
+        'views/transport_vehicle_request_views.xml',
         'views/transport_menus.xml',
         'views/fleet_vehicle_views.xml',
         'views/hr_employee_views.xml',

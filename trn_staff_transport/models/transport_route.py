@@ -11,6 +11,7 @@ class LogisticsTransportRoute(models.Model):
 
     name = fields.Char(string='Route Name', required=True, tracking=True)
     code = fields.Char(string='Route Code', tracking=True, copy=False)
+    active = fields.Boolean(string='Active', default=True)
     direction = fields.Selection(
         [
             ('pickup', 'Pickup'),

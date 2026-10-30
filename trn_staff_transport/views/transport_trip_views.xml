@@ -1,0 +1,133 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- 1. List View -->
+    <record id="view_logistics_transport_trip_list" model="ir.ui.view">
+        <field name="name">logistics.transport.trip.list</field>
+        <field name="model">logistics.transport.trip</field>
+        <field name="arch" type="xml">
+            <list string="Transport Trips" decoration-info="state == 'planned'" decoration-warning="state == 'in_progress'" decoration-success="state == 'completed'" decoration-muted="state == 'cancelled'">
+                <field name="name" decoration-bf="1"/>
+                <field name="date"/>
+                <field name="route_id"/>
+                <field name="schedule_id" optional="show"/>
+                <field name="direction"/>
+                <field name="vehicle_id"/>
+                <field name="driver_id"/>
+                <field name="planned_departure_time" widget="datetime" optional="show"/>
+                <field name="passenger_count"/>
+                <field name="capacity"/>
+                <field name="occupancy_percent" widget="percentage"/>
+                <field name="over_capacity" widget="boolean_toggle" optional="show"/>
+                <field name="state" widget="badge" decoration-info="state == 'planned'" decoration-warning="state == 'in_progress'" decoration-success="state == 'completed'" decoration-muted="state == 'cancelled'"/>
+            </list>
+        </field>
+    </record>
+
+    <!-- 2. Form View -->
+    <record id="view_logistics_transport_trip_form" model="ir.ui.view">
+        <field name="name">logistics.transport.trip.form</field>
+        <field name="model">logistics.transport.trip</field>
+        <field name="arch" type="xml">
+            <form string="Transport Trip">
+                <header>
+                    <button name="action_confirm" string="Plan" type="object" class="oe_highlight"
+                            invisible="state != 'draft'"/>
+                    <button name="action_start" string="Start Trip" type="object" class="btn-success"
+                            invisible="state not in ('draft', 'planned')"/>
+                    <button name="action_complete" string="Complete Trip" type="object" class="btn-primary"
+                            invisible="state != 'in_progress'"/>
+                    <button name="action_cancel" string="Cancel" type="object"
+                            invisible="state in ('completed', 'cancelled')"/>
+                    <button name="action_reset_draft" string="Reset to Draft" type="object"
+                            invisible="state != 'cancelled'"/>
+                    <button name="action_open_google_maps" string="Open Google Maps" type="object" icon="fa-map-marker"/>
+                    <field name="state" widget="statusbar" statusbar_visible="draft,planned,in_progress,completed,cancelled"/>
+                </header>
+                <sheet>
+                    <widget name="web_ribbon" title="Over Capacity" bg_color="text-bg-danger" invisible="not over_capacity"/>
+                    <widget name="web_ribbon" title="Completed" bg_color="text-bg-success" invisible="state != 'completed'"/>
+                    <widget name="web_ribbon" title="Cancelled" bg_color="text-bg-secondary" invisible="state != 'cancelled'"/>
+
+                    <div class="oe_title">
+                        <label for="name" string="Trip Number"/>
+                        <h1>
+                            <field name="name" readonly="1"/>
+                        </h1>
+                    </div>
+
+                    <!-- Top Details -->
+                    <group>
+                        <group>
+                            <field name="date" readonly="state in ('completed', 'cancelled')"/>
+                            <field name="route_id" readonly="state in ('completed', 'cancelled')"/>
+                            <field name="schedule_id" readonly="state in ('completed', 'cancelled')"/>
+                            <field name="direction" readonly="state in ('completed', 'cancelled')"/>
+                        </group>
+                        <group>
+                            <field name="vehicle_id" readonly="state in ('completed', 'cancelled')"/>
+                            <field name="driver_id" readonly="state in ('completed', 'cancelled')"/>
+                            <field name="company_id" groups="base.group_multi_company"/>
+                        </group>
+                    </group>
+
+                    <!-- Timing Section -->
+                    <group string="TIMING">
+                        <group>
+                            <field name="planned_departure_time" readonly="state in ('completed', 'cancelled')"/>
+                            <field name="actual_departure_time"/>
+                        </group>
+                        <group>
+                            <field name="planned_arrival_time" readonly="state in ('completed', 'cancelled')"/>
+                            <field name="actual_arrival_time"/>
+                        </group>
+                    </group>
+
+                    <!-- Capacity Section -->
+                    <group string="CAPACITY">
+                        <group>
+                            <field name="passenger_count"/>
+                            <field name="capacity"/>
+                            <field name="free_seats"/>
+                            <field name="occupancy_percent" widget="percentage"/>
+                        </group>
+                    </group>
+
+                    <!-- Notebook Tabs -->
+                    <notebook>
+                        <page string="Passengers" name="passengers">
+                            <field name="passenger_ids" readonly="state in ('completed', 'cancelled')">
+                                <list editable="bottom" string="Passengers">
+                                    <field name="employee_id"/>
+                                    <field name="pickup_stop_id"/>
+                                    <field name="drop_off_stop_id"/>
+                                    <field name="boarding_time" optional="show"/>
+                                    <field name="drop_time" optional="show"/>
+                                    <field name="status" widget="badge"
+                                           decoration-info="status == 'expected'"
+                                           decoration-primary="status == 'boarded'"
+                                           decoration-success="status == 'dropped'"
+                                           decoration-danger="status == 'no_show'"
+                                           decoration-muted="status == 'cancelled'"/>
+                                    <button name="action_board" string="Board" type="object" icon="fa-sign-in" invisible="status != 'expected'"/>
+                                    <button name="action_drop" string="Drop" type="object" icon="fa-sign-out" invisible="status != 'boarded'"/>
+                                    <button name="action_no_show" string="No Show" type="object" icon="fa-times-circle text-danger" invisible="status != 'expected'"/>
+                                </list>
+                            </field>
+                        </page>
+                        <page string="Notes" name="notes">
+                            <field name="notes" placeholder="Notes..."/>
+                        </page>
+                    </notebook>
+                </sheet>
+                <chatter/>
+            </form>
+        </field>
+    </record>
+
+    <!-- 3. Action -->
+    <record id="action_logistics_transport_trip" model="ir.actions.act_window">
+        <field name="name">Trips</field>
+        <field name="res_model">logistics.transport.trip</field>
+        <field name="view_mode">list,form</field>
+    </record>
+</odoo>

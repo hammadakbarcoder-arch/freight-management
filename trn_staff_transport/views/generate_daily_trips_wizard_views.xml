@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Wizard Form View (Pop-up dialog) -->
+    <record id="view_generate_daily_trips_wizard_form" model="ir.ui.view">
+        <field name="name">generate.daily.trips.wizard.form</field>
+        <field name="model">generate.daily.trips.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Generate Daily Trips">
+                <group>
+                    <group>
+                        <field name="date"/>
+                        <field name="direction"/>
+                        <field name="route_ids" widget="many2many_tags" placeholder="Select routes..."/>
+                    </group>
+                </group>
+                <footer>
+                    <button name="action_generate_trips" string="Generate Trips" type="object" class="btn-primary"/>
+                    <button string="Cancel" class="btn-secondary" special="cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+    <!-- Wizard Action (target="new" ka matlab pop-up modal) -->
+    <record id="action_generate_daily_trips_wizard" model="ir.actions.act_window">
+        <field name="name">Generate Trips</field>
+        <field name="res_model">generate.daily.trips.wizard</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+    </record>
+</odoo>

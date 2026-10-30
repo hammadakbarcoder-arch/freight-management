@@ -40,4 +40,29 @@
         <field name="model_id" ref="model_logistics_transport_stop"/>
         <field name="domain_force">['|', ('company_id', '=', False), ('company_id', 'in', company_ids)]</field>
     </record>
+
+    <!-- 7. Multi-Company Rule for Schedules -->
+    <record id="transport_schedule_comp_rule" model="ir.rule">
+        <field name="name">Transport Schedule Multi-Company</field>
+        <field name="model_id" ref="model_logistics_transport_schedule"/>
+        <field name="domain_force">['|', ('company_id', '=', False), ('company_id', 'in', company_ids)]</field>
+    </record>
+    <!-- Multi-Company Rule for Trips -->
+    <record id="transport_trip_comp_rule" model="ir.rule">
+        <field name="name">Transport Trip Multi-Company</field>
+        <field name="model_id" ref="model_logistics_transport_trip"/>
+        <field name="domain_force">['|', ('company_id', '=', False), ('company_id', 'in', company_ids)]</field>
+    </record>
+    <!-- Multi-Company Rule for Trip Passengers -->
+    <record id="transport_trip_passenger_comp_rule" model="ir.rule">
+        <field name="name">Transport Trip Passenger Multi-Company</field>
+        <field name="model_id" ref="model_logistics_transport_trip_passenger"/>
+        <field name="domain_force">['|', ('company_id', '=', False), ('company_id', 'in', company_ids)]</field>
+    </record>
+    <!-- Multi-Company Rule for Vehicle Requests -->
+    <record id="transport_vehicle_request_comp_rule" model="ir.rule">
+        <field name="name">Transport Vehicle Request Multi-Company</field>
+        <field name="model_id" ref="model_logistics_transport_vehicle_request"/>
+        <field name="domain_force">['|', ('company_id', '=', False), ('company_id', 'in', company_ids)]</field>
+    </record>
 </odoo>
