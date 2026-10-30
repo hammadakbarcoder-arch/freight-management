@@ -513,3 +513,75 @@ Yeh document Freight Management System (`trn_freight`) ke tamam tasks (Task 1 se
   emp_temp._onchange_transport_route_id()
   self.assertFalse(emp_temp.pickup_stop_id)
   ```
+
+
+---
+
+## 🗓️ Section 6: Task 10 - Transport Schedules, Daily Trips & Vehicle Requests
+
+### Q33: `Date` aur `float_time` (e.g. `7.5` for `07:30`) ko Odoo ke liye UTC `Datetime` mein kaise combine aur convert karte hain?
+
+* **⚡ 1-Liner Answer:** 
+  > **Float value se hours (`int(val)`) aur minutes (`round((val - hours) * 60)`) nikal kar `datetime.combine()` se local naive datetime banate hain, phir `pytz` se user ke timezone mein localize karke UTC (`pytz.utc`) mein convert karte hain aur `tzinfo=None` strip kar dete hain.**
+* **🔬 Implementation (`transport_schedule.py`):**
+  ```python
+  def float_time_to_utc_datetime(self, target_date, float_time_val):
+      self.ensure_one()
+      hours = int(float_time_val or 0)
+      minutes = int(round(((float_time_val or 0) - hours) * 60))
+      if minutes >= 60:
+          hours += 1
+          minutes = 0
+      naive_dt = datetime.combine(target_date, time(hour=min(hours, 23), minute=minutes))
+      user_tz = pytz.timezone(self.env.user.tz or 'UTC')
+      local_dt = user_tz.localize(naive_dt, is_dst=None)
+      return local_dt.astimezone(pytz.utc).replace(tzinfo=None)
+  ```
+
+---
+
+### Q34: "Generate Daily Trips" wizard ko Idempotent kaise banate hain taake ek hi date par dobara chalane se duplicate trips na banein?
+
+* **⚡ 1-Liner Answer:** 
+  > **Har matching schedule ke liye trip create karne se pehle `[('date', '=', self.date), ('schedule_id', '=', sched.id), ('state', '!=', 'cancelled')]` domain se existing trip search karte hain; agar mil jaye to `continue` (skip) kar dete hain.**
+* **🔬 Implementation (`generate_daily_trips_wizard.py`):**
+  ```python
+  existing_trip = Trip.search([
+      ('date', '=', self.date),
+      ('schedule_id', '=', sched.id),
+      ('state', '!=', 'cancelled')
+  ], limit=1)
+  if existing_trip:
+      continue
+  ```
+
+---
+
+### Q35: Vehicle Requests mein do datetime intervals $[A_{\text{start}}, A_{\text{end}}]$ aur $[B_{\text{start}}, B_{\text{end}}]$ ka overlap kaise check hota hai?
+
+* **⚡ 1-Liner Answer:** 
+  > **Do time ranges tab overlap karte hain jab pehle ka start doosre ke end se chota ho (`from_datetime < rec.to_datetime`) AUR pehle ka end doosre ke start se bara ho (`to_datetime > rec.from_datetime`).**
+* **🔬 Implementation (`transport_vehicle_request.py`):**
+  ```python
+  overlapping = self.search([
+      ('id', '!=', rec.id),
+      ('vehicle_id', '=', rec.vehicle_id.id),
+      ('state', 'in', ('approved', 'assigned')),
+      ('from_datetime', '<', rec.to_datetime),
+      ('to_datetime', '>', rec.from_datetime),
+  ], limit=1)
+  if overlapping:
+      raise ValidationError(_("Vehicle is already booked for this time period!"))
+  ```
+
+---
+
+### Q36: Manager ko apni khud ki Vehicle Request approve karne se kaise roka jata hai (Self-Approval Prevention)?
+
+* **⚡ 1-Liner Answer:** 
+  > **`action_approve()` mein check karte hain ke agar requester employee ka linked user (`rec.sudo().employee_id.user_id`) current logged-in user (`self.env.user`) ke barabar ho to `UserError` raise kar diya jaye.**
+* **🔬 Implementation (`transport_vehicle_request.py`):**
+  ```python
+  if rec.sudo().employee_id.user_id == self.env.user:
+      raise UserError(_("You cannot approve your own vehicle request!"))
+  ```

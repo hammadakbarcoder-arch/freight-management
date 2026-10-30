@@ -30,9 +30,9 @@ A production-grade, enterprise-ready logistics and corporate transport ecosystem
 | **Primary Domain** | Global cargo, multi-modal shipments & customs | Corporate employee commute & fleet allocation |
 | **Target Users** | Freight forwarders, logistics coordinators, shippers | HR officers, fleet managers, route dispatchers |
 | **Key Odoo Dependencies** | `contacts`, `account`, `mail` | `hr`, `fleet`, `contacts`, `mail`, `web_map` |
-| **Primary Models** | `freight.shipping`, `custom.clearance`, `freight.port` | `logistics.transport.route`, `logistics.transport.stop` |
-| **Core Innovations** | Dynamic CBM/KG rating, container reservation, PDF engine | Drag-handle sequencing, capacity % bar, Google Maps GPS |
-| **Test Coverage** | 11 comprehensive automated tests (`test_freight_order.py`) | 5 automated tests (`test_staff_transport.py`) |
+| **Primary Models** | `freight.shipping`, `custom.clearance`, `freight.port` | `logistics.transport.route`, `logistics.transport.schedule`, `logistics.transport.trip`, `logistics.transport.vehicle.request` |
+| **Core Innovations** | Dynamic CBM/KG rating, container reservation, PDF engine | Drag-handle sequencing, capacity % bar, daily trip wizard, vehicle booking overlap engine |
+| **Test Coverage** | 11 comprehensive automated tests (`test_freight_order.py`) | 9 automated tests (`test_staff_transport.py`, `test_transport_operations.py`) |
 
 ---
 
@@ -158,7 +158,7 @@ All business logic, security constraints, and mathematical computations are prot
 
 ```
 ----------------------------------------------------------------------
-Ran 5 tests in 1.32s (trn_staff_transport)
+Ran 9 tests in 3.05s (trn_staff_transport)
 Ran 11 tests in 3.45s (trn_freight)
 
 OK - 0 Failed, 0 Errors (100% Pass)
