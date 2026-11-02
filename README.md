@@ -25,14 +25,14 @@ A production-grade, enterprise-ready logistics and corporate transport ecosystem
 
 ## 📦 Modular Suite Overview
 
-| Attribute | 🚢 `trn_freight` (Freight Forwarding) | 🚐 `trn_staff_transport` (Staff Transport) |
-| :--- | :--- | :--- |
-| **Primary Domain** | Global cargo, multi-modal shipments & customs | Corporate employee commute & fleet allocation |
-| **Target Users** | Freight forwarders, logistics coordinators, shippers | HR officers, fleet managers, route dispatchers |
-| **Key Odoo Dependencies** | `contacts`, `account`, `mail` | `hr`, `fleet`, `contacts`, `mail`, `web_map` |
-| **Primary Models** | `freight.shipping`, `custom.clearance`, `freight.port` | `logistics.transport.route`, `logistics.transport.schedule`, `logistics.transport.trip`, `logistics.transport.vehicle.request` |
-| **Core Innovations** | Dynamic CBM/KG rating, container reservation, PDF engine | Drag-handle sequencing, capacity % bar, daily trip wizard, vehicle booking overlap engine |
-| **Test Coverage** | 11 comprehensive automated tests (`test_freight_order.py`) | 9 automated tests (`test_staff_transport.py`, `test_transport_operations.py`) |
+| Attribute | 🚢 `trn_freight` (Freight Forwarding) | 🚐 `trn_staff_transport` (Staff Transport) | 📊 `trn_freight_dashboard` (OWL Dashboard) |
+| :--- | :--- | :--- | :--- |
+| **Primary Domain** | Global cargo, multi-modal shipments & customs | Corporate employee commute & fleet allocation | Real-time executive analytics & KPI dashboard |
+| **Target Users** | Freight forwarders, logistics coordinators, shippers | HR officers, fleet managers, route dispatchers | Operations directors, finance managers |
+| **Key Odoo Dependencies** | `contacts`, `account`, `mail` | `hr`, `fleet`, `contacts`, `mail`, `web_map` | `trn_freight`, `web` (OWL 2.0) |
+| **Primary Models** | `freight.shipping`, `custom.clearance`, `freight.port` | `logistics.transport.route`, `logistics.transport.schedule`, `logistics.transport.trip`, `logistics.transport.vehicle.request` | `freight.dashboard` (`AbstractModel` + OWL Component) |
+| **Core Innovations** | Dynamic CBM/KG rating, container reservation, PDF engine | Drag-handle sequencing, capacity % bar, daily trip wizard, vehicle booking overlap engine | `_read_group` SQL aggregation, interactive KPI cards, 6-month Revenue vs Expense chart |
+| **Test Coverage** | 11 comprehensive automated tests (`test_freight_order.py`) | 9 automated tests (`test_staff_transport.py`, `test_transport_operations.py`) | Automated aggregation & cancelled-exclusion test (`test_freight_dashboard.py`) |
 
 ---
 

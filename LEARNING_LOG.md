@@ -585,3 +585,27 @@ Yeh document Freight Management System (`trn_freight`) ke tamam tasks (Task 1 se
   if rec.sudo().employee_id.user_id == self.env.user:
       raise UserError(_("You cannot approve your own vehicle request!"))
   ```
+
+
+---
+
+## 📊 Section 7: Task 11 - Freight Dashboard (OWL Framework & Server Aggregation)
+
+### Q37: Totals Python mein kyun calculate kiye jate hain, JavaScript mein kyun nahi?
+
+* **⚡ 1-Liner Answer:** 
+  > **Performance aur scalability ke liye: Python PostgreSQL (`_read_group`) ke zariye database level par hazaron records ka `SUM` aur `COUNT` milliseconds mein nikal kar sirf chota sa JSON result browser ko bhejta hai, jabke JS mein karne ke liye saare records network par download karne parte.**
+
+---
+
+### Q38: Asset Bundle (`web.assets_backend`) kya hota hai, aur usay change karne ke baad module update (`-u`) kyun karna parta hai?
+
+* **⚡ 1-Liner Answer:** 
+  > **Asset Bundle Odoo ki saari `.js`, `.xml`, aur `.scss` files ko combine aur minify karke ek cached package banata hai; `__manifest__.py` mein naya asset path add karne par module upgrade (`-u`) zaroori hai taake Odoo manifest metadata update kare aur bundle dobara compile kare.**
+
+---
+
+### Q39: `search_read` + `sum` vs `read_group` (`_read_group`): totals ke liye kaunsa behtar hai aur kyun?
+
+* **⚡ 1-Liner Answer:** 
+  > **`_read_group` / `read_group` bohat behtar hai kyunke yeh seedha PostgreSQL mein `GROUP BY` aur `SUM()` chalata hai, jabke `search_read` + `sum` saare records memory mein load karke loop chalata hai jo large datasets par slow hota hai.**

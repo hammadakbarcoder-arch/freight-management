@@ -1,0 +1,146 @@
+<?xml version="1.0" encoding="utf-8"?>
+<templates xml:space="preserve">
+    <t t-name="trn_freight_dashboard.FreightDashboard">
+        <div class="o_freight_dashboard container-fluid py-4">
+            <!-- Header -->
+            <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+                <div>
+                    <h2 class="mb-0 fw-bold text-dark">Freight Operations Dashboard</h2>
+                    <p class="text-muted mb-0 small">Real-time overview of orders, revenue, expenses, and margin</p>
+                </div>
+                <button class="btn btn-primary" t-on-click="() => this.loadDashboardData()">
+                    <i class="fa fa-refresh me-1"/> Refresh
+                </button>
+            </div>
+
+            <!-- 1. Financial Summary KPI Cards -->
+            <div class="row g-3 mb-4">
+                <div class="col-12 col-sm-6 col-xl-3">
+                    <div class="o_kpi_card card border-0 shadow-sm h-100 kpi-primary"
+                         t-on-click="() => this.openOrders('active', 'Active Freight Orders')">
+                        <div class="card-body">
+                            <div class="text-muted small text-uppercase fw-semibold">Active Orders</div>
+                            <div class="fs-2 fw-bold text-primary mt-1" t-out="state.active_orders"/>
+                            <div class="small text-muted mt-1">
+                                Total All Orders: <span class="fw-semibold" t-out="state.total_orders"/>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-12 col-sm-6 col-xl-3">
+                    <div class="o_kpi_card card border-0 shadow-sm h-100 kpi-success"
+                         t-on-click="() => this.openOrders('active', 'Active Freight Orders')">
+                        <div class="card-body">
+                            <div class="text-muted small text-uppercase fw-semibold">Total Revenue</div>
+                            <div class="fs-3 fw-bold text-success mt-1" t-out="formatCurrency(state.total_revenue)"/>
+                            <div class="small text-muted mt-1">Cargo + Routes + Services</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-12 col-sm-6 col-xl-3">
+                    <div class="o_kpi_card card border-0 shadow-sm h-100 kpi-danger"
+                         t-on-click="() => this.openOrders('active', 'Active Freight Orders')">
+                        <div class="card-body">
+                            <div class="text-muted small text-uppercase fw-semibold">Total Expense</div>
+                            <div class="fs-3 fw-bold text-danger mt-1" t-out="formatCurrency(state.total_expense)"/>
+                            <div class="small text-muted mt-1">Vendor Service Costs</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-12 col-sm-6 col-xl-3">
+                    <div class="o_kpi_card card border-0 shadow-sm h-100 kpi-info"
+                         t-on-click="() => this.openOrders('active', 'Active Freight Orders')">
+                        <div class="card-body">
+                            <div class="text-muted small text-uppercase fw-semibold">Net Margin</div>
+                            <div class="fs-3 fw-bold text-info mt-1" t-out="formatCurrency(state.net_margin)"/>
+                            <div class="small text-muted mt-1">Revenue minus Expense</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 2. Orders by Status Cards (Clickable) -->
+            <h5 class="fw-bold mb-3 text-secondary">Orders by Status (Click card to view orders)</h5>
+            <div class="row g-3 mb-4">
+                <div class="col-6 col-md-4 col-lg-2">
+                    <div class="o_kpi_card card border-0 shadow-sm text-center p-3"
+                         t-on-click="() => this.openOrders('draft', 'Draft Orders')">
+                        <div class="text-muted small fw-semibold">Draft</div>
+                        <div class="fs-3 fw-bold text-secondary" t-out="state.orders_by_state.draft"/>
+                    </div>
+                </div>
+                <div class="col-6 col-md-4 col-lg-2">
+                    <div class="o_kpi_card card border-0 shadow-sm text-center p-3"
+                         t-on-click="() => this.openOrders('submitted', 'Submitted Orders')">
+                        <div class="text-muted small fw-semibold">Submitted</div>
+                        <div class="fs-3 fw-bold text-warning" t-out="state.orders_by_state.submitted"/>
+                    </div>
+                </div>
+                <div class="col-6 col-md-4 col-lg-2">
+                    <div class="o_kpi_card card border-0 shadow-sm text-center p-3"
+                         t-on-click="() => this.openOrders('confirmed', 'Confirmed Orders')">
+                        <div class="text-muted small fw-semibold">Confirmed</div>
+                        <div class="fs-3 fw-bold text-primary" t-out="state.orders_by_state.confirmed"/>
+                    </div>
+                </div>
+                <div class="col-6 col-md-4 col-lg-2">
+                    <div class="o_kpi_card card border-0 shadow-sm text-center p-3"
+                         t-on-click="() => this.openOrders('invoiced', 'Invoiced Orders')">
+                        <div class="text-muted small fw-semibold">Invoiced</div>
+                        <div class="fs-3 fw-bold text-info" t-out="state.orders_by_state.invoiced"/>
+                    </div>
+                </div>
+                <div class="col-6 col-md-4 col-lg-2">
+                    <div class="o_kpi_card card border-0 shadow-sm text-center p-3"
+                         t-on-click="() => this.openOrders('done', 'Completed Orders')">
+                        <div class="text-muted small fw-semibold">Done</div>
+                        <div class="fs-3 fw-bold text-success" t-out="state.orders_by_state.done"/>
+                    </div>
+                </div>
+                <div class="col-6 col-md-4 col-lg-2">
+                    <div class="o_kpi_card card border-0 shadow-sm text-center p-3"
+                         t-on-click="() => this.openOrders('cancelled', 'Cancelled Orders')">
+                        <div class="text-muted small fw-semibold">Cancelled</div>
+                        <div class="fs-3 fw-bold text-danger" t-out="state.orders_by_state.cancelled"/>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 3. Monthly Revenue vs Expense Chart (Last 6 Months) -->
+            <div class="card border-0 shadow-sm">
+                <div class="card-body p-4">
+                    <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
+                        <h5 class="fw-bold mb-0">Monthly Revenue vs. Expense (Last 6 Months)</h5>
+                        <div class="d-flex gap-3 small">
+                            <span><span class="badge bg-success me-1">&#9632;</span> Revenue</span>
+                            <span><span class="badge bg-danger me-1">&#9632;</span> Expense</span>
+                        </div>
+                    </div>
+
+                    <div class="o_freight_chart_container">
+                        <t t-foreach="state.monthly_data" t-as="item" t-key="item.month">
+                            <div class="o_chart_column">
+                                <div class="o_bars_wrapper">
+                                    <div class="o_bar o_bar_revenue"
+                                         t-attf-style="height: {{ getBarHeight(item.revenue) }}%;"
+                                         t-att-title="'Revenue: ' + formatCurrency(item.revenue)">
+                                        <span class="o_bar_val" t-if="item.revenue > 0" t-out="formatCurrency(item.revenue)"/>
+                                    </div>
+                                    <div class="o_bar o_bar_expense"
+                                         t-attf-style="height: {{ getBarHeight(item.expense) }}%;"
+                                         t-att-title="'Expense: ' + formatCurrency(item.expense)">
+                                        <span class="o_bar_val" t-if="item.expense > 0" t-out="formatCurrency(item.expense)"/>
+                                    </div>
+                                </div>
+                                <div class="o_month_label text-muted small fw-semibold mt-2" t-out="item.month"/>
+                            </div>
+                        </t>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </t>
+</templates>
