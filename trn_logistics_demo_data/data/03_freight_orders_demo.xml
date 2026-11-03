@@ -1,0 +1,399 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="1">
+
+        <!-- ============================================================ -->
+        <!-- 1. DEMO CARGO PRODUCTS (product.product)                     -->
+        <!-- ============================================================ -->
+        <record id="product_cargo_cotton" model="product.product">
+            <field name="name">Export Grade Cotton Bales</field>
+            <field name="type">consu</field>
+            <field name="list_price">120.0</field>
+        </record>
+
+        <record id="product_cargo_surgical" model="product.product">
+            <field name="name">Sterile Surgical Instrument Kits</field>
+            <field name="type">consu</field>
+            <field name="list_price">450.0</field>
+        </record>
+
+        <record id="product_cargo_rice" model="product.product">
+            <field name="name">Super Basmati Rice (50kg Sacks)</field>
+            <field name="type">consu</field>
+            <field name="list_price">85.0</field>
+        </record>
+
+        <!-- ============================================================ -->
+        <!-- ORDER 1: DRAFT STATE (Export Water FCL)                      -->
+        <!-- ============================================================ -->
+        <record id="freight_order_demo_1_draft" model="freight.shipping">
+            <field name="shipper_id" ref="partner_shipper_indus"/>
+            <field name="consignee_id" ref="partner_consignee_gulf"/>
+            <field name="agent_id" ref="partner_agent_qasim"/>
+            <field name="order_type">export</field>
+            <field name="transport">water</field>
+            <field name="sea_type">fcl</field>
+            <field name="loading_port" ref="port_karachi_sea"/>
+            <field name="discharge_port_id" ref="port_jebel_ali"/>
+            <field name="order_date" eval="DateTime.today().strftime('%Y-%m-%d')"/>
+            <field name="expected_date" eval="(DateTime.today() + relativedelta(days=10)).strftime('%Y-%m-%d')"/>
+            <field name="cargo_ids" eval="[
+                Command.create({
+                    'container_id': ref('container_20ft_std_1'),
+                    'product_id': ref('product_cargo_cotton'),
+                    'billing_on': 'weight',
+                    'pricing_id': ref('price_ocean_standard'),
+                    'weight': 12000.0,
+                    'volume': 28.0,
+                })
+            ]"/>
+            <field name="route_ids" eval="[
+                Command.create({
+                    'route_id': ref('freight_route_khi_jea'),
+                    'source_port_id': ref('port_karachi_sea'),
+                    'destination_port_id': ref('port_jebel_ali'),
+                })
+            ]"/>
+            <field name="service_ids" eval="[
+                Command.create({
+                    'vendor_id': ref('partner_vendor_maersk'),
+                    'service_id': ref('service_thc_handling'),
+                    'qty': 1.0,
+                    'sale': 220.0,
+                })
+            ]"/>
+        </record>
+
+        <!-- ============================================================ -->
+        <!-- ORDER 2: SUBMITTED STATE (Export Air + Draft Clearance)      -->
+        <!-- ============================================================ -->
+        <record id="freight_order_demo_2_submitted" model="freight.shipping">
+            <field name="shipper_id" ref="partner_shipper_crescent"/>
+            <field name="consignee_id" ref="partner_consignee_gulf"/>
+            <field name="agent_id" ref="partner_agent_skyline"/>
+            <field name="order_type">export</field>
+            <field name="transport">air</field>
+            <field name="loading_port" ref="port_jinnah_air"/>
+            <field name="discharge_port_id" ref="port_dxb_air"/>
+            <field name="order_date" eval="(DateTime.today() - relativedelta(days=2)).strftime('%Y-%m-%d')"/>
+            <field name="expected_date" eval="(DateTime.today() + relativedelta(days=3)).strftime('%Y-%m-%d')"/>
+            <field name="cargo_ids" eval="[
+                Command.create({
+                    'container_id': ref('container_air_uld_1'),
+                    'product_id': ref('product_cargo_surgical'),
+                    'billing_on': 'weight',
+                    'pricing_id': ref('price_air_express'),
+                    'weight': 850.0,
+                    'volume': 4.2,
+                })
+            ]"/>
+            <field name="route_ids" eval="[
+                Command.create({
+                    'route_id': ref('freight_route_opkc_omdb'),
+                    'source_port_id': ref('port_jinnah_air'),
+                    'destination_port_id': ref('port_dxb_air'),
+                })
+            ]"/>
+            <field name="service_ids" eval="[
+                Command.create({
+                    'vendor_id': ref('partner_agent_skyline'),
+                    'service_id': ref('service_customs_brokerage'),
+                    'qty': 1.0,
+                    'sale': 165.0,
+                })
+            ]"/>
+            <field name="track_ids" eval="[
+                Command.create({
+                    'source_location_id': ref('port_jinnah_air'),
+                    'destination_location_id': ref('port_dxb_air'),
+                    'transport': 'air',
+                    'date': (DateTime.today() - relativedelta(days=1)).strftime('%Y-%m-%d'),
+                    'status': 'received',
+                })
+            ]"/>
+        </record>
+
+        <record id="clearance_demo_2" model="custom.clearance">
+            <field name="freight_id" ref="freight_order_demo_2_submitted"/>
+            <field name="date" eval="(DateTime.today() - relativedelta(days=1)).strftime('%Y-%m-%d')"/>
+            <field name="agent_id" ref="partner_agent_skyline"/>
+            <field name="loading_port_id" ref="port_jinnah_air"/>
+            <field name="discharge_port_id" ref="port_dxb_air"/>
+            <field name="line_ids" eval="[
+                Command.create({
+                    'name': 'Air Waybill (AWB) &amp; Commercial Invoice',
+                    'file_name': 'awb_crescent_02.pdf',
+                    'document': 'JVBERi0xLjQKMSAwIG9iago8PC9UeXBlL0NhdGFsb2c+PgplbmRvYmoK',
+                })
+            ]"/>
+        </record>
+
+        <function model="freight.shipping" name="action_submit" eval="[[ref('freight_order_demo_2_submitted')]]"/>
+
+        <!-- ============================================================ -->
+        <!-- ORDER 3: CONFIRMED STATE (Export Water FCL + Clearance)      -->
+        <!-- ============================================================ -->
+        <record id="freight_order_demo_3_confirmed" model="freight.shipping">
+            <field name="shipper_id" ref="partner_shipper_indus"/>
+            <field name="consignee_id" ref="partner_consignee_euro"/>
+            <field name="agent_id" ref="partner_agent_qasim"/>
+            <field name="order_type">export</field>
+            <field name="transport">water</field>
+            <field name="sea_type">fcl</field>
+            <field name="loading_port" ref="port_qasim_sea"/>
+            <field name="discharge_port_id" ref="port_hamburg"/>
+            <field name="order_date" eval="(DateTime.today() - relativedelta(days=5)).strftime('%Y-%m-%d')"/>
+            <field name="expected_date" eval="(DateTime.today() + relativedelta(days=14)).strftime('%Y-%m-%d')"/>
+            <field name="cargo_ids" eval="[
+                Command.create({
+                    'container_id': ref('container_40ft_hc_1'),
+                    'product_id': ref('product_cargo_cotton'),
+                    'billing_on': 'weight',
+                    'pricing_id': ref('price_ocean_standard'),
+                    'weight': 24000.0,
+                    'volume': 68.0,
+                })
+            ]"/>
+            <field name="route_ids" eval="[
+                Command.create({
+                    'route_id': ref('freight_route_bqm_ham'),
+                    'source_port_id': ref('port_qasim_sea'),
+                    'destination_port_id': ref('port_hamburg'),
+                })
+            ]"/>
+            <field name="service_ids" eval="[
+                Command.create({
+                    'vendor_id': ref('partner_vendor_maersk'),
+                    'service_id': ref('service_thc_handling'),
+                    'qty': 1.0,
+                    'sale': 220.0,
+                }),
+                Command.create({
+                    'vendor_id': ref('partner_vendor_maersk'),
+                    'service_id': ref('service_cargo_insurance'),
+                    'qty': 1.0,
+                    'sale': 420.0,
+                })
+            ]"/>
+            <field name="track_ids" eval="[
+                Command.create({
+                    'source_location_id': ref('port_qasim_sea'),
+                    'destination_location_id': ref('port_hamburg'),
+                    'transport': 'water',
+                    'date': (DateTime.today() - relativedelta(days=3)).strftime('%Y-%m-%d'),
+                    'status': 'received',
+                })
+            ]"/>
+        </record>
+
+        <record id="clearance_demo_3" model="custom.clearance">
+            <field name="freight_id" ref="freight_order_demo_3_confirmed"/>
+            <field name="date" eval="(DateTime.today() - relativedelta(days=4)).strftime('%Y-%m-%d')"/>
+            <field name="agent_id" ref="partner_agent_qasim"/>
+            <field name="loading_port_id" ref="port_qasim_sea"/>
+            <field name="discharge_port_id" ref="port_hamburg"/>
+            <field name="line_ids" eval="[
+                Command.create({
+                    'name': 'Bill of Lading &amp; Phytosanitary Certificate',
+                    'file_name': 'bl_hamburg_03.pdf',
+                    'document': 'JVBERi0xLjQKMSAwIG9iago8PC9UeXBlL0NhdGFsb2c+PgplbmRvYmoK',
+                })
+            ]"/>
+            <field name="revision_ids" eval="[
+                Command.create({
+                    'name': 'REV-01 (HS Code Verification)',
+                    'reason': 'Updated EU Combined Nomenclature tariff code for cotton bales',
+                    'note': 'Verified with Hamburg Port Customs Broker',
+                })
+            ]"/>
+        </record>
+
+        <function model="freight.shipping" name="action_submit" eval="[[ref('freight_order_demo_3_confirmed')]]"/>
+        <function model="custom.clearance" name="action_confirm" eval="[[ref('clearance_demo_3')]]"/>
+        <function model="freight.shipping" name="action_confirm" eval="[[ref('freight_order_demo_3_confirmed')]]"/>
+
+        <!-- ============================================================ -->
+        <!-- ORDER 4: INVOICED STATE (Export Land FTL + Invoice)          -->
+        <!-- ============================================================ -->
+        <record id="freight_order_demo_4_invoiced" model="freight.shipping">
+            <field name="shipper_id" ref="partner_shipper_atlas"/>
+            <field name="consignee_id" ref="partner_consignee_pacific"/>
+            <field name="agent_id" ref="partner_agent_skyline"/>
+            <field name="order_type">export</field>
+            <field name="transport">land</field>
+            <field name="land_type">ftl</field>
+            <field name="loading_port" ref="port_lahore_dry"/>
+            <field name="discharge_port_id" ref="port_torkham_land"/>
+            <field name="order_date" eval="(DateTime.today() - relativedelta(days=7)).strftime('%Y-%m-%d')"/>
+            <field name="expected_date" eval="(DateTime.today() + relativedelta(days=2)).strftime('%Y-%m-%d')"/>
+            <field name="cargo_ids" eval="[
+                Command.create({
+                    'container_id': ref('container_40ft_reefer_1'),
+                    'product_id': ref('product_cargo_rice'),
+                    'billing_on': 'weight',
+                    'pricing_id': ref('price_land_crossborder'),
+                    'weight': 20000.0,
+                    'volume': 55.0,
+                })
+            ]"/>
+            <field name="route_ids" eval="[
+                Command.create({
+                    'route_id': ref('freight_route_lhe_tkm'),
+                    'source_port_id': ref('port_lahore_dry'),
+                    'destination_port_id': ref('port_torkham_land'),
+                })
+            ]"/>
+            <field name="service_ids" eval="[
+                Command.create({
+                    'vendor_id': ref('partner_vendor_noor_trucking'),
+                    'service_id': ref('service_cold_chain'),
+                    'qty': 1.0,
+                    'sale': 350.0,
+                })
+            ]"/>
+            <field name="track_ids" eval="[
+                Command.create({
+                    'source_location_id': ref('port_lahore_dry'),
+                    'destination_location_id': ref('port_torkham_land'),
+                    'transport': 'land',
+                    'date': (DateTime.today() - relativedelta(days=5)).strftime('%Y-%m-%d'),
+                    'status': 'received',
+                })
+            ]"/>
+        </record>
+
+        <record id="clearance_demo_4" model="custom.clearance">
+            <field name="freight_id" ref="freight_order_demo_4_invoiced"/>
+            <field name="date" eval="(DateTime.today() - relativedelta(days=6)).strftime('%Y-%m-%d')"/>
+            <field name="agent_id" ref="partner_agent_skyline"/>
+            <field name="loading_port_id" ref="port_lahore_dry"/>
+            <field name="discharge_port_id" ref="port_torkham_land"/>
+            <field name="line_ids" eval="[
+                Command.create({
+                    'name': 'TIR Carnet &amp; Cross-Border Transit Permit',
+                    'file_name': 'tir_torkham_04.pdf',
+                    'document': 'JVBERi0xLjQKMSAwIG9iago8PC9UeXBlL0NhdGFsb2c+PgplbmRvYmoK',
+                })
+            ]"/>
+        </record>
+
+        <function model="freight.shipping" name="action_submit" eval="[[ref('freight_order_demo_4_invoiced')]]"/>
+        <function model="custom.clearance" name="action_confirm" eval="[[ref('clearance_demo_4')]]"/>
+        <function model="freight.shipping" name="action_confirm" eval="[[ref('freight_order_demo_4_invoiced')]]"/>
+        <function model="freight.shipping" name="action_create_invoice" eval="[[ref('freight_order_demo_4_invoiced')]]"/>
+
+        <!-- ============================================================ -->
+        <!-- ORDER 5: DONE STATE (Import Water FCL + Invoice + Delivered) -->
+        <!-- ============================================================ -->
+        <record id="freight_order_demo_5_done" model="freight.shipping">
+            <field name="shipper_id" ref="partner_consignee_gulf"/>
+            <field name="consignee_id" ref="partner_shipper_indus"/>
+            <field name="agent_id" ref="partner_agent_qasim"/>
+            <field name="order_type">import</field>
+            <field name="transport">water</field>
+            <field name="sea_type">fcl</field>
+            <field name="loading_port" ref="port_jebel_ali"/>
+            <field name="discharge_port_id" ref="port_karachi_sea"/>
+            <field name="order_date" eval="(DateTime.today() - relativedelta(days=15)).strftime('%Y-%m-%d')"/>
+            <field name="expected_date" eval="(DateTime.today() - relativedelta(days=2)).strftime('%Y-%m-%d')"/>
+            <field name="cargo_ids" eval="[
+                Command.create({
+                    'container_id': ref('container_20ft_std_2'),
+                    'product_id': ref('product_cargo_cotton'),
+                    'billing_on': 'weight',
+                    'pricing_id': ref('price_ocean_standard'),
+                    'weight': 16000.0,
+                    'volume': 30.0,
+                })
+            ]"/>
+            <field name="route_ids" eval="[
+                Command.create({
+                    'route_id': ref('freight_route_khi_jea'),
+                    'source_port_id': ref('port_jebel_ali'),
+                    'destination_port_id': ref('port_karachi_sea'),
+                })
+            ]"/>
+            <field name="service_ids" eval="[
+                Command.create({
+                    'vendor_id': ref('partner_vendor_maersk'),
+                    'service_id': ref('service_thc_handling'),
+                    'qty': 1.0,
+                    'sale': 220.0,
+                }),
+                Command.create({
+                    'vendor_id': ref('partner_agent_qasim'),
+                    'service_id': ref('service_customs_brokerage'),
+                    'qty': 1.0,
+                    'sale': 180.0,
+                })
+            ]"/>
+            <field name="track_ids" eval="[
+                Command.create({
+                    'source_location_id': ref('port_jebel_ali'),
+                    'destination_location_id': ref('port_karachi_sea'),
+                    'transport': 'water',
+                    'date': (DateTime.today() - relativedelta(days=12)).strftime('%Y-%m-%d'),
+                    'status': 'received',
+                }),
+                Command.create({
+                    'source_location_id': ref('port_jebel_ali'),
+                    'destination_location_id': ref('port_karachi_sea'),
+                    'transport': 'water',
+                    'date': (DateTime.today() - relativedelta(days=2)).strftime('%Y-%m-%d'),
+                    'status': 'delivered',
+                })
+            ]"/>
+        </record>
+
+        <record id="clearance_demo_5" model="custom.clearance">
+            <field name="freight_id" ref="freight_order_demo_5_done"/>
+            <field name="date" eval="(DateTime.today() - relativedelta(days=10)).strftime('%Y-%m-%d')"/>
+            <field name="agent_id" ref="partner_agent_qasim"/>
+            <field name="loading_port_id" ref="port_jebel_ali"/>
+            <field name="discharge_port_id" ref="port_karachi_sea"/>
+            <field name="line_ids" eval="[
+                Command.create({
+                    'name': 'WeBOC Goods Declaration (GD) &amp; Delivery Order',
+                    'file_name': 'weboc_gd_05.pdf',
+                    'document': 'JVBERi0xLjQKMSAwIG9iago8PC9UeXBlL0NhdGFsb2c+PgplbmRvYmoK',
+                })
+            ]"/>
+        </record>
+
+        <function model="freight.shipping" name="action_submit" eval="[[ref('freight_order_demo_5_done')]]"/>
+        <function model="custom.clearance" name="action_confirm" eval="[[ref('clearance_demo_5')]]"/>
+        <function model="custom.clearance" name="action_done" eval="[[ref('clearance_demo_5')]]"/>
+        <function model="freight.shipping" name="action_confirm" eval="[[ref('freight_order_demo_5_done')]]"/>
+        <function model="freight.shipping" name="action_create_invoice" eval="[[ref('freight_order_demo_5_done')]]"/>
+        <function model="freight.shipping" name="action_done" eval="[[ref('freight_order_demo_5_done')]]"/>
+
+        <!-- ============================================================ -->
+        <!-- ORDER 6: CANCELLED STATE (Export Air)                        -->
+        <!-- ============================================================ -->
+        <record id="freight_order_demo_6_cancelled" model="freight.shipping">
+            <field name="shipper_id" ref="partner_shipper_crescent"/>
+            <field name="consignee_id" ref="partner_consignee_euro"/>
+            <field name="agent_id" ref="partner_agent_skyline"/>
+            <field name="order_type">export</field>
+            <field name="transport">air</field>
+            <field name="loading_port" ref="port_jinnah_air"/>
+            <field name="discharge_port_id" ref="port_dxb_air"/>
+            <field name="order_date" eval="(DateTime.today() - relativedelta(days=4)).strftime('%Y-%m-%d')"/>
+            <field name="expected_date" eval="(DateTime.today() + relativedelta(days=1)).strftime('%Y-%m-%d')"/>
+            <field name="cargo_ids" eval="[
+                Command.create({
+                    'container_id': ref('container_air_uld_1'),
+                    'product_id': ref('product_cargo_surgical'),
+                    'billing_on': 'weight',
+                    'pricing_id': ref('price_air_express'),
+                    'weight': 400.0,
+                    'volume': 2.0,
+                })
+            ]"/>
+        </record>
+
+        <function model="freight.shipping" name="action_submit" eval="[[ref('freight_order_demo_6_cancelled')]]"/>
+        <function model="freight.shipping" name="action_cancel" eval="[[ref('freight_order_demo_6_cancelled')]]"/>
+
+    </data>
+</odoo>

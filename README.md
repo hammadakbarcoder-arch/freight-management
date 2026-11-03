@@ -220,9 +220,21 @@ freight-management/
     ├── security/
     │   ├── transport_security.xml      # User & Admin groups, multi-company rules
     │   └── ir.model.access.csv         # CRUD permissions
-    └── tests/
-        ├── __init__.py
-        └── test_staff_transport.py     # 5 comprehensive automated tests
+│   └── tests/
+│       ├── __init__.py
+│       ├── test_staff_transport.py     # 5 foundational route/stop/security tests
+│       └── test_transport_operations.py # 4 schedule, trip, wizard & vehicle request tests
+│
+├── trn_freight_dashboard/              # Module 3: OWL 2.0 Freight Dashboard
+│   ├── __manifest__.py
+│   ├── models/freight_dashboard.py     # _read_group KPI aggregation engine
+│   ├── static/src/                     # OWL 2.0 JS component, QWeb XML & dark/light SCSS
+│   └── tests/test_freight_dashboard.py # Automated KPI & cancelled exclusion test
+│
+└── trn_logistics_demo_data/            # Module 4: End-to-End Logistics Demo Data
+    ├── __manifest__.py
+    ├── data/                           # Ordered XML demo pipeline (01 to 05)
+    └── tests/test_demo_data.py         # End-to-end demo data & workflow state verification
 ```
 
 ---
@@ -241,11 +253,10 @@ freight-management/
    addons_path = /path/to/odoo/addons,/path/to/odoo/custom_addons/freight-management
    ```
 
-3. **Install the Modules**:
-   * Restart your Odoo server.
-   * Activate **Developer Mode** in Odoo Settings.
-   * Navigate to **Apps ➔ Update Apps List**.
-   * Search for **`trn_freight`** and **`trn_staff_transport`** and click **Activate**.
+3. **Fresh Database Single-Command Install & Test Verification**:
+   ```bash
+   odoo-bin -c odoo.conf -d freight_fresh -i trn_freight,trn_staff_transport,trn_freight_dashboard,trn_logistics_demo_data --test-tags=/trn_freight,/trn_staff_transport,/trn_freight_dashboard,/trn_logistics_demo_data --stop-after-init
+   ```
 
 ---
 

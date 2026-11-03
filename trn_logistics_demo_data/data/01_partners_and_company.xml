@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="1">
+
+        <!-- 1. COMPANY PROFILE -->
+        <record id="base.main_company" model="res.company">
+            <field name="name">Apex Global Logistics &amp; Transport</field>
+            <field name="street">Plot 42-B, Dockyard Road, West Wharf</field>
+            <field name="city">Karachi</field>
+            <field name="country_id" ref="base.pk"/>
+            <field name="phone">+92 21 3231 8800</field>
+            <field name="email">operations@apexlogistics.pk</field>
+            <field name="website">https://www.apexlogistics.pk</field>
+        </record>
+
+        <!-- 2. SHIPPERS / CUSTOMERS -->
+        <record id="partner_shipper_indus" model="res.partner">
+            <field name="name">Indus Valley Textiles Ltd.</field>
+            <field name="is_company" eval="True"/>
+            <field name="street">Sector 23, Korangi Industrial Area</field>
+            <field name="city">Karachi</field>
+            <field name="country_id" ref="base.pk"/>
+            <field name="email">exports@indusvalley.pk</field>
+            <field name="phone">+92 21 3506 1122</field>
+        </record>
+
+        <record id="partner_shipper_crescent" model="res.partner">
+            <field name="name">Crescent Surgical Instruments Co.</field>
+            <field name="is_company" eval="True"/>
+            <field name="street">Small Industrial Estate, Shahabpura</field>
+            <field name="city">Sialkot</field>
+            <field name="country_id" ref="base.pk"/>
+            <field name="email">logistics@crescentsurgical.pk</field>
+            <field name="phone">+92 52 355 4490</field>
+        </record>
+
+        <record id="partner_shipper_atlas" model="res.partner">
+            <field name="name">Atlas Agro Exports Pvt. Ltd.</field>
+            <field name="is_company" eval="True"/>
+            <field name="street">Multan Road, Sundar Industrial Estate</field>
+            <field name="city">Lahore</field>
+            <field name="country_id" ref="base.pk"/>
+            <field name="email">shipping@atlasagro.pk</field>
+            <field name="phone">+92 42 3529 7700</field>
+        </record>
+
+        <!-- 3. CONSIGNEES -->
+        <record id="partner_consignee_gulf" model="res.partner">
+            <field name="name">Gulf Horizon Trading LLC</field>
+            <field name="is_company" eval="True"/>
+            <field name="street">Jebel Ali Free Zone, South Zone 2</field>
+            <field name="city">Dubai</field>
+            <field name="country_id" ref="base.ae"/>
+            <field name="email">imports@gulfhorizon.ae</field>
+            <field name="phone">+971 4 881 5500</field>
+        </record>
+
+        <record id="partner_consignee_euro" model="res.partner">
+            <field name="name">EuroMed Supply GmbH</field>
+            <field name="is_company" eval="True"/>
+            <field name="street">Speicherstadt Block N, HafenCity</field>
+            <field name="city">Hamburg</field>
+            <field name="country_id" ref="base.de"/>
+            <field name="email">procurement@euromedsupply.de</field>
+            <field name="phone">+49 40 300 8821</field>
+        </record>
+
+        <record id="partner_consignee_pacific" model="res.partner">
+            <field name="name">SilkRoad Distribution Co.</field>
+            <field name="is_company" eval="True"/>
+            <field name="street">Kabul Industrial Park, District 9</field>
+            <field name="city">Kabul</field>
+            <field name="country_id" ref="base.af"/>
+            <field name="email">receiving@silkroaddist.af</field>
+            <field name="phone">+93 20 230 1190</field>
+        </record>
+
+        <!-- 4. CLEARING AGENTS & VENDORS -->
+        <record id="partner_agent_qasim" model="res.partner">
+            <field name="name">Qasim Maritime Clearing Agency</field>
+            <field name="is_company" eval="True"/>
+            <field name="city">Karachi</field>
+            <field name="country_id" ref="base.pk"/>
+            <field name="email">clearance@qasimmaritime.pk</field>
+            <field name="phone">+92 21 3220 9911</field>
+        </record>
+
+        <record id="partner_agent_skyline" model="res.partner">
+            <field name="name">Skyline Customs &amp; Forwarding</field>
+            <field name="is_company" eval="True"/>
+            <field name="city">Lahore</field>
+            <field name="country_id" ref="base.pk"/>
+            <field name="email">customs@skylineforwarding.pk</field>
+            <field name="phone">+92 42 3661 2244</field>
+        </record>
+
+        <record id="partner_vendor_maersk" model="res.partner">
+            <field name="name">BlueWave Ocean Carriers</field>
+            <field name="is_company" eval="True"/>
+            <field name="city">Karachi</field>
+            <field name="country_id" ref="base.pk"/>
+            <field name="email">booking@bluewavecarriers.com</field>
+        </record>
+
+        <record id="partner_vendor_noor_trucking" model="res.partner">
+            <field name="name">Noor Heavy Haulage &amp; Crane Services</field>
+            <field name="is_company" eval="True"/>
+            <field name="city">Lahore</field>
+            <field name="country_id" ref="base.pk"/>
+            <field name="email">dispatch@noorhaulage.pk</field>
+        </record>
+
+    </data>
+</odoo>

@@ -1,143 +1,249 @@
 <?xml version="1.0" encoding="utf-8"?>
 <templates xml:space="preserve">
     <t t-name="trn_freight_dashboard.FreightDashboard">
-        <div class="o_freight_dashboard container-fluid py-4">
-            <!-- Header -->
-            <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
-                <div>
-                    <h2 class="mb-0 fw-bold text-dark">Freight Operations Dashboard</h2>
-                    <p class="text-muted mb-0 small">Real-time overview of orders, revenue, expenses, and margin</p>
+        <div class="o_freight_dashboard_container">
+            <!-- 1. Top Executive Bar -->
+            <div class="o_dash_header mb-3">
+                <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
+                    <div class="d-flex align-items-center gap-2">
+                        <div class="o_dash_logo_badge">
+                            <i class="fa fa-ship fs-5 text-white"/>
+                        </div>
+                        <div>
+                            <h4 class="mb-0 fw-bold text-white tracking-wide">Trucking and Logistics Dashboard</h4>
+                            <p class="text-white-50 mb-0 small">Real-time overview of shipments, revenue, expenses, and fleet operations</p>
+                        </div>
+                    </div>
+                    <div class="d-flex align-items-center gap-2">
+                        <button class="btn btn-sm btn-outline-light rounded-pill px-3" t-on-click="() => this.openOrders('active', 'All Active Shipments')">
+                            <i class="fa fa-table me-1"/> All Shipments
+                        </button>
+                        <button class="btn btn-sm btn-primary rounded-pill px-3" t-on-click="() => this.loadDashboardData()" t-att-disabled="state.loading">
+                            <i t-attf-class="fa #{state.loading ? 'fa-spinner fa-spin' : 'fa-refresh'} me-1"/>
+                            <span t-out="state.loading ? 'Updating...' : 'Refresh'"/>
+                        </button>
+                    </div>
                 </div>
-                <button class="btn btn-primary" t-on-click="() => this.loadDashboardData()">
-                    <i class="fa fa-refresh me-1"/> Refresh
-                </button>
+
+                <!-- Filters Bar -->
+                <div class="o_dash_filters_bar d-flex align-items-center flex-wrap gap-3 p-3 rounded-3">
+                    <div class="o_filter_item">
+                        <label class="o_filter_label">CARGO TYPE</label>
+                        <select class="form-select form-select-sm o_dash_select"
+                                t-att-value="state.filter_transport"
+                                t-on-change="(ev) => this.onFilterChange('transport', ev)">
+                            <option value="all">All Modes</option>
+                            <option value="water">Water / Ocean FCL/LCL</option>
+                            <option value="air">Air Cargo Express</option>
+                            <option value="land">Land Overland FTL/LTL</option>
+                        </select>
+                    </div>
+
+                    <div class="o_filter_item">
+                        <label class="o_filter_label">STATUS</label>
+                        <select class="form-select form-select-sm o_dash_select"
+                                t-att-value="state.filter_status"
+                                t-on-change="(ev) => this.onFilterChange('status', ev)">
+                            <option value="all">All Statuses</option>
+                            <option value="draft">Draft</option>
+                            <option value="submitted">Submitted</option>
+                            <option value="confirmed">Confirmed</option>
+                            <option value="invoiced">Invoiced</option>
+                            <option value="done">Delivered / Done</option>
+                            <option value="cancelled">Cancelled</option>
+                        </select>
+                    </div>
+
+                    <div class="ms-auto align-self-end">
+                        <button class="btn btn-sm btn-danger rounded-pill px-3 o_clear_btn" t-on-click="() => this.clearFilters()">
+                            <i class="fa fa-times me-1"/> Clear All
+                        </button>
+                    </div>
+                </div>
             </div>
 
-            <!-- 1. Financial Summary KPI Cards -->
+            <!-- 2. Six (6) Dark KPI Cards in a Single Row -->
             <div class="row g-3 mb-4">
-                <div class="col-12 col-sm-6 col-xl-3">
-                    <div class="o_kpi_card card border-0 shadow-sm h-100 kpi-primary"
-                         t-on-click="() => this.openOrders('active', 'Active Freight Orders')">
-                        <div class="card-body">
-                            <div class="text-muted small text-uppercase fw-semibold">Active Orders</div>
-                            <div class="fs-2 fw-bold text-primary mt-1" t-out="state.active_orders"/>
-                            <div class="small text-muted mt-1">
-                                Total All Orders: <span class="fw-semibold" t-out="state.total_orders"/>
+                <!-- Card 1: Total Shipments -->
+                <div class="col-6 col-md-4 col-xl-2">
+                    <div class="o_exec_card card border-0 h-100"
+                         t-on-click="() => this.openOrders('active', 'Active Shipments')">
+                        <div class="card-body p-3">
+                            <div class="o_icon_badge bg-warning-subtle text-warning mb-2">
+                                <i class="fa fa-truck"/>
+                            </div>
+                            <div class="o_card_sub text-uppercase">TOTAL SHIPMENTS</div>
+                            <div class="o_card_val" t-out="state.active_orders"/>
+                            <div class="o_card_footer text-white-50">
+                                Total All: <span class="text-white" t-out="state.total_orders"/>
                             </div>
                         </div>
                     </div>
                 </div>
 
-                <div class="col-12 col-sm-6 col-xl-3">
-                    <div class="o_kpi_card card border-0 shadow-sm h-100 kpi-success"
-                         t-on-click="() => this.openOrders('active', 'Active Freight Orders')">
-                        <div class="card-body">
-                            <div class="text-muted small text-uppercase fw-semibold">Total Revenue</div>
-                            <div class="fs-3 fw-bold text-success mt-1" t-out="formatCurrency(state.total_revenue)"/>
-                            <div class="small text-muted mt-1">Cargo + Routes + Services</div>
+                <!-- Card 2: Total Revenue -->
+                <div class="col-6 col-md-4 col-xl-2">
+                    <div class="o_exec_card card border-0 h-100"
+                         t-on-click="() => this.openOrders('active', 'Active Orders')">
+                        <div class="card-body p-3">
+                            <div class="o_icon_badge bg-success-subtle text-success mb-2">
+                                <i class="fa fa-money"/>
+                            </div>
+                            <div class="o_card_sub text-uppercase">TOTAL REVENUE</div>
+                            <div class="o_card_val text-success" t-out="formatCurrency(state.total_revenue)"/>
+                            <div class="o_card_footer text-white-50">Gross Billing</div>
                         </div>
                     </div>
                 </div>
 
-                <div class="col-12 col-sm-6 col-xl-3">
-                    <div class="o_kpi_card card border-0 shadow-sm h-100 kpi-danger"
-                         t-on-click="() => this.openOrders('active', 'Active Freight Orders')">
-                        <div class="card-body">
-                            <div class="text-muted small text-uppercase fw-semibold">Total Expense</div>
-                            <div class="fs-3 fw-bold text-danger mt-1" t-out="formatCurrency(state.total_expense)"/>
-                            <div class="small text-muted mt-1">Vendor Service Costs</div>
+                <!-- Card 3: Total Cost / Expense -->
+                <div class="col-6 col-md-4 col-xl-2">
+                    <div class="o_exec_card card border-0 h-100"
+                         t-on-click="() => this.openOrders('active', 'Active Orders')">
+                        <div class="card-body p-3">
+                            <div class="o_icon_badge bg-danger-subtle text-danger mb-2">
+                                <i class="fa fa-line-chart"/>
+                            </div>
+                            <div class="o_card_sub text-uppercase">TOTAL EXPENSE</div>
+                            <div class="o_card_val text-danger" t-out="formatCurrency(state.total_expense)"/>
+                            <div class="o_card_footer text-white-50">Vendor &amp; THC Costs</div>
                         </div>
                     </div>
                 </div>
 
-                <div class="col-12 col-sm-6 col-xl-3">
-                    <div class="o_kpi_card card border-0 shadow-sm h-100 kpi-info"
-                         t-on-click="() => this.openOrders('active', 'Active Freight Orders')">
-                        <div class="card-body">
-                            <div class="text-muted small text-uppercase fw-semibold">Net Margin</div>
-                            <div class="fs-3 fw-bold text-info mt-1" t-out="formatCurrency(state.net_margin)"/>
-                            <div class="small text-muted mt-1">Revenue minus Expense</div>
+                <!-- Card 4: Net Profit -->
+                <div class="col-6 col-md-4 col-xl-2">
+                    <div class="o_exec_card card border-0 h-100"
+                         t-on-click="() => this.openOrders('active', 'Active Orders')">
+                        <div class="card-body p-3">
+                            <div class="o_icon_badge bg-info-subtle text-info mb-2">
+                                <i class="fa fa-check-circle"/>
+                            </div>
+                            <div class="o_card_sub text-uppercase">TOTAL PROFIT</div>
+                            <div class="o_card_val text-info" t-out="formatCurrency(state.net_margin)"/>
+                            <div class="o_card_footer text-white-50">Revenue - Expense</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Card 5: Confirmed Shipments -->
+                <div class="col-6 col-md-4 col-xl-2">
+                    <div class="o_exec_card card border-0 h-100"
+                         t-on-click="() => this.openOrders('confirmed', 'Confirmed Shipments')">
+                        <div class="card-body p-3">
+                            <div class="o_icon_badge bg-primary-subtle text-primary mb-2">
+                                <i class="fa fa-ship"/>
+                            </div>
+                            <div class="o_card_sub text-uppercase">CONFIRMED</div>
+                            <div class="o_card_val text-primary" t-out="state.orders_by_state.confirmed"/>
+                            <div class="o_card_footer text-white-50">Ready / Reserved</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Card 6: Completed / Delivered -->
+                <div class="col-6 col-md-4 col-xl-2">
+                    <div class="o_exec_card card border-0 h-100"
+                         t-on-click="() => this.openOrders('done', 'Completed Shipments')">
+                        <div class="card-body p-3">
+                            <div class="o_icon_badge bg-purple-subtle text-purple mb-2">
+                                <i class="fa fa-archive"/>
+                            </div>
+                            <div class="o_card_sub text-uppercase">DELIVERED</div>
+                            <div class="o_card_val text-light" t-out="state.orders_by_state.done"/>
+                            <div class="o_card_footer text-white-50">Completed Shipments</div>
                         </div>
                     </div>
                 </div>
             </div>
 
-            <!-- 2. Orders by Status Cards (Clickable) -->
-            <h5 class="fw-bold mb-3 text-secondary">Orders by Status (Click card to view orders)</h5>
-            <div class="row g-3 mb-4">
-                <div class="col-6 col-md-4 col-lg-2">
-                    <div class="o_kpi_card card border-0 shadow-sm text-center p-3"
-                         t-on-click="() => this.openOrders('draft', 'Draft Orders')">
-                        <div class="text-muted small fw-semibold">Draft</div>
-                        <div class="fs-3 fw-bold text-secondary" t-out="state.orders_by_state.draft"/>
-                    </div>
-                </div>
-                <div class="col-6 col-md-4 col-lg-2">
-                    <div class="o_kpi_card card border-0 shadow-sm text-center p-3"
-                         t-on-click="() => this.openOrders('submitted', 'Submitted Orders')">
-                        <div class="text-muted small fw-semibold">Submitted</div>
-                        <div class="fs-3 fw-bold text-warning" t-out="state.orders_by_state.submitted"/>
-                    </div>
-                </div>
-                <div class="col-6 col-md-4 col-lg-2">
-                    <div class="o_kpi_card card border-0 shadow-sm text-center p-3"
-                         t-on-click="() => this.openOrders('confirmed', 'Confirmed Orders')">
-                        <div class="text-muted small fw-semibold">Confirmed</div>
-                        <div class="fs-3 fw-bold text-primary" t-out="state.orders_by_state.confirmed"/>
-                    </div>
-                </div>
-                <div class="col-6 col-md-4 col-lg-2">
-                    <div class="o_kpi_card card border-0 shadow-sm text-center p-3"
-                         t-on-click="() => this.openOrders('invoiced', 'Invoiced Orders')">
-                        <div class="text-muted small fw-semibold">Invoiced</div>
-                        <div class="fs-3 fw-bold text-info" t-out="state.orders_by_state.invoiced"/>
-                    </div>
-                </div>
-                <div class="col-6 col-md-4 col-lg-2">
-                    <div class="o_kpi_card card border-0 shadow-sm text-center p-3"
-                         t-on-click="() => this.openOrders('done', 'Completed Orders')">
-                        <div class="text-muted small fw-semibold">Done</div>
-                        <div class="fs-3 fw-bold text-success" t-out="state.orders_by_state.done"/>
-                    </div>
-                </div>
-                <div class="col-6 col-md-4 col-lg-2">
-                    <div class="o_kpi_card card border-0 shadow-sm text-center p-3"
-                         t-on-click="() => this.openOrders('cancelled', 'Cancelled Orders')">
-                        <div class="text-muted small fw-semibold">Cancelled</div>
-                        <div class="fs-3 fw-bold text-danger" t-out="state.orders_by_state.cancelled"/>
-                    </div>
-                </div>
-            </div>
+            <!-- 3. Bottom Panels: Two Side-by-Side Cards (Matching Screenshot) -->
+            <div class="row g-3">
+                <!-- Left Panel: Monthly Revenue vs Expense (60% width) -->
+                <div class="col-12 col-lg-7">
+                    <div class="o_white_panel card border-0 shadow-sm h-100">
+                        <div class="card-body p-4 d-flex flex-column">
+                            <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
+                                <h6 class="fw-bold mb-0 text-dark">Revenue vs. Expense Trend</h6>
+                                <div class="d-flex gap-3 small">
+                                    <span class="d-flex align-items-center gap-1">
+                                        <span class="o_legend_dot" style="background-color: #8b5cf6;"/> Revenue
+                                    </span>
+                                    <span class="d-flex align-items-center gap-1">
+                                        <span class="o_legend_dot" style="background-color: #ef4444;"/> Expense
+                                    </span>
+                                </div>
+                            </div>
 
-            <!-- 3. Monthly Revenue vs Expense Chart (Last 6 Months) -->
-            <div class="card border-0 shadow-sm">
-                <div class="card-body p-4">
-                    <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
-                        <h5 class="fw-bold mb-0">Monthly Revenue vs. Expense (Last 6 Months)</h5>
-                        <div class="d-flex gap-3 small">
-                            <span><span class="badge bg-success me-1">&#9632;</span> Revenue</span>
-                            <span><span class="badge bg-danger me-1">&#9632;</span> Expense</span>
-                        </div>
-                    </div>
-
-                    <div class="o_freight_chart_container">
-                        <t t-foreach="state.monthly_data" t-as="item" t-key="item.month">
-                            <div class="o_chart_column">
-                                <div class="o_bars_wrapper">
-                                    <div class="o_bar o_bar_revenue"
-                                         t-attf-style="height: {{ getBarHeight(item.revenue) }}%;"
-                                         t-att-title="'Revenue: ' + formatCurrency(item.revenue)">
-                                        <span class="o_bar_val" t-if="item.revenue > 0" t-out="formatCurrency(item.revenue)"/>
+                            <!-- Bar Chart Visual -->
+                            <div class="o_dash_bar_chart flex-grow-1">
+                                <t t-foreach="state.monthly_data" t-as="item" t-key="item.month">
+                                    <div class="o_bar_col">
+                                        <div class="o_bars_stack">
+                                            <div class="o_bar o_bar_rev"
+                                                 t-attf-style="height: {{ getBarHeight(item.revenue) }}%;"
+                                                 t-att-title="'Revenue: ' + formatCurrency(item.revenue)">
+                                                <span class="o_tip_label" t-if="item.revenue > 0" t-out="formatCurrency(item.revenue)"/>
+                                            </div>
+                                            <div class="o_bar o_bar_exp"
+                                                 t-attf-style="height: {{ getBarHeight(item.expense) }}%;"
+                                                 t-att-title="'Expense: ' + formatCurrency(item.expense)">
+                                                <span class="o_tip_label" t-if="item.expense > 0" t-out="formatCurrency(item.expense)"/>
+                                            </div>
+                                        </div>
+                                        <div class="o_month_tag text-muted" t-out="item.month"/>
                                     </div>
-                                    <div class="o_bar o_bar_expense"
-                                         t-attf-style="height: {{ getBarHeight(item.expense) }}%;"
-                                         t-att-title="'Expense: ' + formatCurrency(item.expense)">
-                                        <span class="o_bar_val" t-if="item.expense > 0" t-out="formatCurrency(item.expense)"/>
+                                </t>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Right Panel: Shipments by Status Donut Chart (40% width) -->
+                <div class="col-12 col-lg-5">
+                    <div class="o_white_panel card border-0 shadow-sm h-100">
+                        <div class="card-body p-4 d-flex flex-column">
+                            <h6 class="fw-bold mb-3 text-dark">Shipments by Status</h6>
+
+                            <!-- Donut Chart -->
+                            <div class="o_donut_wrapper d-flex flex-column align-items-center justify-content-center flex-grow-1">
+                                <div class="o_donut_container position-relative">
+                                    <svg viewBox="0 0 100 100" class="o_donut_svg">
+                                        <!-- Base Track Circle -->
+                                        <circle cx="50" cy="50" r="40" fill="transparent" stroke="#f1f5f9" stroke-width="14"/>
+
+                                        <!-- Segments -->
+                                        <t t-foreach="statusSegments" t-as="seg" t-key="seg.key">
+                                            <circle cx="50" cy="50" r="40"
+                                                    fill="transparent"
+                                                    t-att-stroke="seg.color"
+                                                    stroke-width="14"
+                                                    t-att-stroke-dasharray="seg.dasharray"
+                                                    t-att-stroke-dashoffset="seg.dashoffset"
+                                                    class="o_donut_segment"
+                                                    t-on-click="() => this.openOrders(seg.key, seg.label + ' Orders')"/>
+                                        </t>
+                                    </svg>
+                                    <!-- Center Counter Inside Donut Hole -->
+                                    <div class="o_donut_center text-center">
+                                        <div class="fs-3 fw-bold text-dark" t-out="state.total_orders"/>
+                                        <div class="small text-muted" style="font-size: 11px;">Shipments</div>
                                     </div>
                                 </div>
-                                <div class="o_month_label text-muted small fw-semibold mt-2" t-out="item.month"/>
+
+                                <!-- Legend Matching User Image -->
+                                <div class="o_donut_legend d-flex flex-wrap justify-content-center gap-3 mt-4 w-100">
+                                    <t t-foreach="statusSegments" t-as="seg" t-key="seg.key">
+                                        <div class="d-flex align-items-center gap-1 small cursor-pointer"
+                                             t-on-click="() => this.openOrders(seg.key, seg.label + ' Orders')">
+                                            <span class="o_legend_dot" t-attf-style="background-color: {{ seg.color }};"/>
+                                            <span class="text-secondary fw-semibold" t-out="seg.label"/>
+                                            <span class="text-muted">(<t t-out="seg.count"/>)</span>
+                                        </div>
+                                    </t>
+                                </div>
                             </div>
-                        </t>
+                        </div>
                     </div>
                 </div>
             </div>

@@ -1,0 +1,227 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="1">
+
+        <!-- 1. SEAPORTS, AIRPORTS & LAND PORTS (freight.port) -->
+        <record id="port_karachi_sea" model="freight.port">
+            <field name="name">Karachi International Container Terminal (KICT)</field>
+            <field name="code">PKKHI</field>
+            <field name="country_id" ref="base.pk"/>
+            <field name="is_water" eval="True"/>
+            <field name="is_land" eval="True"/>
+        </record>
+
+        <record id="port_qasim_sea" model="freight.port">
+            <field name="name">Port Muhammad Bin Qasim</field>
+            <field name="code">PKBQM</field>
+            <field name="country_id" ref="base.pk"/>
+            <field name="is_water" eval="True"/>
+            <field name="is_land" eval="True"/>
+        </record>
+
+        <record id="port_jebel_ali" model="freight.port">
+            <field name="name">Jebel Ali Seaport</field>
+            <field name="code">AEJEA</field>
+            <field name="country_id" ref="base.ae"/>
+            <field name="is_water" eval="True"/>
+        </record>
+
+        <record id="port_hamburg" model="freight.port">
+            <field name="name">Port of Hamburg</field>
+            <field name="code">DEHAM</field>
+            <field name="country_id" ref="base.de"/>
+            <field name="is_water" eval="True"/>
+        </record>
+
+        <record id="port_jinnah_air" model="freight.port">
+            <field name="name">Jinnah International Airport Cargo</field>
+            <field name="code">OPKC</field>
+            <field name="country_id" ref="base.pk"/>
+            <field name="is_air" eval="True"/>
+        </record>
+
+        <record id="port_dxb_air" model="freight.port">
+            <field name="name">Dubai International Air Cargo Village</field>
+            <field name="code">OMDB</field>
+            <field name="country_id" ref="base.ae"/>
+            <field name="is_air" eval="True"/>
+        </record>
+
+        <record id="port_lahore_dry" model="freight.port">
+            <field name="name">Lahore Dry Port (Mughalpura)</field>
+            <field name="code">PKLHE</field>
+            <field name="country_id" ref="base.pk"/>
+            <field name="is_land" eval="True"/>
+        </record>
+
+        <record id="port_torkham_land" model="freight.port">
+            <field name="name">Torkham Border Terminal</field>
+            <field name="code">PKTKM</field>
+            <field name="country_id" ref="base.pk"/>
+            <field name="is_land" eval="True"/>
+        </record>
+
+        <!-- 2. CONTAINER TYPES (freight.container) -->
+        <record id="container_20ft_std_1" model="freight.container">
+            <field name="name">20ft Standard Dry Container #01</field>
+            <field name="code">CNTR-20STD-01</field>
+            <field name="size">6.06</field>
+            <field name="size_uom_id" ref="uom.product_uom_meter"/>
+            <field name="weight">28000.0</field>
+            <field name="weight_uom_id" ref="uom.product_uom_kgm"/>
+            <field name="volume">33000.0</field>
+            <field name="volume_uom_id" ref="uom.product_uom_litre"/>
+            <field name="state">available</field>
+        </record>
+
+        <record id="container_40ft_hc_1" model="freight.container">
+            <field name="name">40ft High Cube Container #01</field>
+            <field name="code">CNTR-40HC-01</field>
+            <field name="size">12.19</field>
+            <field name="size_uom_id" ref="uom.product_uom_meter"/>
+            <field name="weight">30480.0</field>
+            <field name="weight_uom_id" ref="uom.product_uom_kgm"/>
+            <field name="volume">76000.0</field>
+            <field name="volume_uom_id" ref="uom.product_uom_litre"/>
+            <field name="state">available</field>
+        </record>
+
+        <record id="container_40ft_reefer_1" model="freight.container">
+            <field name="name">40ft Reefer (Temperature Controlled) #01</field>
+            <field name="code">CNTR-40RF-01</field>
+            <field name="size">12.19</field>
+            <field name="size_uom_id" ref="uom.product_uom_meter"/>
+            <field name="weight">29500.0</field>
+            <field name="weight_uom_id" ref="uom.product_uom_kgm"/>
+            <field name="volume">67000.0</field>
+            <field name="volume_uom_id" ref="uom.product_uom_litre"/>
+            <field name="state">available</field>
+        </record>
+
+        <record id="container_air_uld_1" model="freight.container">
+            <field name="name">Air Cargo ULD LD3 Container #01</field>
+            <field name="code">ULD-LD3-01</field>
+            <field name="size">2.0</field>
+            <field name="size_uom_id" ref="uom.product_uom_meter"/>
+            <field name="weight">1588.0</field>
+            <field name="weight_uom_id" ref="uom.product_uom_kgm"/>
+            <field name="volume">4500.0</field>
+            <field name="volume_uom_id" ref="uom.product_uom_litre"/>
+            <field name="state">available</field>
+        </record>
+
+        <record id="container_20ft_std_2" model="freight.container">
+            <field name="name">20ft Standard Dry Container #02</field>
+            <field name="code">CNTR-20STD-02</field>
+            <field name="size">6.06</field>
+            <field name="size_uom_id" ref="uom.product_uom_meter"/>
+            <field name="weight">28000.0</field>
+            <field name="weight_uom_id" ref="uom.product_uom_kgm"/>
+            <field name="volume">33000.0</field>
+            <field name="volume_uom_id" ref="uom.product_uom_litre"/>
+            <field name="state">available</field>
+        </record>
+
+        <!-- 3. PRICE LISTS (freight.price) -->
+        <record id="price_ocean_standard" model="freight.price">
+            <field name="name">Ocean Freight Standard Tariff</field>
+            <field name="weight_price">1.50</field>
+            <field name="volume_price">12.00</field>
+        </record>
+
+        <record id="price_air_express" model="freight.price">
+            <field name="name">Air Cargo Priority Tariff</field>
+            <field name="weight_price">6.50</field>
+            <field name="volume_price">45.00</field>
+        </record>
+
+        <record id="price_land_crossborder" model="freight.price">
+            <field name="name">Overland Cross-Border Tariff</field>
+            <field name="weight_price">0.95</field>
+            <field name="volume_price">8.50</field>
+        </record>
+
+        <!-- 4. SERVICE CATALOG (freight.service) -->
+        <record id="service_thc_handling" model="freight.service">
+            <field name="name">Terminal Handling &amp; Crane Charges (THC)</field>
+            <field name="sale_price">250.00</field>
+            <field name="vendor_line_ids" eval="[
+                Command.create({
+                    'vendor_id': ref('partner_vendor_maersk'),
+                    'sale_price': 220.00,
+                }),
+                Command.create({
+                    'vendor_id': ref('partner_vendor_noor_trucking'),
+                    'sale_price': 250.00,
+                })
+            ]"/>
+        </record>
+
+        <record id="service_customs_brokerage" model="freight.service">
+            <field name="name">Customs Documentation &amp; EDI Filing</field>
+            <field name="sale_price">180.00</field>
+            <field name="vendor_line_ids" eval="[
+                Command.create({
+                    'vendor_id': ref('partner_agent_qasim'),
+                    'sale_price': 180.00,
+                }),
+                Command.create({
+                    'vendor_id': ref('partner_agent_skyline'),
+                    'sale_price': 165.00,
+                })
+            ]"/>
+        </record>
+
+        <record id="service_cargo_insurance" model="freight.service">
+            <field name="name">Marine &amp; Transit Cargo Insurance</field>
+            <field name="sale_price">420.00</field>
+            <field name="vendor_line_ids" eval="[
+                Command.create({
+                    'vendor_id': ref('partner_vendor_maersk'),
+                    'sale_price': 420.00,
+                })
+            ]"/>
+        </record>
+
+        <record id="service_cold_chain" model="freight.service">
+            <field name="name">Reefer Plug-in &amp; Cold Chain Monitoring</field>
+            <field name="sale_price">350.00</field>
+            <field name="vendor_line_ids" eval="[
+                Command.create({
+                    'vendor_id': ref('partner_vendor_noor_trucking'),
+                    'sale_price': 350.00,
+                })
+            ]"/>
+        </record>
+
+        <!-- 5. FREIGHT ROUTES (freight.routes) -->
+        <record id="freight_route_khi_jea" model="freight.routes">
+            <field name="name">Karachi (PKKHI) → Jebel Ali (AEJEA) Corridor</field>
+            <field name="water_price">850.00</field>
+            <field name="air_price">1650.00</field>
+            <field name="land_price">600.00</field>
+        </record>
+
+        <record id="freight_route_bqm_ham" model="freight.routes">
+            <field name="name">Port Qasim (PKBQM) → Hamburg (DEHAM) Deep-Sea</field>
+            <field name="water_price">2100.00</field>
+            <field name="air_price">4200.00</field>
+            <field name="land_price">1500.00</field>
+        </record>
+
+        <record id="freight_route_opkc_omdb" model="freight.routes">
+            <field name="name">Karachi Air (OPKC) → Dubai Air Cargo (OMDB)</field>
+            <field name="water_price">700.00</field>
+            <field name="air_price">1450.00</field>
+            <field name="land_price">500.00</field>
+        </record>
+
+        <record id="freight_route_lhe_tkm" model="freight.routes">
+            <field name="name">Lahore Dry Port (PKLHE) → Torkham Border (PKTKM)</field>
+            <field name="water_price">400.00</field>
+            <field name="air_price">1100.00</field>
+            <field name="land_price">780.00</field>
+        </record>
+
+    </data>
+</odoo>

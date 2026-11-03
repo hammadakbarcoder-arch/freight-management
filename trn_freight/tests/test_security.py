@@ -1,7 +1,8 @@
-from odoo.tests.common import TransactionCase
+from odoo.tests.common import TransactionCase, tagged
 from odoo.exceptions import AccessError
 
 
+@tagged('post_install', '-at_install')
 class TestFreightSecurity(TransactionCase):
 
     def setUp(self):

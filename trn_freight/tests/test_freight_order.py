@@ -1,7 +1,8 @@
-from odoo.tests.common import TransactionCase
+from odoo.tests.common import TransactionCase, tagged
 from odoo.exceptions import UserError, ValidationError
 
 
+@tagged('post_install', '-at_install')
 class TestFreightOrder(TransactionCase):
 
     def setUp(self):

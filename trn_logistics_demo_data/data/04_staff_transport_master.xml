@@ -1,0 +1,275 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="1">
+
+        <!-- ============================================================ -->
+        <!-- 1. DRIVERS & STOP ADDRESSES WITH GPS COORDINATES             -->
+        <!-- ============================================================ -->
+        <record id="partner_driver_rashid" model="res.partner">
+            <field name="name">Ustad Rashid Mahmood (Senior Driver)</field>
+            <field name="phone">+92 300 411 2233</field>
+            <field name="city">Lahore</field>
+            <field name="country_id" ref="base.pk"/>
+        </record>
+
+        <record id="partner_driver_imran" model="res.partner">
+            <field name="name">Muhammad Imran Bhatti (Shuttle Driver)</field>
+            <field name="phone">+92 321 488 9900</field>
+            <field name="city">Lahore</field>
+            <field name="country_id" ref="base.pk"/>
+        </record>
+
+        <record id="partner_stop_gulberg" model="res.partner">
+            <field name="name">Gulberg Liberty Chowk Terminal</field>
+            <field name="street">Main Boulevard Gulberg III, Liberty Market</field>
+            <field name="city">Lahore</field>
+            <field name="country_id" ref="base.pk"/>
+            <field name="partner_latitude">31.5102</field>
+            <field name="partner_longitude">74.3441</field>
+        </record>
+
+        <record id="partner_stop_kalma" model="res.partner">
+            <field name="name">Kalma Chowk Metro Station</field>
+            <field name="street">Ferozepur Road, Kalma Underpass</field>
+            <field name="city">Lahore</field>
+            <field name="country_id" ref="base.pk"/>
+            <field name="partner_latitude">31.5036</field>
+            <field name="partner_longitude">74.3318</field>
+        </record>
+
+        <record id="partner_stop_johar_town" model="res.partner">
+            <field name="name">Johar Town Expo Center Gate</field>
+            <field name="street">Abdul Haque Road, Johar Town</field>
+            <field name="city">Lahore</field>
+            <field name="country_id" ref="base.pk"/>
+            <field name="partner_latitude">31.4673</field>
+            <field name="partner_longitude">74.2654</field>
+        </record>
+
+        <record id="partner_stop_model_town" model="res.partner">
+            <field name="name">Model Town Link Road Pickup Point</field>
+            <field name="street">Model Town Link Road, Amanah Mall</field>
+            <field name="city">Lahore</field>
+            <field name="country_id" ref="base.pk"/>
+            <field name="partner_latitude">31.4790</field>
+            <field name="partner_longitude">74.3168</field>
+        </record>
+
+        <record id="partner_stop_hq" model="res.partner">
+            <field name="name">Apex Logistics Regional Hub (DHA Phase 5)</field>
+            <field name="street">Sector C Commercial, DHA Phase 5</field>
+            <field name="city">Lahore</field>
+            <field name="country_id" ref="base.pk"/>
+            <field name="partner_latitude">31.4625</field>
+            <field name="partner_longitude">74.4085</field>
+        </record>
+
+        <!-- ============================================================ -->
+        <!-- 2. FLEET BRANDS, MODELS & VEHICLES (fleet.vehicle)           -->
+        <!-- ============================================================ -->
+        <record id="fleet_brand_toyota" model="fleet.vehicle.model.brand">
+            <field name="name">Toyota</field>
+        </record>
+
+        <record id="fleet_brand_hyundai" model="fleet.vehicle.model.brand">
+            <field name="name">Hyundai</field>
+        </record>
+
+        <record id="fleet_model_hiace" model="fleet.vehicle.model">
+            <field name="name">Hiace Grand Cabin</field>
+            <field name="brand_id" ref="fleet_brand_toyota"/>
+            <field name="seats">14</field>
+        </record>
+
+        <record id="fleet_model_coaster" model="fleet.vehicle.model">
+            <field name="name">Coaster Saloon 28-Seater</field>
+            <field name="brand_id" ref="fleet_brand_toyota"/>
+            <field name="seats">28</field>
+        </record>
+
+        <record id="fleet_model_staria" model="fleet.vehicle.model">
+            <field name="name">Staria Executive Van</field>
+            <field name="brand_id" ref="fleet_brand_hyundai"/>
+            <field name="seats">9</field>
+        </record>
+
+        <record id="vehicle_hiace_01" model="fleet.vehicle">
+            <field name="model_id" ref="fleet_model_hiace"/>
+            <field name="license_plate">LEA-26-101</field>
+            <field name="driver_id" ref="partner_driver_rashid"/>
+            <field name="seats">14</field>
+            <field name="seat_capacity_override">15</field>
+        </record>
+
+        <record id="vehicle_coaster_02" model="fleet.vehicle">
+            <field name="model_id" ref="fleet_model_coaster"/>
+            <field name="license_plate">LEB-26-202</field>
+            <field name="driver_id" ref="partner_driver_imran"/>
+            <field name="seats">28</field>
+        </record>
+
+        <record id="vehicle_staria_03" model="fleet.vehicle">
+            <field name="model_id" ref="fleet_model_staria"/>
+            <field name="license_plate">LEC-26-303</field>
+            <field name="driver_id" ref="partner_driver_rashid"/>
+            <field name="seats">9</field>
+        </record>
+
+        <!-- ============================================================ -->
+        <!-- 3. TRANSPORT ROUTES & STOPS                                  -->
+        <!-- ============================================================ -->
+        <!-- Route A: Gulberg -> Kalma -> DHA HQ -->
+        <record id="transport_route_gulberg_dha" model="logistics.transport.route">
+            <field name="name">Route A: Gulberg - Kalma - DHA HQ</field>
+            <field name="code">RT-GUL-DHA</field>
+            <field name="direction">both</field>
+            <field name="vehicle_id" ref="vehicle_hiace_01"/>
+            <field name="start_address_id" ref="partner_stop_gulberg"/>
+            <field name="end_address_id" ref="partner_stop_hq"/>
+            <field name="planned_distance">18.5</field>
+            <field name="notes">Primary morning pickup and evening drop-off shuttle for Gulberg and Ferozepur Road staff.</field>
+        </record>
+
+        <record id="stop_gulberg_1" model="logistics.transport.stop">
+            <field name="name">Liberty Chowk Pickup Point</field>
+            <field name="sequence">10</field>
+            <field name="route_id" ref="transport_route_gulberg_dha"/>
+            <field name="address_id" ref="partner_stop_gulberg"/>
+            <field name="planned_time">7.5</field>
+            <field name="stop_type">both</field>
+        </record>
+
+        <record id="stop_kalma_2" model="logistics.transport.stop">
+            <field name="name">Kalma Chowk Metro Stop</field>
+            <field name="sequence">20</field>
+            <field name="route_id" ref="transport_route_gulberg_dha"/>
+            <field name="address_id" ref="partner_stop_kalma"/>
+            <field name="planned_time">7.83</field>
+            <field name="stop_type">both</field>
+        </record>
+
+        <record id="stop_hq_3" model="logistics.transport.stop">
+            <field name="name">DHA Phase 5 Regional Hub</field>
+            <field name="sequence">30</field>
+            <field name="route_id" ref="transport_route_gulberg_dha"/>
+            <field name="address_id" ref="partner_stop_hq"/>
+            <field name="planned_time">8.42</field>
+            <field name="stop_type">both</field>
+        </record>
+
+        <!-- Route B: Johar Town -> Model Town -> DHA HQ -->
+        <record id="transport_route_johar_dha" model="logistics.transport.route">
+            <field name="name">Route B: Johar Town - Model Town - DHA HQ</field>
+            <field name="code">RT-JHR-DHA</field>
+            <field name="direction">both</field>
+            <field name="vehicle_id" ref="vehicle_coaster_02"/>
+            <field name="start_address_id" ref="partner_stop_johar_town"/>
+            <field name="end_address_id" ref="partner_stop_hq"/>
+            <field name="planned_distance">24.0</field>
+            <field name="notes">High-capacity Coaster route serving Johar Town and Model Town Link Road corridors.</field>
+        </record>
+
+        <record id="stop_johar_1" model="logistics.transport.stop">
+            <field name="name">Expo Center Gate 1 Stop</field>
+            <field name="sequence">10</field>
+            <field name="route_id" ref="transport_route_johar_dha"/>
+            <field name="address_id" ref="partner_stop_johar_town"/>
+            <field name="planned_time">7.33</field>
+            <field name="stop_type">both</field>
+        </record>
+
+        <record id="stop_model_2" model="logistics.transport.stop">
+            <field name="name">Model Town Link Road Stop</field>
+            <field name="sequence">20</field>
+            <field name="route_id" ref="transport_route_johar_dha"/>
+            <field name="address_id" ref="partner_stop_model_town"/>
+            <field name="planned_time">7.75</field>
+            <field name="stop_type">both</field>
+        </record>
+
+        <record id="stop_hq_b3" model="logistics.transport.stop">
+            <field name="name">DHA Phase 5 Regional Hub (Gate B)</field>
+            <field name="sequence">30</field>
+            <field name="route_id" ref="transport_route_johar_dha"/>
+            <field name="address_id" ref="partner_stop_hq"/>
+            <field name="planned_time">8.5</field>
+            <field name="stop_type">both</field>
+        </record>
+
+        <!-- ============================================================ -->
+        <!-- 4. HR EMPLOYEES ASSIGNED TO ROUTES & STOPS                   -->
+        <!-- ============================================================ -->
+        <record id="emp_bilal_ahmed" model="hr.employee">
+            <field name="name">Bilal Ahmed</field>
+            <field name="job_title">Customs Operations Lead</field>
+            <field name="work_email">bilal.ahmed@apexlogistics.pk</field>
+            <field name="work_phone">+92 300 811 1001</field>
+            <field name="is_transport_enabled" eval="True"/>
+            <field name="transport_route_id" ref="transport_route_gulberg_dha"/>
+            <field name="pickup_stop_id" ref="stop_gulberg_1"/>
+            <field name="drop_off_stop_id" ref="stop_hq_3"/>
+            <field name="transport_direction">both</field>
+        </record>
+
+        <record id="emp_sana_tariq" model="hr.employee">
+            <field name="name">Sana Tariq</field>
+            <field name="job_title">Freight Billing Specialist</field>
+            <field name="work_email">sana.tariq@apexlogistics.pk</field>
+            <field name="work_phone">+92 300 811 1002</field>
+            <field name="is_transport_enabled" eval="True"/>
+            <field name="transport_route_id" ref="transport_route_gulberg_dha"/>
+            <field name="pickup_stop_id" ref="stop_kalma_2"/>
+            <field name="drop_off_stop_id" ref="stop_hq_3"/>
+            <field name="transport_direction">both</field>
+        </record>
+
+        <record id="emp_usman_ghani" model="hr.employee">
+            <field name="name">Usman Ghani</field>
+            <field name="job_title">Port Dispatch Coordinator</field>
+            <field name="work_email">usman.ghani@apexlogistics.pk</field>
+            <field name="work_phone">+92 300 811 1003</field>
+            <field name="is_transport_enabled" eval="True"/>
+            <field name="transport_route_id" ref="transport_route_gulberg_dha"/>
+            <field name="pickup_stop_id" ref="stop_gulberg_1"/>
+            <field name="drop_off_stop_id" ref="stop_hq_3"/>
+            <field name="transport_direction">both</field>
+        </record>
+
+        <record id="emp_ayesha_malik" model="hr.employee">
+            <field name="name">Ayesha Malik</field>
+            <field name="job_title">Supply Chain Analyst</field>
+            <field name="work_email">ayesha.malik@apexlogistics.pk</field>
+            <field name="work_phone">+92 300 811 1004</field>
+            <field name="is_transport_enabled" eval="True"/>
+            <field name="transport_route_id" ref="transport_route_gulberg_dha"/>
+            <field name="pickup_stop_id" ref="stop_kalma_2"/>
+            <field name="drop_off_stop_id" ref="stop_hq_3"/>
+            <field name="transport_direction">both</field>
+        </record>
+
+        <record id="emp_zain_abbas" model="hr.employee">
+            <field name="name">Zain Abbas</field>
+            <field name="job_title">Warehouse Supervisor</field>
+            <field name="work_email">zain.abbas@apexlogistics.pk</field>
+            <field name="work_phone">+92 300 811 1005</field>
+            <field name="is_transport_enabled" eval="True"/>
+            <field name="transport_route_id" ref="transport_route_johar_dha"/>
+            <field name="pickup_stop_id" ref="stop_johar_1"/>
+            <field name="drop_off_stop_id" ref="stop_hq_b3"/>
+            <field name="transport_direction">both</field>
+        </record>
+
+        <record id="emp_hira_noor" model="hr.employee">
+            <field name="name">Hira Noor</field>
+            <field name="job_title">Client Relations Officer</field>
+            <field name="work_email">hira.noor@apexlogistics.pk</field>
+            <field name="work_phone">+92 300 811 1006</field>
+            <field name="is_transport_enabled" eval="True"/>
+            <field name="transport_route_id" ref="transport_route_johar_dha"/>
+            <field name="pickup_stop_id" ref="stop_model_2"/>
+            <field name="drop_off_stop_id" ref="stop_hq_b3"/>
+            <field name="transport_direction">both</field>
+        </record>
+
+    </data>
+</odoo>

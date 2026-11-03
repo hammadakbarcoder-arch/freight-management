@@ -26,9 +26,56 @@ class FreightShipping(models.Model):
                     subtype_xmlid='mail.mt_comment'
                 )
 
+    def _ensure_invoicing_setup(self, company):
+        """Ensure a sale journal and default receivable/income accounts exist for the company."""
+        Account = self.env['account.account'].sudo().with_company(company)
+        Journal = self.env['account.journal'].sudo().with_company(company)
+
+        receivable = Account.search([
+            ('company_ids', 'in', company.id),
+            ('account_type', '=', 'asset_receivable'),
+        ], limit=1)
+        if not receivable:
+            receivable = Account.create({
+                'name': 'Freight Account Receivable',
+                'code': '121999',
+                'account_type': 'asset_receivable',
+                'company_ids': [Command.set([company.id])],
+            })
+
+        income = Account.search([
+            ('company_ids', 'in', company.id),
+            ('account_type', '=', 'income'),
+        ], limit=1)
+        if not income:
+            income = Account.create({
+                'name': 'Freight Revenue',
+                'code': '400999',
+                'account_type': 'income',
+                'company_ids': [Command.set([company.id])],
+            })
+
+        journal = Journal.search([
+            ('company_id', '=', company.id),
+            ('type', '=', 'sale'),
+        ], limit=1)
+        if not journal:
+            journal = Journal.create({
+                'name': 'Freight Customer Invoices',
+                'code': 'FRT',
+                'type': 'sale',
+                'company_id': company.id,
+                'default_account_id': income.id,
+            })
+        elif not journal.default_account_id:
+            journal.default_account_id = income.id
+
+        return journal, income
+
     def action_create_invoice(self):
         self._ensure_state(['confirmed'], 'invoiced')
         for rec in self:
+            journal, income_account = self._ensure_invoicing_setup(rec.company_id)
             invoice_lines = []
 
             # 1. Cargo Lines add karein
@@ -40,6 +87,7 @@ class FreightShipping(models.Model):
                     'product_id': cargo.product_id.id,
                     'quantity': qty or 1.0,
                     'price_unit': price,
+                    'account_id': income_account.id,
                     'tax_ids': [Command.clear()],
                 }))
 
@@ -49,6 +97,7 @@ class FreightShipping(models.Model):
                     'name': f"Route: {route.route_id.name} ({route.source_port_id.name} -> {route.destination_port_id.name})",
                     'quantity': 1.0,
                     'price_unit': route.sale,
+                    'account_id': income_account.id,
                     'tax_ids': [Command.clear()],
                 }))
 
@@ -58,13 +107,15 @@ class FreightShipping(models.Model):
                     'name': f"Service: {srv.service_id.name} (Vendor: {srv.vendor_id.name})",
                     'quantity': srv.qty,
                     'price_unit': srv.sale,
+                    'account_id': income_account.id,
                     'tax_ids': [Command.clear()],
                 }))
 
             # 4. Customer Invoice Create karein
-            move = self.env['account.move'].create({
+            move = self.env['account.move'].with_company(rec.company_id).create({
                 'move_type': 'out_invoice',
                 'partner_id': rec.shipper_id.id,
+                'journal_id': journal.id,
                 'invoice_origin': rec.name,
                 'company_id': rec.company_id.id,
                 'invoice_date': fields.Date.context_today(self),

@@ -1,0 +1,211 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="1">
+
+        <!-- ============================================================ -->
+        <!-- 0. ENSURE ADMIN HAS MANAGER GROUPS IN BOTH MODULES           -->
+        <!-- ============================================================ -->
+        <record id="base.user_admin" model="res.users">
+            <field name="group_ids" eval="[
+                Command.link(ref('trn_freight.group_freight_manager')),
+                Command.link(ref('trn_staff_transport.group_staff_transport_manager'))
+            ]"/>
+        </record>
+
+        <!-- ============================================================ -->
+        <!-- 1. TRANSPORT SCHEDULES (logistics.transport.schedule)        -->
+        <!-- ============================================================ -->
+        <record id="schedule_route_a_morning" model="logistics.transport.schedule">
+            <field name="name">Route A - Morning Pickup Shift</field>
+            <field name="route_id" ref="transport_route_gulberg_dha"/>
+            <field name="departure_time">7.5</field>
+            <field name="arrival_time">8.5</field>
+            <field name="mon" eval="True"/>
+            <field name="tue" eval="True"/>
+            <field name="wed" eval="True"/>
+            <field name="thu" eval="True"/>
+            <field name="fri" eval="True"/>
+            <field name="sat" eval="True"/>
+            <field name="sun" eval="True"/>
+        </record>
+
+        <record id="schedule_route_a_evening" model="logistics.transport.schedule">
+            <field name="name">Route A - Evening Drop-off Shift</field>
+            <field name="route_id" ref="transport_route_gulberg_dha"/>
+            <field name="departure_time">17.5</field>
+            <field name="arrival_time">18.5</field>
+            <field name="mon" eval="True"/>
+            <field name="tue" eval="True"/>
+            <field name="wed" eval="True"/>
+            <field name="thu" eval="True"/>
+            <field name="fri" eval="True"/>
+            <field name="sat" eval="True"/>
+            <field name="sun" eval="True"/>
+        </record>
+
+        <record id="schedule_route_b_morning" model="logistics.transport.schedule">
+            <field name="name">Route B - Morning Coaster Shift</field>
+            <field name="route_id" ref="transport_route_johar_dha"/>
+            <field name="departure_time">7.33</field>
+            <field name="arrival_time">8.5</field>
+            <field name="mon" eval="True"/>
+            <field name="tue" eval="True"/>
+            <field name="wed" eval="True"/>
+            <field name="thu" eval="True"/>
+            <field name="fri" eval="True"/>
+            <field name="sat" eval="True"/>
+            <field name="sun" eval="True"/>
+        </record>
+
+        <!-- ============================================================ -->
+        <!-- 2. DAILY TRIPS & PASSENGER WORKFLOWS                         -->
+        <!-- ============================================================ -->
+
+        <!-- TRIP 1: COMPLETED TRIP (Yesterday) with Dropped & No-Show Passengers -->
+        <record id="trip_demo_1_completed" model="logistics.transport.trip">
+            <field name="date" eval="(DateTime.today() - relativedelta(days=1)).strftime('%Y-%m-%d')"/>
+            <field name="route_id" ref="transport_route_gulberg_dha"/>
+            <field name="schedule_id" ref="schedule_route_a_morning"/>
+            <field name="direction">both</field>
+            <field name="vehicle_id" ref="vehicle_hiace_01"/>
+            <field name="driver_id" ref="partner_driver_rashid"/>
+            <field name="planned_departure_time" eval="(DateTime.today() - relativedelta(days=1)).strftime('%Y-%m-%d 02:30:00')"/>
+            <field name="planned_arrival_time" eval="(DateTime.today() - relativedelta(days=1)).strftime('%Y-%m-%d 03:30:00')"/>
+            <field name="notes">Completed morning shift shuttle. 3 passengers dropped at HQ, 1 no-show.</field>
+        </record>
+
+        <record id="pax_trip1_bilal" model="logistics.transport.trip.passenger">
+            <field name="trip_id" ref="trip_demo_1_completed"/>
+            <field name="employee_id" ref="emp_bilal_ahmed"/>
+            <field name="pickup_stop_id" ref="stop_gulberg_1"/>
+            <field name="drop_off_stop_id" ref="stop_hq_3"/>
+        </record>
+
+        <record id="pax_trip1_sana" model="logistics.transport.trip.passenger">
+            <field name="trip_id" ref="trip_demo_1_completed"/>
+            <field name="employee_id" ref="emp_sana_tariq"/>
+            <field name="pickup_stop_id" ref="stop_kalma_2"/>
+            <field name="drop_off_stop_id" ref="stop_hq_3"/>
+        </record>
+
+        <record id="pax_trip1_usman" model="logistics.transport.trip.passenger">
+            <field name="trip_id" ref="trip_demo_1_completed"/>
+            <field name="employee_id" ref="emp_usman_ghani"/>
+            <field name="pickup_stop_id" ref="stop_gulberg_1"/>
+            <field name="drop_off_stop_id" ref="stop_hq_3"/>
+        </record>
+
+        <record id="pax_trip1_ayesha" model="logistics.transport.trip.passenger">
+            <field name="trip_id" ref="trip_demo_1_completed"/>
+            <field name="employee_id" ref="emp_ayesha_malik"/>
+            <field name="pickup_stop_id" ref="stop_kalma_2"/>
+            <field name="drop_off_stop_id" ref="stop_hq_3"/>
+        </record>
+
+        <!-- Workflow calls for Trip 1 & its Passengers -->
+        <function model="logistics.transport.trip" name="action_confirm" eval="[[ref('trip_demo_1_completed')]]"/>
+        <function model="logistics.transport.trip" name="action_start" eval="[[ref('trip_demo_1_completed')]]"/>
+        <function model="logistics.transport.trip.passenger" name="action_board" eval="[[ref('pax_trip1_bilal'), ref('pax_trip1_sana'), ref('pax_trip1_usman')]]"/>
+        <function model="logistics.transport.trip.passenger" name="action_no_show" eval="[[ref('pax_trip1_ayesha')]]"/>
+        <function model="logistics.transport.trip.passenger" name="action_drop" eval="[[ref('pax_trip1_bilal'), ref('pax_trip1_sana'), ref('pax_trip1_usman')]]"/>
+        <function model="logistics.transport.trip" name="action_complete" eval="[[ref('trip_demo_1_completed')]]"/>
+
+        <!-- TRIP 2: IN-PROGRESS TRIP (Today on Route B) with Boarded & Expected Passengers -->
+        <record id="trip_demo_2_in_progress" model="logistics.transport.trip">
+            <field name="date" eval="DateTime.today().strftime('%Y-%m-%d')"/>
+            <field name="route_id" ref="transport_route_johar_dha"/>
+            <field name="schedule_id" ref="schedule_route_b_morning"/>
+            <field name="direction">both</field>
+            <field name="vehicle_id" ref="vehicle_coaster_02"/>
+            <field name="driver_id" ref="partner_driver_imran"/>
+            <field name="planned_departure_time" eval="DateTime.today().strftime('%Y-%m-%d 02:20:00')"/>
+            <field name="planned_arrival_time" eval="DateTime.today().strftime('%Y-%m-%d 03:30:00')"/>
+            <field name="notes">Active Coaster shuttle currently en route from Johar Town to DHA HQ.</field>
+        </record>
+
+        <record id="pax_trip2_zain" model="logistics.transport.trip.passenger">
+            <field name="trip_id" ref="trip_demo_2_in_progress"/>
+            <field name="employee_id" ref="emp_zain_abbas"/>
+            <field name="pickup_stop_id" ref="stop_johar_1"/>
+            <field name="drop_off_stop_id" ref="stop_hq_b3"/>
+        </record>
+
+        <record id="pax_trip2_hira" model="logistics.transport.trip.passenger">
+            <field name="trip_id" ref="trip_demo_2_in_progress"/>
+            <field name="employee_id" ref="emp_hira_noor"/>
+            <field name="pickup_stop_id" ref="stop_model_2"/>
+            <field name="drop_off_stop_id" ref="stop_hq_b3"/>
+        </record>
+
+        <function model="logistics.transport.trip" name="action_confirm" eval="[[ref('trip_demo_2_in_progress')]]"/>
+        <function model="logistics.transport.trip" name="action_start" eval="[[ref('trip_demo_2_in_progress')]]"/>
+        <function model="logistics.transport.trip.passenger" name="action_board" eval="[[ref('pax_trip2_zain')]]"/>
+
+        <!-- TRIP 3 & 4: GENERATED VIA WIZARD FOR TODAY (Route A Planned Trips) -->
+        <record id="wizard_demo_generate_today" model="generate.daily.trips.wizard">
+            <field name="date" eval="DateTime.today().strftime('%Y-%m-%d')"/>
+            <field name="direction">both</field>
+            <field name="route_ids" eval="[Command.set([ref('transport_route_gulberg_dha')])]"/>
+        </record>
+
+        <function model="generate.daily.trips.wizard" name="action_generate_trips" eval="[[ref('wizard_demo_generate_today')]]"/>
+
+        <!-- ============================================================ -->
+        <!-- 3. SAMPLE VEHICLE REQUESTS ACROSS WORKFLOW STATES            -->
+        <!-- ============================================================ -->
+
+        <!-- Request 1: DRAFT -->
+        <record id="veh_req_demo_1_draft" model="logistics.transport.vehicle.request">
+            <field name="employee_id" ref="emp_ayesha_malik"/>
+            <field name="from_datetime" eval="(DateTime.today() + relativedelta(days=4)).strftime('%Y-%m-%d 06:00:00')"/>
+            <field name="to_datetime" eval="(DateTime.today() + relativedelta(days=4)).strftime('%Y-%m-%d 10:00:00')"/>
+            <field name="purpose">Vendor quality audit visit at Sundar Industrial Estate packaging plant.</field>
+        </record>
+
+        <!-- Request 2: SUBMITTED -->
+        <record id="veh_req_demo_2_submitted" model="logistics.transport.vehicle.request">
+            <field name="employee_id" ref="emp_sana_tariq"/>
+            <field name="from_datetime" eval="(DateTime.today() + relativedelta(days=3)).strftime('%Y-%m-%d 05:00:00')"/>
+            <field name="to_datetime" eval="(DateTime.today() + relativedelta(days=3)).strftime('%Y-%m-%d 08:00:00')"/>
+            <field name="purpose">Submission of original export Letter of Credit (LC) documents at State Bank.</field>
+        </record>
+        <function model="logistics.transport.vehicle.request" name="action_submit" eval="[[ref('veh_req_demo_2_submitted')]]"/>
+
+        <!-- Request 3: APPROVED -->
+        <record id="veh_req_demo_3_approved" model="logistics.transport.vehicle.request">
+            <field name="employee_id" ref="emp_zain_abbas"/>
+            <field name="vehicle_id" ref="vehicle_staria_03"/>
+            <field name="from_datetime" eval="(DateTime.today() + relativedelta(days=2)).strftime('%Y-%m-%d 09:00:00')"/>
+            <field name="to_datetime" eval="(DateTime.today() + relativedelta(days=2)).strftime('%Y-%m-%d 12:00:00')"/>
+            <field name="purpose">Cold-chain warehouse inspection before reefer container loading.</field>
+        </record>
+        <function model="logistics.transport.vehicle.request" name="action_submit" eval="[[ref('veh_req_demo_3_approved')]]"/>
+        <function model="logistics.transport.vehicle.request" name="action_approve" eval="[[ref('veh_req_demo_3_approved')]]"/>
+
+        <!-- Request 4: ASSIGNED -->
+        <record id="veh_req_demo_4_assigned" model="logistics.transport.vehicle.request">
+            <field name="employee_id" ref="emp_usman_ghani"/>
+            <field name="vehicle_id" ref="vehicle_staria_03"/>
+            <field name="from_datetime" eval="(DateTime.today() + relativedelta(days=1)).strftime('%Y-%m-%d 04:00:00')"/>
+            <field name="to_datetime" eval="(DateTime.today() + relativedelta(days=1)).strftime('%Y-%m-%d 07:00:00')"/>
+            <field name="purpose">Urgent WeBOC customs clearance file hand-off at Lahore Dry Port (Mughalpura).</field>
+        </record>
+        <function model="logistics.transport.vehicle.request" name="action_submit" eval="[[ref('veh_req_demo_4_assigned')]]"/>
+        <function model="logistics.transport.vehicle.request" name="action_approve" eval="[[ref('veh_req_demo_4_assigned')]]"/>
+        <function model="logistics.transport.vehicle.request" name="action_assign" eval="[[ref('veh_req_demo_4_assigned')]]"/>
+
+        <!-- Request 5: DONE -->
+        <record id="veh_req_demo_5_done" model="logistics.transport.vehicle.request">
+            <field name="employee_id" ref="emp_bilal_ahmed"/>
+            <field name="vehicle_id" ref="vehicle_staria_03"/>
+            <field name="from_datetime" eval="(DateTime.today() - relativedelta(days=3)).strftime('%Y-%m-%d 05:00:00')"/>
+            <field name="to_datetime" eval="(DateTime.today() - relativedelta(days=3)).strftime('%Y-%m-%d 09:00:00')"/>
+            <field name="purpose">Executive airport protocol transfer for visiting EuroMed Supply delegation.</field>
+        </record>
+        <function model="logistics.transport.vehicle.request" name="action_submit" eval="[[ref('veh_req_demo_5_done')]]"/>
+        <function model="logistics.transport.vehicle.request" name="action_approve" eval="[[ref('veh_req_demo_5_done')]]"/>
+        <function model="logistics.transport.vehicle.request" name="action_assign" eval="[[ref('veh_req_demo_5_done')]]"/>
+        <function model="logistics.transport.vehicle.request" name="action_done" eval="[[ref('veh_req_demo_5_done')]]"/>
+
+    </data>
+</odoo>
