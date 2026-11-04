@@ -11,6 +11,9 @@ class TestLogisticsDemoData(TransactionCase):
         main_company = self.env.ref('base.main_company')
         self.assertEqual(main_company.name, 'Apex Global Logistics & Transport')
 
+        company_isl = self.env.ref('trn_logistics_demo_data.company_islamabad')
+        self.assertEqual(company_isl.name, 'Northern Cross Logistics (Islamabad)')
+
         port_khi = self.env.ref('trn_logistics_demo_data.port_karachi_sea')
         self.assertTrue(port_khi.is_water)
 
@@ -22,6 +25,7 @@ class TestLogisticsDemoData(TransactionCase):
         order_done = self.env.ref('trn_logistics_demo_data.freight_order_demo_5_done')
         order_canc = self.env.ref('trn_logistics_demo_data.freight_order_demo_6_cancelled')
 
+        self.assertEqual(order_draft.company_id, company_isl)
         self.assertEqual(order_draft.state, 'draft')
         self.assertEqual(order_sub.state, 'submitted')
         self.assertEqual(order_conf.state, 'confirmed')
@@ -40,6 +44,7 @@ class TestLogisticsDemoData(TransactionCase):
         # 4. Verify Staff Transport Trips & Passenger Statuses
         trip_completed = self.env.ref('trn_logistics_demo_data.trip_demo_1_completed')
         trip_in_prog = self.env.ref('trn_logistics_demo_data.trip_demo_2_in_progress')
+        self.assertEqual(trip_completed.company_id, company_isl)
         self.assertEqual(trip_completed.state, 'completed')
         self.assertEqual(trip_in_prog.state, 'in_progress')
 
@@ -57,6 +62,7 @@ class TestLogisticsDemoData(TransactionCase):
         vr_ass = self.env.ref('trn_logistics_demo_data.veh_req_demo_4_assigned')
         vr_done = self.env.ref('trn_logistics_demo_data.veh_req_demo_5_done')
 
+        self.assertEqual(vr_draft.company_id, company_isl)
         self.assertEqual(vr_draft.state, 'draft')
         self.assertEqual(vr_sub.state, 'submitted')
         self.assertEqual(vr_app.state, 'approved')

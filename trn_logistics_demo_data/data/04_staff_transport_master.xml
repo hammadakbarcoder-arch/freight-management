@@ -94,6 +94,7 @@
         </record>
 
         <record id="vehicle_hiace_01" model="fleet.vehicle">
+            <field name="company_id" ref="company_islamabad"/>
             <field name="model_id" ref="fleet_model_hiace"/>
             <field name="license_plate">LEA-26-101</field>
             <field name="driver_id" ref="partner_driver_rashid"/>
@@ -102,6 +103,7 @@
         </record>
 
         <record id="vehicle_coaster_02" model="fleet.vehicle">
+            <field name="company_id" ref="company_islamabad"/>
             <field name="model_id" ref="fleet_model_coaster"/>
             <field name="license_plate">LEB-26-202</field>
             <field name="driver_id" ref="partner_driver_imran"/>
@@ -109,6 +111,7 @@
         </record>
 
         <record id="vehicle_staria_03" model="fleet.vehicle">
+            <field name="company_id" ref="company_islamabad"/>
             <field name="model_id" ref="fleet_model_staria"/>
             <field name="license_plate">LEC-26-303</field>
             <field name="driver_id" ref="partner_driver_rashid"/>
@@ -120,6 +123,7 @@
         <!-- ============================================================ -->
         <!-- Route A: Gulberg -> Kalma -> DHA HQ -->
         <record id="transport_route_gulberg_dha" model="logistics.transport.route">
+            <field name="company_id" ref="company_islamabad"/>
             <field name="name">Route A: Gulberg - Kalma - DHA HQ</field>
             <field name="code">RT-GUL-DHA</field>
             <field name="direction">both</field>
@@ -159,6 +163,7 @@
 
         <!-- Route B: Johar Town -> Model Town -> DHA HQ -->
         <record id="transport_route_johar_dha" model="logistics.transport.route">
+            <field name="company_id" ref="company_islamabad"/>
             <field name="name">Route B: Johar Town - Model Town - DHA HQ</field>
             <field name="code">RT-JHR-DHA</field>
             <field name="direction">both</field>
@@ -200,6 +205,7 @@
         <!-- 4. HR EMPLOYEES ASSIGNED TO ROUTES & STOPS                   -->
         <!-- ============================================================ -->
         <record id="emp_bilal_ahmed" model="hr.employee">
+            <field name="company_id" ref="company_islamabad"/>
             <field name="name">Bilal Ahmed</field>
             <field name="job_title">Customs Operations Lead</field>
             <field name="work_email">bilal.ahmed@apexlogistics.pk</field>
@@ -212,6 +218,7 @@
         </record>
 
         <record id="emp_sana_tariq" model="hr.employee">
+            <field name="company_id" ref="company_islamabad"/>
             <field name="name">Sana Tariq</field>
             <field name="job_title">Freight Billing Specialist</field>
             <field name="work_email">sana.tariq@apexlogistics.pk</field>
@@ -224,6 +231,7 @@
         </record>
 
         <record id="emp_usman_ghani" model="hr.employee">
+            <field name="company_id" ref="company_islamabad"/>
             <field name="name">Usman Ghani</field>
             <field name="job_title">Port Dispatch Coordinator</field>
             <field name="work_email">usman.ghani@apexlogistics.pk</field>
@@ -236,6 +244,7 @@
         </record>
 
         <record id="emp_ayesha_malik" model="hr.employee">
+            <field name="company_id" ref="company_islamabad"/>
             <field name="name">Ayesha Malik</field>
             <field name="job_title">Supply Chain Analyst</field>
             <field name="work_email">ayesha.malik@apexlogistics.pk</field>
@@ -248,6 +257,7 @@
         </record>
 
         <record id="emp_zain_abbas" model="hr.employee">
+            <field name="company_id" ref="company_islamabad"/>
             <field name="name">Zain Abbas</field>
             <field name="job_title">Warehouse Supervisor</field>
             <field name="work_email">zain.abbas@apexlogistics.pk</field>
@@ -260,6 +270,7 @@
         </record>
 
         <record id="emp_hira_noor" model="hr.employee">
+            <field name="company_id" ref="company_islamabad"/>
             <field name="name">Hira Noor</field>
             <field name="job_title">Client Relations Officer</field>
             <field name="work_email">hira.noor@apexlogistics.pk</field>

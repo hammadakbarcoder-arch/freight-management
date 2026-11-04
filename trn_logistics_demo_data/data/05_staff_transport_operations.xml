@@ -16,6 +16,7 @@
         <!-- 1. TRANSPORT SCHEDULES (logistics.transport.schedule)        -->
         <!-- ============================================================ -->
         <record id="schedule_route_a_morning" model="logistics.transport.schedule">
+            <field name="company_id" ref="company_islamabad"/>
             <field name="name">Route A - Morning Pickup Shift</field>
             <field name="route_id" ref="transport_route_gulberg_dha"/>
             <field name="departure_time">7.5</field>
@@ -30,6 +31,7 @@
         </record>
 
         <record id="schedule_route_a_evening" model="logistics.transport.schedule">
+            <field name="company_id" ref="company_islamabad"/>
             <field name="name">Route A - Evening Drop-off Shift</field>
             <field name="route_id" ref="transport_route_gulberg_dha"/>
             <field name="departure_time">17.5</field>
@@ -44,6 +46,7 @@
         </record>
 
         <record id="schedule_route_b_morning" model="logistics.transport.schedule">
+            <field name="company_id" ref="company_islamabad"/>
             <field name="name">Route B - Morning Coaster Shift</field>
             <field name="route_id" ref="transport_route_johar_dha"/>
             <field name="departure_time">7.33</field>
@@ -63,6 +66,7 @@
 
         <!-- TRIP 1: COMPLETED TRIP (Yesterday) with Dropped & No-Show Passengers -->
         <record id="trip_demo_1_completed" model="logistics.transport.trip">
+            <field name="company_id" ref="company_islamabad"/>
             <field name="date" eval="(DateTime.today() - relativedelta(days=1)).strftime('%Y-%m-%d')"/>
             <field name="route_id" ref="transport_route_gulberg_dha"/>
             <field name="schedule_id" ref="schedule_route_a_morning"/>
@@ -112,6 +116,7 @@
 
         <!-- TRIP 2: IN-PROGRESS TRIP (Today on Route B) with Boarded & Expected Passengers -->
         <record id="trip_demo_2_in_progress" model="logistics.transport.trip">
+            <field name="company_id" ref="company_islamabad"/>
             <field name="date" eval="DateTime.today().strftime('%Y-%m-%d')"/>
             <field name="route_id" ref="transport_route_johar_dha"/>
             <field name="schedule_id" ref="schedule_route_b_morning"/>
@@ -156,6 +161,7 @@
 
         <!-- Request 1: DRAFT -->
         <record id="veh_req_demo_1_draft" model="logistics.transport.vehicle.request">
+            <field name="company_id" ref="company_islamabad"/>
             <field name="employee_id" ref="emp_ayesha_malik"/>
             <field name="from_datetime" eval="(DateTime.today() + relativedelta(days=4)).strftime('%Y-%m-%d 06:00:00')"/>
             <field name="to_datetime" eval="(DateTime.today() + relativedelta(days=4)).strftime('%Y-%m-%d 10:00:00')"/>
@@ -164,6 +170,7 @@
 
         <!-- Request 2: SUBMITTED -->
         <record id="veh_req_demo_2_submitted" model="logistics.transport.vehicle.request">
+            <field name="company_id" ref="company_islamabad"/>
             <field name="employee_id" ref="emp_sana_tariq"/>
             <field name="from_datetime" eval="(DateTime.today() + relativedelta(days=3)).strftime('%Y-%m-%d 05:00:00')"/>
             <field name="to_datetime" eval="(DateTime.today() + relativedelta(days=3)).strftime('%Y-%m-%d 08:00:00')"/>
@@ -173,6 +180,7 @@
 
         <!-- Request 3: APPROVED -->
         <record id="veh_req_demo_3_approved" model="logistics.transport.vehicle.request">
+            <field name="company_id" ref="company_islamabad"/>
             <field name="employee_id" ref="emp_zain_abbas"/>
             <field name="vehicle_id" ref="vehicle_staria_03"/>
             <field name="from_datetime" eval="(DateTime.today() + relativedelta(days=2)).strftime('%Y-%m-%d 09:00:00')"/>
@@ -184,6 +192,7 @@
 
         <!-- Request 4: ASSIGNED -->
         <record id="veh_req_demo_4_assigned" model="logistics.transport.vehicle.request">
+            <field name="company_id" ref="company_islamabad"/>
             <field name="employee_id" ref="emp_usman_ghani"/>
             <field name="vehicle_id" ref="vehicle_staria_03"/>
             <field name="from_datetime" eval="(DateTime.today() + relativedelta(days=1)).strftime('%Y-%m-%d 04:00:00')"/>
@@ -196,6 +205,7 @@
 
         <!-- Request 5: DONE -->
         <record id="veh_req_demo_5_done" model="logistics.transport.vehicle.request">
+            <field name="company_id" ref="company_islamabad"/>
             <field name="employee_id" ref="emp_bilal_ahmed"/>
             <field name="vehicle_id" ref="vehicle_staria_03"/>
             <field name="from_datetime" eval="(DateTime.today() - relativedelta(days=3)).strftime('%Y-%m-%d 05:00:00')"/>

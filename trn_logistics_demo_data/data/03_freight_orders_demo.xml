@@ -27,6 +27,7 @@
         <!-- ORDER 1: DRAFT STATE (Export Water FCL)                      -->
         <!-- ============================================================ -->
         <record id="freight_order_demo_1_draft" model="freight.shipping">
+            <field name="company_id" ref="company_islamabad"/>
             <field name="shipper_id" ref="partner_shipper_indus"/>
             <field name="consignee_id" ref="partner_consignee_gulf"/>
             <field name="agent_id" ref="partner_agent_qasim"/>
@@ -68,6 +69,7 @@
         <!-- ORDER 2: SUBMITTED STATE (Export Air + Draft Clearance)      -->
         <!-- ============================================================ -->
         <record id="freight_order_demo_2_submitted" model="freight.shipping">
+            <field name="company_id" ref="company_islamabad"/>
             <field name="shipper_id" ref="partner_shipper_crescent"/>
             <field name="consignee_id" ref="partner_consignee_gulf"/>
             <field name="agent_id" ref="partner_agent_skyline"/>
@@ -134,6 +136,7 @@
         <!-- ORDER 3: CONFIRMED STATE (Export Water FCL + Clearance)      -->
         <!-- ============================================================ -->
         <record id="freight_order_demo_3_confirmed" model="freight.shipping">
+            <field name="company_id" ref="company_islamabad"/>
             <field name="shipper_id" ref="partner_shipper_indus"/>
             <field name="consignee_id" ref="partner_consignee_euro"/>
             <field name="agent_id" ref="partner_agent_qasim"/>
@@ -216,6 +219,7 @@
         <!-- ORDER 4: INVOICED STATE (Export Land FTL + Invoice)          -->
         <!-- ============================================================ -->
         <record id="freight_order_demo_4_invoiced" model="freight.shipping">
+            <field name="company_id" ref="company_islamabad"/>
             <field name="shipper_id" ref="partner_shipper_atlas"/>
             <field name="consignee_id" ref="partner_consignee_pacific"/>
             <field name="agent_id" ref="partner_agent_skyline"/>
@@ -286,6 +290,7 @@
         <!-- ORDER 5: DONE STATE (Import Water FCL + Invoice + Delivered) -->
         <!-- ============================================================ -->
         <record id="freight_order_demo_5_done" model="freight.shipping">
+            <field name="company_id" ref="company_islamabad"/>
             <field name="shipper_id" ref="partner_consignee_gulf"/>
             <field name="consignee_id" ref="partner_shipper_indus"/>
             <field name="agent_id" ref="partner_agent_qasim"/>
@@ -371,6 +376,7 @@
         <!-- ORDER 6: CANCELLED STATE (Export Air)                        -->
         <!-- ============================================================ -->
         <record id="freight_order_demo_6_cancelled" model="freight.shipping">
+            <field name="company_id" ref="company_islamabad"/>
             <field name="shipper_id" ref="partner_shipper_crescent"/>
             <field name="consignee_id" ref="partner_consignee_euro"/>
             <field name="agent_id" ref="partner_agent_skyline"/>

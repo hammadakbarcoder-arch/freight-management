@@ -661,3 +661,22 @@ Yeh document Freight Management System (`trn_freight`) ke tamam tasks (Task 1 se
    - Restructured the KPI summary into 6 cards in a single responsive row: `Total Shipments`, `Total Revenue`, `Total Expense`, `Total Profit`, `Confirmed`, and `Delivered`.
    - Engineered an interactive Filter Bar (`Cargo Type / Transport Mode`, `Status`, `Clear All`, and `Refresh` with loading spinner animation).
    - Implemented an SVG Donut Chart (`Shipments by Status`) with mathematical `stroke-dasharray` and `stroke-dashoffset` segment offsets directly in OWL without heavy 3rd-party chart dependencies.
+
+---
+
+## 🏢 Section 7: Multi-Company Demo Data Assignment & Isolation
+
+### Architecture & Key Learnings:
+1. **Multi-Company Record Rules & Demo Data Visibility**:
+   - In Odoo 19, transactional models (`freight.shipping`, `logistics.transport.route`, `logistics.transport.schedule`, `logistics.transport.trip`, `logistics.transport.vehicle.request`) enforce multi-company rules: `['|', ('company_id', '=', False), ('company_id', 'in', company_ids)]`.
+   - If demo data is assigned to `base.main_company` (Apex Global Logistics & Transport, Karachi), users switching to a regional tenant such as `Northern Cross Logistics (Islamabad)` will see empty views and dashboards due to record isolation.
+   - By creating and referencing `company_islamabad` (`Northern Cross Logistics (Islamabad)`) in XML demo data, all demo orders, routes, trips, vehicle requests, vehicles, and employees are bound to Islamabad company.
+2. **Catalog Sharing vs Company-Specific Records**:
+   - Global reference infrastructure like Ports (`freight.port`) and Container Types (`freight.container`) can have `company_id = False` to be universally shared across companies.
+   - Price lists (`freight.price`), routes (`freight.routes`), and services (`freight.service`) have mandatory `company_id` constraints, requiring explicit company assignment.
+
+#### Q42: Multi-company environment mein demo data doosri company mein kaise show karwaya jata hai?
+* **⚡ 1-Liner Answer:**
+  > **Demo XML records mein `company_id` ko target company ke XML ID (`ref="company_islamabad"`) par bind karte hain, aur database mein multi-company rules ke mutabiq records ka `company_id` update karte hain taake switcher change karne par wahi tenant ka data filter ho.**
+* **🔬 Roman Urdu Explanation (Senior Ko Batane Ke Liye):**
+  > **Odoo ke standard multi-company rules `('company_id', 'in', company_ids)` check karte hain. Jab hum company switch kar ke Northern Cross Logistics (Islamabad) choose karte hain, to session mein `company_ids` sirf Islamabad company ki ID hold karta hai. Is liye demo orders, transport routes aur trips ko Islamabad company ke sath associate kiya taake dashboard aur views mein Islamabad company ka real operational demo data nazar aaye.**

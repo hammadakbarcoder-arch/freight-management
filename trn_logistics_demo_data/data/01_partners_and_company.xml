@@ -2,7 +2,7 @@
 <odoo>
     <data noupdate="1">
 
-        <!-- 1. COMPANY PROFILE -->
+        <!-- 1. PRIMARY COMPANY PROFILE -->
         <record id="base.main_company" model="res.company">
             <field name="name">Apex Global Logistics &amp; Transport</field>
             <field name="street">Plot 42-B, Dockyard Road, West Wharf</field>
@@ -11,6 +11,17 @@
             <field name="phone">+92 21 3231 8800</field>
             <field name="email">operations@apexlogistics.pk</field>
             <field name="website">https://www.apexlogistics.pk</field>
+        </record>
+
+        <!-- 1B. REGIONAL / SECONDARY COMPANY PROFILE (ISLAMABAD) -->
+        <record id="company_islamabad" model="res.company">
+            <field name="name">Northern Cross Logistics (Islamabad)</field>
+            <field name="street">Sector I-9/2, Industrial Area</field>
+            <field name="city">Islamabad</field>
+            <field name="country_id" ref="base.pk"/>
+            <field name="phone">+92 51 4433 2211</field>
+            <field name="email">islamabad@northerncross.pk</field>
+            <field name="website">https://www.northerncross.pk</field>
         </record>
 
         <!-- 2. SHIPPERS / CUSTOMERS -->

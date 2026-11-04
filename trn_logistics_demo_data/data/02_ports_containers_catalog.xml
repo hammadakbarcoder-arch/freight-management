@@ -125,18 +125,21 @@
         <!-- 3. PRICE LISTS (freight.price) -->
         <record id="price_ocean_standard" model="freight.price">
             <field name="name">Ocean Freight Standard Tariff</field>
+            <field name="company_id" ref="company_islamabad"/>
             <field name="weight_price">1.50</field>
             <field name="volume_price">12.00</field>
         </record>
 
         <record id="price_air_express" model="freight.price">
             <field name="name">Air Cargo Priority Tariff</field>
+            <field name="company_id" ref="company_islamabad"/>
             <field name="weight_price">6.50</field>
             <field name="volume_price">45.00</field>
         </record>
 
         <record id="price_land_crossborder" model="freight.price">
             <field name="name">Overland Cross-Border Tariff</field>
+            <field name="company_id" ref="company_islamabad"/>
             <field name="weight_price">0.95</field>
             <field name="volume_price">8.50</field>
         </record>
@@ -144,6 +147,7 @@
         <!-- 4. SERVICE CATALOG (freight.service) -->
         <record id="service_thc_handling" model="freight.service">
             <field name="name">Terminal Handling &amp; Crane Charges (THC)</field>
+            <field name="company_id" ref="company_islamabad"/>
             <field name="sale_price">250.00</field>
             <field name="vendor_line_ids" eval="[
                 Command.create({
@@ -159,6 +163,7 @@
 
         <record id="service_customs_brokerage" model="freight.service">
             <field name="name">Customs Documentation &amp; EDI Filing</field>
+            <field name="company_id" ref="company_islamabad"/>
             <field name="sale_price">180.00</field>
             <field name="vendor_line_ids" eval="[
                 Command.create({
@@ -174,6 +179,7 @@
 
         <record id="service_cargo_insurance" model="freight.service">
             <field name="name">Marine &amp; Transit Cargo Insurance</field>
+            <field name="company_id" ref="company_islamabad"/>
             <field name="sale_price">420.00</field>
             <field name="vendor_line_ids" eval="[
                 Command.create({
@@ -185,6 +191,7 @@
 
         <record id="service_cold_chain" model="freight.service">
             <field name="name">Reefer Plug-in &amp; Cold Chain Monitoring</field>
+            <field name="company_id" ref="company_islamabad"/>
             <field name="sale_price">350.00</field>
             <field name="vendor_line_ids" eval="[
                 Command.create({
@@ -197,6 +204,7 @@
         <!-- 5. FREIGHT ROUTES (freight.routes) -->
         <record id="freight_route_khi_jea" model="freight.routes">
             <field name="name">Karachi (PKKHI) → Jebel Ali (AEJEA) Corridor</field>
+            <field name="company_id" ref="company_islamabad"/>
             <field name="water_price">850.00</field>
             <field name="air_price">1650.00</field>
             <field name="land_price">600.00</field>
@@ -204,6 +212,7 @@
 
         <record id="freight_route_bqm_ham" model="freight.routes">
             <field name="name">Port Qasim (PKBQM) → Hamburg (DEHAM) Deep-Sea</field>
+            <field name="company_id" ref="company_islamabad"/>
             <field name="water_price">2100.00</field>
             <field name="air_price">4200.00</field>
             <field name="land_price">1500.00</field>
@@ -211,6 +220,7 @@
 
         <record id="freight_route_opkc_omdb" model="freight.routes">
             <field name="name">Karachi Air (OPKC) → Dubai Air Cargo (OMDB)</field>
+            <field name="company_id" ref="company_islamabad"/>
             <field name="water_price">700.00</field>
             <field name="air_price">1450.00</field>
             <field name="land_price">500.00</field>
@@ -218,6 +228,7 @@
 
         <record id="freight_route_lhe_tkm" model="freight.routes">
             <field name="name">Lahore Dry Port (PKLHE) → Torkham Border (PKTKM)</field>
+            <field name="company_id" ref="company_islamabad"/>
             <field name="water_price">400.00</field>
             <field name="air_price">1100.00</field>
             <field name="land_price">780.00</field>
