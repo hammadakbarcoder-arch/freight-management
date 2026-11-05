@@ -15,7 +15,8 @@ Extends Fleet and HR modules to manage:
     """,
     'category': 'Human Resources/Fleet',
     'author': 'Hammad Akbar',
-    'license': 'LGPL-3',
+    'website': 'https://github.com/hammadakbarcoder-arch',
+    'license': 'OPL-1',
     'depends': [
         'hr',
         'fleet',
