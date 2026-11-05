@@ -5,7 +5,9 @@
     'category': 'Logistics',
     'summary': 'End-to-End Master & Operational Demo Data for Freight & Staff Transport',
     'author': 'Hammad Akbar',
-    'license': 'LGPL-3',
+    'website': 'https://github.com/hammadakbarcoder-arch',
+    'license': 'OPL-1',
+    'images': ['static/description/banner.png'],
     'depends': [
         'trn_freight',
         'trn_staff_transport',
