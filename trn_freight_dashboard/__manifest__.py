@@ -16,6 +16,8 @@ Freight Management Dashboard
     'author': 'Hammad Akbar',
     'website': 'https://github.com/hammadakbarcoder-arch',
     'license': 'OPL-1',
+    'price': 49.00,
+    'currency': 'USD',
     'depends': [
         'trn_freight',
         'web',
