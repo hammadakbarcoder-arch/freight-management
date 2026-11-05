@@ -54,6 +54,41 @@
                         </select>
                     </div>
 
+                    <!-- Date Range Presets -->
+                    <div class="o_filter_item">
+                        <label class="o_filter_label">DATE RANGE</label>
+                        <select class="form-select form-select-sm o_dash_select"
+                                t-att-value="state.filter_date_preset"
+                                t-on-change="(ev) => this.onDatePresetChange(ev)">
+                            <option value="all">All Time</option>
+                            <option value="today">Today</option>
+                            <option value="this_week">This Week</option>
+                            <option value="this_month">This Month</option>
+                            <option value="last_month">Last Month</option>
+                            <option value="this_quarter">This Quarter</option>
+                            <option value="this_year">This Year</option>
+                            <option value="custom">Custom Range</option>
+                        </select>
+                    </div>
+
+                    <!-- From Date Input -->
+                    <div class="o_filter_item">
+                        <label class="o_filter_label">FROM DATE</label>
+                        <input type="date"
+                               class="form-control form-control-sm o_dash_select o_dash_date_input"
+                               t-att-value="state.filter_date_from"
+                               t-on-change="(ev) => this.onCustomDateChange('from', ev)"/>
+                    </div>
+
+                    <!-- To Date Input -->
+                    <div class="o_filter_item">
+                        <label class="o_filter_label">TO DATE</label>
+                        <input type="date"
+                               class="form-control form-control-sm o_dash_select o_dash_date_input"
+                               t-att-value="state.filter_date_to"
+                               t-on-change="(ev) => this.onCustomDateChange('to', ev)"/>
+                    </div>
+
                     <div class="ms-auto align-self-end">
                         <button class="btn btn-sm btn-danger rounded-pill px-3 o_clear_btn" t-on-click="() => this.clearFilters()">
                             <i class="fa fa-times me-1"/> Clear All

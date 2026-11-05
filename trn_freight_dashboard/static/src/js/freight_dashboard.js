@@ -34,6 +34,9 @@ export class FreightDashboard extends Component {
             // Filter selections
             filter_status: "all",
             filter_transport: "all",
+            filter_date_preset: "all",
+            filter_date_from: "",
+            filter_date_to: "",
         });
 
         onWillStart(async () => {
@@ -41,10 +44,23 @@ export class FreightDashboard extends Component {
         });
     }
 
+    formatDateISO(d) {
+        const year = d.getFullYear();
+        const month = String(d.getMonth() + 1).padStart(2, "0");
+        const day = String(d.getDate()).padStart(2, "0");
+        return `${year}-${month}-${day}`;
+    }
+
     async loadDashboardData() {
         this.state.loading = true;
         try {
-            const data = await this.orm.call("freight.dashboard", "get_dashboard_data", []);
+            const kwargs = {
+                date_from: this.state.filter_date_from || false,
+                date_to: this.state.filter_date_to || false,
+                transport: this.state.filter_transport !== "all" ? this.state.filter_transport : false,
+                status: this.state.filter_status !== "all" ? this.state.filter_status : false,
+            };
+            const data = await this.orm.call("freight.dashboard", "get_dashboard_data", [], kwargs);
             Object.assign(this.state, data);
 
             // Chart bar scale max value
@@ -119,14 +135,21 @@ export class FreightDashboard extends Component {
 
     openOrders(stateFilter = null, title = "Freight Orders") {
         let domain = [];
-        if (stateFilter === "active") {
-            domain = [["state", "!=", "cancelled"]];
-        } else if (stateFilter) {
-            domain = [["state", "=", stateFilter]];
+        const finalState = stateFilter || (this.state.filter_status !== "all" ? this.state.filter_status : null);
+        if (finalState === "active") {
+            domain.push(["state", "!=", "cancelled"]);
+        } else if (finalState) {
+            domain.push(["state", "=", finalState]);
         }
 
         if (this.state.filter_transport && this.state.filter_transport !== "all") {
             domain.push(["transport", "=", this.state.filter_transport]);
+        }
+        if (this.state.filter_date_from) {
+            domain.push(["order_date", ">=", this.state.filter_date_from]);
+        }
+        if (this.state.filter_date_to) {
+            domain.push(["order_date", "<=", this.state.filter_date_to]);
         }
 
         this.action.doAction({
@@ -145,27 +168,71 @@ export class FreightDashboard extends Component {
     onFilterChange(type, ev) {
         if (type === "status") {
             this.state.filter_status = ev.target.value;
-            if (this.state.filter_status !== "all") {
-                this.openOrders(this.state.filter_status, `${this.state.filter_status.toUpperCase()} Orders`);
-            }
         } else if (type === "transport") {
             this.state.filter_transport = ev.target.value;
-            if (this.state.filter_transport !== "all") {
-                this.action.doAction({
-                    type: "ir.actions.act_window",
-                    name: `${this.state.filter_transport.toUpperCase()} Shipments`,
-                    res_model: "freight.shipping",
-                    views: [[false, "list"], [false, "form"]],
-                    domain: [["transport", "=", this.state.filter_transport]],
-                    target: "current",
-                });
-            }
         }
+        this.loadDashboardData();
+    }
+
+    onDatePresetChange(ev) {
+        const preset = ev.target.value;
+        this.state.filter_date_preset = preset;
+        const now = new Date();
+
+        if (preset === "all") {
+            this.state.filter_date_from = "";
+            this.state.filter_date_to = "";
+        } else if (preset === "today") {
+            const todayStr = this.formatDateISO(now);
+            this.state.filter_date_from = todayStr;
+            this.state.filter_date_to = todayStr;
+        } else if (preset === "this_week") {
+            const d = new Date(now);
+            const day = d.getDay();
+            const diff = d.getDate() - day + (day === 0 ? -6 : 1);
+            const monday = new Date(d.setDate(diff));
+            this.state.filter_date_from = this.formatDateISO(monday);
+            this.state.filter_date_to = this.formatDateISO(new Date());
+        } else if (preset === "this_month") {
+            const firstDay = new Date(now.getFullYear(), now.getMonth(), 1);
+            this.state.filter_date_from = this.formatDateISO(firstDay);
+            this.state.filter_date_to = this.formatDateISO(now);
+        } else if (preset === "last_month") {
+            const firstDay = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+            const lastDay = new Date(now.getFullYear(), now.getMonth(), 0);
+            this.state.filter_date_from = this.formatDateISO(firstDay);
+            this.state.filter_date_to = this.formatDateISO(lastDay);
+        } else if (preset === "this_quarter") {
+            const qMonth = Math.floor(now.getMonth() / 3) * 3;
+            const firstDay = new Date(now.getFullYear(), qMonth, 1);
+            this.state.filter_date_from = this.formatDateISO(firstDay);
+            this.state.filter_date_to = this.formatDateISO(now);
+        } else if (preset === "this_year") {
+            const firstDay = new Date(now.getFullYear(), 0, 1);
+            this.state.filter_date_from = this.formatDateISO(firstDay);
+            this.state.filter_date_to = this.formatDateISO(now);
+        } else if (preset === "custom") {
+            return;
+        }
+        this.loadDashboardData();
+    }
+
+    onCustomDateChange(type, ev) {
+        if (type === "from") {
+            this.state.filter_date_from = ev.target.value;
+        } else if (type === "to") {
+            this.state.filter_date_to = ev.target.value;
+        }
+        this.state.filter_date_preset = "custom";
+        this.loadDashboardData();
     }
 
     clearFilters() {
         this.state.filter_status = "all";
         this.state.filter_transport = "all";
+        this.state.filter_date_preset = "all";
+        this.state.filter_date_from = "";
+        this.state.filter_date_to = "";
         this.loadDashboardData();
     }
 }

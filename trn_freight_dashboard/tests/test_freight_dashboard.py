@@ -83,3 +83,25 @@ class TestFreightDashboard(TransactionCase):
         after_cancel = self.Dashboard.get_dashboard_data()
         self.assertEqual(after_cancel['active_orders'], before['active_orders'])
         self.assertAlmostEqual(after_cancel['total_revenue'], before['total_revenue'], places=2)
+
+    def test_02_dashboard_filtering_by_date_and_transport(self):
+        """Test get_dashboard_data with date_from, date_to, and transport filters."""
+        # Order in the future (land transport with port_a and port_b)
+        self.Order.create({
+            'shipper_id': self.shipper.id,
+            'consignee_id': self.consignee.id,
+            'order_type': 'export',
+            'transport': 'land',
+            'land_type': 'ftl',
+            'order_date': '2030-01-15',
+            'loading_port': self.port_a.id,
+            'discharge_port_id': self.port_b.id,
+        })
+
+        # Filter by 2030 date range -> should only see 2030 order
+        data_2030 = self.Dashboard.get_dashboard_data(date_from='2030-01-01', date_to='2030-01-31')
+        self.assertEqual(data_2030['total_orders'], 1)
+
+        # Filter by transport='air' in 2030 -> should be 0
+        data_air_2030 = self.Dashboard.get_dashboard_data(date_from='2030-01-01', date_to='2030-01-31', transport='air')
+        self.assertEqual(data_air_2030['total_orders'], 0)

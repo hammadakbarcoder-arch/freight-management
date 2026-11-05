@@ -53,6 +53,16 @@
                 }
             }
 
+            .o_dash_date_input {
+                min-width: 140px;
+                color-scheme: dark;
+
+                &::-webkit-calendar-picker-indicator {
+                    filter: invert(0.85);
+                    cursor: pointer;
+                }
+            }
+
             .o_clear_btn {
                 background-color: #dc2626;
                 border: none;
