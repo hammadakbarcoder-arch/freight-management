@@ -18,9 +18,7 @@ A complete end-to-end multimodal logistics and shipping management suite.
     'category': 'Operations/Logistics',
     'author': 'Hammad Akbar',
     'website': 'https://github.com/hammadakbarcoder-arch',
-    'license': 'OPL-1',
-    'price': 85.00,
-    'currency': 'USD',
+    'license': 'LGPL-3',
     'images': ['static/description/banner.png'],
     'depends': ['base', 'web', 'uom', 'mail', 'product', 'account'],
     'data': [
