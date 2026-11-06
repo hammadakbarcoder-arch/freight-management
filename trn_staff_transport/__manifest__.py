@@ -16,9 +16,7 @@ Extends Fleet and HR modules to manage:
     'category': 'Human Resources/Fleet',
     'author': 'Hammad Akbar',
     'website': 'https://github.com/hammadakbarcoder-arch',
-    'license': 'OPL-1',
-    'price': 64.00,
-    'currency': 'USD',
+    'license': 'LGPL-3',
     'images': ['static/description/banner.png'],
     'depends': [
         'hr',
