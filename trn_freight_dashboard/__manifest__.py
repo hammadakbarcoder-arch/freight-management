@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 {
     'name': 'Freight Dashboard (OWL)',
-    'version': '18.0.1.0.0',
+    'version': '17.0.1.0.0',
     'summary': 'Interactive OWL Dashboard for Freight Management',
     'description': """
 Freight Management Dashboard

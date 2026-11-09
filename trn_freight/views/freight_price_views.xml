@@ -3,12 +3,12 @@
         <field name="name">freight.price.list</field>
         <field name="model">freight.price</field>
         <field name="arch" type="xml">
-            <list>
+            <tree>
                 <field name="name"/>
                 <field name="weight_price"/>
                 <field name="volume_price"/>
                 <field name="company_id" groups="base.group_multi_company"/>
-            </list>
+            </tree>
         </field>
     </record>
 

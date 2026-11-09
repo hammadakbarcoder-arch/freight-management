@@ -5,7 +5,7 @@
         <field name="name">freight.port.list</field>
         <field name="model">freight.port</field>
         <field name="arch" type="xml">
-            <list string="Freight Port">
+            <tree string="Freight Port">
                 <field name="name"/>
                 <field name="active" widget="boolean_toggle"/>
                 <field name="code" optional="hide"/>
@@ -15,7 +15,7 @@
                 <field name="is_air" optional="hide"/>
                 <field name="is_water" optional="hide"/>
                 <field name="company_id" groups="base.group_multi_company" optional="hide"/>
-            </list>
+            </tree>
         </field>
     </record>
 

@@ -3,11 +3,11 @@
         <field name="name">freight.service.list</field>
         <field name="model">freight.service</field>
         <field name="arch" type="xml">
-            <list>
+            <tree>
                 <field name="name"/>
                 <field name="sale_price"/>
                 <field name="company_id" groups="base.group_multi_company"/>
-            </list>
+            </tree>
         </field>
     </record>
 
@@ -29,10 +29,10 @@
                     <notebook>
                         <page string="Vendors" name="vendors">
                             <field name="vendor_line_ids">
-                                <list editable="bottom">
+                                <tree editable="bottom">
                                     <field name="vendor_id"/>
                                     <field name="sale_price"/>
-                                </list>
+                                </tree>
                             </field>
                         </page>
                     </notebook>

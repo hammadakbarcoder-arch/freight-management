@@ -6,10 +6,10 @@
         <field name="name">custom.clearance.list</field>
         <field name="model">custom.clearance</field>
         <field name="arch" type="xml">
-            <list string="Custom Clearance">
+            <tree string="Custom Clearance">
                 <field name="name" string="Name"/>
                 <field name="freight_id" string="Freight Order"/>
-            </list>
+            </tree>
         </field>
     </record>
 
@@ -52,11 +52,11 @@
                     <notebook>
                         <page string="Custom Clearance" name="documents">
                             <field name="line_ids" readonly="state == 'done'">
-                                <list editable="bottom">
+                                <tree editable="bottom">
                                     <field name="name" string="Document Name"/>
                                     <field name="document" string="File" filename="file_name"/>
                                     <field name="file_name" column_invisible="1"/>
-                                </list>
+                                </tree>
                             </field>
                         </page>
                     </notebook>
@@ -70,12 +70,12 @@
         <field name="name">clearance.revision.list</field>
         <field name="model">clearance.revision</field>
         <field name="arch" type="xml">
-            <list string="Clearance Revisions">
+            <tree string="Clearance Revisions">
                 <field name="name"/>
                 <field name="clearance_id"/>
                 <field name="reason"/>
                 <field name="note"/>
-            </list>
+            </tree>
         </field>
     </record>
 

@@ -5,14 +5,14 @@
         <field name="name">logistics.transport.vehicle.request.list</field>
         <field name="model">logistics.transport.vehicle.request</field>
         <field name="arch" type="xml">
-            <list string="Vehicle Requests" decoration-info="state == 'draft'" decoration-warning="state == 'submitted'" decoration-primary="state == 'approved'" decoration-success="state in ('assigned', 'done')" decoration-danger="state in ('rejected', 'cancelled')">
+            <tree string="Vehicle Requests" decoration-info="state == 'draft'" decoration-warning="state == 'submitted'" decoration-primary="state == 'approved'" decoration-success="state in ('assigned', 'done')" decoration-danger="state in ('rejected', 'cancelled')">
                 <field name="name"/>
                 <field name="employee_id"/>
                 <field name="from_datetime"/>
                 <field name="to_datetime"/>
                 <field name="vehicle_id"/>
                 <field name="state" widget="badge"/>
-            </list>
+            </tree>
         </field>
     </record>
 

@@ -5,14 +5,14 @@
         <field name="name">logistics.transport.stop.list</field>
         <field name="model">logistics.transport.stop</field>
         <field name="arch" type="xml">
-            <list string="Transport Stops">
+            <tree string="Transport Stops">
                 <field name="sequence" widget="handle"/>
                 <field name="name"/>
                 <field name="route_id"/>
                 <field name="address_id"/>
                 <field name="stop_type"/>
                 <field name="planned_time" widget="float_time"/>
-            </list>
+            </tree>
         </field>
     </record>
     <!-- Stop Map View -->

@@ -5,7 +5,7 @@
         <field name="name">freight.container.list</field>
         <field name="model">freight.container</field>
         <field name="arch" type="xml">
-            <list string="Freight Container">
+            <tree string="Freight Container">
                 <field name="name" string="Name"/>
                 <field name="active" string="Active" widget="boolean_toggle"/>
                 <field name="code" optional="hide"/>
@@ -13,7 +13,7 @@
                 <field name="weight" optional="hide"/>
                 <field name="volume" optional="hide"/>
                 <field name="state" optional="hide"/>
-            </list>
+            </tree>
         </field>
     </record>
 

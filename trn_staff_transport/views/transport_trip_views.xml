@@ -5,7 +5,7 @@
         <field name="name">logistics.transport.trip.list</field>
         <field name="model">logistics.transport.trip</field>
         <field name="arch" type="xml">
-            <list string="Transport Trips" decoration-info="state == 'planned'" decoration-warning="state == 'in_progress'" decoration-success="state == 'completed'" decoration-muted="state == 'cancelled'">
+            <tree string="Transport Trips" decoration-info="state == 'planned'" decoration-warning="state == 'in_progress'" decoration-success="state == 'completed'" decoration-muted="state == 'cancelled'">
                 <field name="name" decoration-bf="1"/>
                 <field name="date"/>
                 <field name="route_id"/>
@@ -19,7 +19,7 @@
                 <field name="occupancy_percent" widget="percentage"/>
                 <field name="over_capacity" widget="boolean_toggle" optional="show"/>
                 <field name="state" widget="badge" decoration-info="state == 'planned'" decoration-warning="state == 'in_progress'" decoration-success="state == 'completed'" decoration-muted="state == 'cancelled'"/>
-            </list>
+            </tree>
         </field>
     </record>
 
@@ -96,7 +96,7 @@
                     <notebook>
                         <page string="Passengers" name="passengers">
                             <field name="passenger_ids" readonly="state in ('completed', 'cancelled')">
-                                <list editable="bottom" string="Passengers">
+                                <tree editable="bottom" string="Passengers">
                                     <field name="employee_id"/>
                                     <field name="pickup_stop_id"/>
                                     <field name="drop_off_stop_id"/>
@@ -111,7 +111,7 @@
                                     <button name="action_board" string="Board" type="object" icon="fa-sign-in" invisible="status != 'expected'"/>
                                     <button name="action_drop" string="Drop" type="object" icon="fa-sign-out" invisible="status != 'boarded'"/>
                                     <button name="action_no_show" string="No Show" type="object" icon="fa-times-circle text-danger" invisible="status != 'expected'"/>
-                                </list>
+                                </tree>
                             </field>
                         </page>
                         <page string="Notes" name="notes">

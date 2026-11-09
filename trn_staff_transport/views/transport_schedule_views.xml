@@ -5,7 +5,7 @@
         <field name="name">logistics.transport.schedule.list</field>
         <field name="model">logistics.transport.schedule</field>
         <field name="arch" type="xml">
-            <list string="Transport Schedules">
+            <tree string="Transport Schedules">
                 <field name="name"/>
                 <field name="route_id"/>
                 <field name="direction"/>
@@ -14,7 +14,7 @@
                 <field name="vehicle_id" optional="show"/>
                 <field name="driver_id" optional="show"/>
                 <field name="active" widget="boolean_toggle"/>
-            </list>
+            </tree>
         </field>
     </record>
 

@@ -5,7 +5,7 @@
         <field name="name">logistics.transport.route.list</field>
         <field name="model">logistics.transport.route</field>
         <field name="arch" type="xml">
-            <list string="Transport Routes">
+            <tree string="Transport Routes">
                 <field name="name"/>
                 <field name="code"/>
                 <field name="direction"/>
@@ -16,7 +16,7 @@
                 <field name="employee_count"/>
                 <field name="capacity"/>
                 <field name="occupancy_percent" widget="percentage"/>
-            </list>
+            </tree>
         </field>
     </record>
 
@@ -78,27 +78,27 @@
                         <!-- Tab 1: Stops -->
                         <page string="Stops" name="stops">
                             <field name="stop_ids">
-                                <list editable="bottom">
+                                <tree editable="bottom">
                                     <field name="sequence" widget="handle"/>
                                     <field name="name"/>
                                     <field name="address_id"/>
                                     <field name="stop_type"/>
                                     <field name="planned_time" widget="float_time"/>
                                     <field name="notes"/>
-                                </list>
+                                </tree>
                             </field>
                         </page>
 
                         <!-- Tab 2: Employees List -->
                         <page string="Employees" name="employees">
                             <field name="employee_ids" readonly="1">
-                                <list create="false" edit="false" delete="false">
+                                <tree create="false" edit="false" delete="false">
                                     <field name="name"/>
                                     <field name="work_email"/>
                                     <field name="pickup_stop_id"/>
                                     <field name="drop_off_stop_id"/>
                                     <field name="transport_direction"/>
-                                </list>
+                                </tree>
                             </field>
                         </page>
 
