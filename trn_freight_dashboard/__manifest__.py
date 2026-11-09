@@ -15,6 +15,7 @@ Freight Management Dashboard
     'category': 'Operations/Logistics',
     'author': 'Hammad Akbar',
     'website': 'https://github.com/hammadakbarcoder-arch',
+    'support': 'rrajahammadakbar@gmail.com',
     'license': 'OPL-1',
     'price': 34.00,
     'currency': 'USD',
