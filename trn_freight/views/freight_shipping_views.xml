@@ -52,6 +52,7 @@
             <form string="Freight Order">
                 <!-- Header Buttons & Statusbar -->
                 <header>
+                    <field name="invoice_count" invisible="1"/>
                     <button name="action_create_clearance" string="Custom Clearance" type="object"
                             class="btn-primary" invisible="state in ('done', 'cancelled')"/>
                     <button name="action_submit" string="Submit" type="object" class="btn-primary"
@@ -59,7 +60,7 @@
                     <button name="action_confirm" string="Confirm" type="object" class="btn-primary"
                             invisible="state != 'submitted'"/>
                     <button name="action_create_invoice" string="Create Invoice" type="object" class="btn-primary"
-                            invisible="state != 'confirmed'"/>
+                            invisible="state != 'confirmed' and (state != 'invoiced' or invoice_count &gt; 0)"/>
                     <button name="action_tracking" string="Tracking" type="object" class="btn-primary"
                             invisible="state not in ('confirmed', 'invoiced')"/>
                     <button name="action_done" string="Done" type="object" class="btn-primary"

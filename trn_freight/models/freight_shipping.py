@@ -73,7 +73,16 @@ class FreightShipping(models.Model):
         return journal, income
 
     def action_create_invoice(self):
-        self._ensure_state(['confirmed'], 'invoiced')
+        for rec in self:
+            if rec.state not in ('confirmed', 'invoiced'):
+                labels = dict(self._fields['state'].selection)
+                raise UserError(
+                    f"Order {rec.name} cannot be invoiced because it is {labels.get(rec.state, rec.state)}. "
+                    f"Only Confirmed orders can be invoiced."
+                )
+            if rec.state == 'invoiced' and rec.invoice_count > 0:
+                raise UserError(f"Order {rec.name} already has an active invoice.")
+
         for rec in self:
             journal, income_account = self._ensure_invoicing_setup(rec.company_id)
             invoice_lines = []
