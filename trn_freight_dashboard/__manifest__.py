@@ -7,12 +7,19 @@
 Freight Management Dashboard
 ============================
 - Live KPI Cards (Orders per state, Total Revenue, Total Expense, Net Margin)
-- Last 6 Months Revenue vs Expense Chart
+- Last 6 Months Revenue vs Expense Trend Chart
+- Status Distribution Donut Chart
+- Quick Presets & Custom Date Range Filtering
 - Interactive drill-down to filtered Freight Orders
     """,
-    'category': 'Logistics',
+    'category': 'Operations/Logistics',
     'author': 'Hammad Akbar',
-    'license': 'LGPL-3',
+    'website': 'https://github.com/hammadakbarcoder-arch',
+    'support': 'rrajahammadakbar@gmail.com',
+    'license': 'OPL-1',
+    'price': 34.00,
+    'currency': 'USD',
+    'images': ['static/description/banner.png'],
     'depends': [
         'trn_freight',
         'web',

@@ -3,10 +3,25 @@
     'name': 'Freight Management System',
     'version': '19.0.1.0.0',
     'summary': 'Manage Freight Ports, Containers, Prices, Routes, Services, and Customs Clearance',
-    'category': 'Logistics',
-    'author': 'Hammad',
+    'description': """
+Freight Management System for Odoo 19
+=====================================
+A complete end-to-end multimodal logistics and shipping management suite.
+- Multimodal freight (Ocean, Air, Land)
+- Port & Container Management
+- Automated Freight Pricing & Quotations
+- Route Management with stops
+- Customs Clearance Tracking
+- Direct Invoicing & Accounting Integration
+- Interactive OWL Executive Dashboard
+    """,
+    'category': 'Operations/Logistics',
+    'author': 'Hammad Akbar',
+    'website': 'https://github.com/hammadakbarcoder-arch',
+    'support': 'rrajahammadakbar@gmail.com',
     'license': 'LGPL-3',
-    'depends': ['base', 'web', 'uom', 'mail', 'product','account'],
+    'images': ['static/description/banner.png'],
+    'depends': ['base', 'web', 'uom', 'mail', 'product', 'account'],
     'data': [
         'security/freight_security.xml',
         'security/ir.model.access.csv',
@@ -19,8 +34,9 @@
         'views/freight_shipping_views.xml',
         'views/custom_clearance_views.xml',
         'views/freight_menus.xml',
-        'report/freight_shipping_report.xml'
+        'report/freight_shipping_report.xml',
     ],
     'installable': True,
     'application': True,
+    'auto_install': False,
 }
