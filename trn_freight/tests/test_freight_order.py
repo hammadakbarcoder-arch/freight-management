@@ -270,6 +270,42 @@ class TestFreightOrder(TransactionCase):
         self.assertEqual(invoice.amount_untaxed, expected_total)
         self.assertEqual(expected_total, 1300.0)
 
+    def test_08b_recreate_invoice_after_deletion(self):
+        """When an invoice is deleted, action_create_invoice allows re-creating the invoice."""
+        order = self._create_order()
+        self.env['freight.order.cargo'].create({
+            'order_id': order.id,
+            'container_id': self.container.id,
+            'product_id': self.product.id,
+            'billing_on': 'weight',
+            'pricing_id': self.pricing.id,
+            'weight': 10.0,
+        })
+        order.action_submit()
+        self._create_and_confirm_clearance(order)
+        order.action_confirm()
+
+        # 1. First invoice creation
+        order.action_create_invoice()
+        self.assertEqual(order.state, 'invoiced')
+        self.assertEqual(order.invoice_count, 1)
+
+        # 2. Cannot create duplicate invoice while active invoice exists
+        with self.assertRaises(UserError):
+            order.action_create_invoice()
+
+        # 3. Simulate user deleting invoice in Accounting
+        invoice = order.invoice_ids
+        invoice.unlink()
+        self.assertEqual(order.invoice_count, 0)
+        self.assertEqual(order.state, 'invoiced')
+
+        # 4. Create invoice again succeeds and generates a new invoice
+        order.action_create_invoice()
+        self.assertEqual(order.state, 'invoiced')
+        self.assertEqual(order.invoice_count, 1)
+        self.assertEqual(order.invoice_ids.move_type, 'out_invoice')
+
     def test_09_line_locks_enforced(self):
         """Task 7: Locks prevent creating, writing, or deleting lines on confirmed/invoiced orders."""
         order = self._create_order()
