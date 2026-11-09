@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 {
     'name': 'Staff Transport Management',
-    'version': '19.0.1.0.0',
+    'version': '18.0.1.0.0',
     'summary': 'Manage staff transport routes, stops, vehicle capacity and maps',
     'description': """
 Staff Transport Management System

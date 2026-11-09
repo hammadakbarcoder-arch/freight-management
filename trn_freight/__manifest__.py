@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 {
     'name': 'Freight Management System',
-    'version': '19.0.1.0.0',
+    'version': '18.0.1.0.0',
     'summary': 'Manage Freight Ports, Containers, Prices, Routes, Services, and Customs Clearance',
     'description': """
 Freight Management System for Odoo 19
