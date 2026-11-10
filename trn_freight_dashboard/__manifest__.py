@@ -14,7 +14,7 @@ Freight Management Dashboard
     """,
     'category': 'Operations/Logistics',
     'author': 'Hammad Akbar',
-    'website': 'https://apps.odoo.com/apps/modules/browse?author=Hammad%20Akbar',
+    'website': 'https://hammad-akbar-odoo-store.netlify.app',
     'support': 'rrajahammadakbar@gmail.com',
     'license': 'OPL-1',
     'price': 34.00,
