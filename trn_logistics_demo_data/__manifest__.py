@@ -5,7 +5,7 @@
     'category': 'Logistics',
     'summary': 'End-to-End Master & Operational Demo Data for Freight & Staff Transport',
     'author': 'Hammad Akbar',
-    'website': 'https://apps.odoo.com/apps/modules/browse?author=Hammad%20Akbar',
+    'website': 'https://hammad-akbar-odoo-store.netlify.app',
     'support': 'rrajahammadakbar@gmail.com',
     'license': 'LGPL-3',
     'images': ['static/description/banner.png'],
