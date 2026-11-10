@@ -244,7 +244,7 @@ freight-management/
 1. **Clone the Repository**:
    ```bash
    cd /path/to/odoo/custom_addons/
-   git clone git@github.com:hammadakbarcoder-arch/freight-management.git
+   git clone https://apps.odoo.com/apps/modules/browse?author=Hammad%20Akbar
    ```
 
 2. **Configure `odoo.conf`**:
