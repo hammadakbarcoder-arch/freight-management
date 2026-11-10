@@ -15,7 +15,7 @@ Extends Fleet and HR modules to manage:
     """,
     'category': 'Human Resources/Fleet',
     'author': 'Hammad Akbar',
-    'website': 'https://apps.odoo.com/apps/modules/browse?author=Hammad%20Akbar',
+    'website': 'https://hammad-akbar-odoo-store.netlify.app',
     'support': 'rrajahammadakbar@gmail.com',
     'license': 'LGPL-3',
     'images': ['static/description/banner.png'],
