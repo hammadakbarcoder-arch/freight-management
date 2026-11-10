@@ -15,7 +15,7 @@ Extends Fleet and HR modules to manage:
     """,
     'category': 'Human Resources/Fleet',
     'author': 'Hammad Akbar',
-    'website': 'https://github.com/hammadakbarcoder-arch',
+    'website': 'https://apps.odoo.com/apps/modules/browse?author=Hammad%20Akbar',
     'support': 'rrajahammadakbar@gmail.com',
     'license': 'LGPL-3',
     'images': ['static/description/banner.png'],
