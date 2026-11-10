@@ -1,7 +1,7 @@
 # 📊 Freight Dashboard (`trn_freight_dashboard`)
 
 [![Odoo Version](https://img.shields.io/badge/Odoo-19.0-714B67?style=flat-square&logo=odoo&logoColor=white)](https://www.odoo.com)
-[![Framework](https://img.shields.io/badge/Frontend-OWL%202.0-00A09D?style=flat-square)](https://github.com/odoo/owl)
+[![Framework](https://img.shields.io/badge/Frontend-OWL%202.0-00A09D?style=flat-square)](https://www.odoo.com)
 [![Tests Passing](https://img.shields.io/badge/Tests-Passing-brightgreen?style=flat-square)](#-automated-tests)
 
 An interactive executive dashboard built with **Odoo 19's OWL (Odoo Web Library)** framework for the `trn_freight` module.
