@@ -11,6 +11,7 @@ class FreightDashboard(models.AbstractModel):
     @api.model
     def get_dashboard_data(self, date_from=None, date_to=None, transport=None, status=None):
         Order = self.env['freight.shipping']
+        Clearance = self.env['custom.clearance']
 
         # Clean filter parameters
         date_from = date_from or None
@@ -27,7 +28,7 @@ class FreightDashboard(models.AbstractModel):
         if transport:
             base_domain.append(('transport', '=', transport))
 
-        # 1. Orders count per state (matching date + transport + optional status)
+        # 1. Orders count per state
         state_counts_domain = list(base_domain)
         if status:
             state_counts_domain.append(('state', '=', status))
@@ -47,7 +48,12 @@ class FreightDashboard(models.AbstractModel):
         total_orders = sum(state_counts.values())
         active_orders = total_orders - state_counts['cancelled']
 
-        # 2. Revenue & Expense of active orders (state != 'cancelled' or specific active status)
+        # KPI derived counters
+        in_transit_orders = state_counts['submitted'] + state_counts['confirmed']
+        delivered_orders = state_counts['done']
+        awaiting_action_orders = state_counts['draft']
+
+        # 2. Revenue & Expense of active orders
         active_domain = list(base_domain)
         if status:
             active_domain.append(('state', '=', status))
@@ -67,8 +73,13 @@ class FreightDashboard(models.AbstractModel):
         total_revenue = round(cargo_sum + routes_sum + service_sum, 2)
         total_expense = round(service_sum, 2)
         net_margin = round(total_revenue - total_expense, 2)
+        profit_margin_pct = round(((total_revenue - total_expense) / total_revenue) * 100, 1) if total_revenue > 0 else 0.0
 
-        # 3. Monthly Revenue vs Expense Trend
+        # Delivered rate percentage
+        delivered_rate_pct = round((state_counts['done'] / (active_orders or total_orders or 1)) * 100)
+        tracked_states_count = sum(1 for v in state_counts.values() if v > 0)
+
+        # 3. Monthly Revenue vs Expense Trend (6 months for test compatibility)
         today = fields.Date.context_today(self)
         if date_from:
             try:
@@ -86,7 +97,6 @@ class FreightDashboard(models.AbstractModel):
         else:
             end_dt = today
 
-        # Generate month sequence (up to 12 months for chart display)
         months_map = {}
         months_order = []
         cur_m = start_dt.replace(day=1)
@@ -129,13 +139,155 @@ class FreightDashboard(models.AbstractModel):
                     months_map[m_key]['revenue'] = m_rev
                     months_map[m_key]['expense'] = m_exp
 
+        # 4. 12-Month Timeline Data for Executive Area Chart (Dec - Nov timeline)
+        chart_12m = []
+        chart_12m_map = {}
+        for i in range(11, -1, -1):
+            m_date = today.replace(day=1) - relativedelta(months=i)
+            mk = m_date.strftime('%Y-%m')
+            item = {
+                'key': mk,
+                'label': m_date.strftime('%b'),
+                'full_label': m_date.strftime('%b %Y'),
+                'revenue': 0.0,
+                'expense': 0.0,
+                'profit': 0.0,
+            }
+            chart_12m.append(item)
+            chart_12m_map[mk] = item
+
+        chart_12m_domain = list(active_domain)
+        chart_12m_domain.append(('order_date', '>=', chart_12m[0]['key'] + '-01'))
+
+        chart_12m_groups = Order._read_group(
+            chart_12m_domain,
+            ['order_date:month'],
+            ['cargo_total:sum', 'routes_total:sum', 'service_total_sale:sum']
+        )
+        for month_dt, c_cargo, c_routes, c_service in chart_12m_groups:
+            if month_dt:
+                mk = month_dt.strftime('%Y-%m')
+                if mk in chart_12m_map:
+                    c_rev = round((c_cargo or 0.0) + (c_routes or 0.0) + (c_service or 0.0), 2)
+                    c_exp = round(c_service or 0.0, 2)
+                    chart_12m_map[mk]['revenue'] = c_rev
+                    chart_12m_map[mk]['expense'] = c_exp
+                    chart_12m_map[mk]['profit'] = max(0.0, round(c_rev - c_exp, 2))
+
+        # 5. Shipments by Top Routes (Grouped by loading_port -> discharge_port)
+        top_routes = []
+        route_palette = ['#f97316', '#3b82f6', '#10b981', '#ea580c', '#8b5cf6']
+        route_groups = Order._read_group(
+            active_domain,
+            ['loading_port', 'discharge_port_id'],
+            ['__count']
+        )
+        sorted_routes = sorted(route_groups, key=lambda x: x[2], reverse=True)[:5]
+        max_route_count = sorted_routes[0][2] if sorted_routes else 1
+        for idx, (l_port, d_port, cnt) in enumerate(sorted_routes):
+            lp_name = l_port.name if l_port else 'Origin'
+            dp_name = d_port.name if d_port else 'Destination'
+            pct = max(10, min(100, round((cnt / max_route_count) * 100)))
+            top_routes.append({
+                'name': f"{lp_name} → {dp_name}",
+                'count': cnt,
+                'percentage': pct,
+                'color': route_palette[idx % len(route_palette)],
+                'loading_port_id': l_port.id if l_port else False,
+                'discharge_port_id': d_port.id if d_port else False,
+            })
+
+        # 6. Booking Pipeline Counters & Pending Tasks
+        pending_invoices_cnt = Order.search_count([
+            ('state', '=', 'confirmed'),
+            ('invoice_ids', '=', False),
+        ])
+        pending_clearances_cnt = Clearance.search_count([('state', '=', 'draft')])
+
+        booking_pipeline = {
+            'draft': state_counts['draft'],
+            'submitted': state_counts['submitted'],
+            'confirmed': state_counts['confirmed'],
+            'invoiced': state_counts['invoiced'],
+            'done': state_counts['done'],
+            'pending_invoices': pending_invoices_cnt,
+            'pending_clearances': pending_clearances_cnt,
+        }
+
+        # 7. Recent Shipments (Latest 6 shipments)
+        recent_shipments = []
+        for o in Order.search([], order='id desc', limit=6):
+            lp_str = o.loading_port.name or ''
+            dp_str = o.discharge_port_id.name or ''
+            r_str = f"{lp_str} → {dp_str}" if (lp_str or dp_str) else 'Direct'
+            recent_shipments.append({
+                'id': o.id,
+                'name': o.name,
+                'shipper': o.shipper_id.name or 'Unknown',
+                'route': r_str,
+                'state': o.state,
+            })
+
+        # 8. Recent Clearances (Latest 6 custom clearance records)
+        recent_clearances = []
+        for c in Clearance.search([], order='id desc', limit=6):
+            recent_clearances.append({
+                'id': c.id,
+                'name': c.name,
+                'shipment': c.freight_id.name if c.freight_id else 'N/A',
+                'agent': c.agent_id.name or 'N/A',
+                'state': c.state,
+            })
+
+        # 9. Alerts & Notifications
+        draft_clearances_alert = Clearance.search_count([('state', '=', 'draft')])
+        overdue_orders_alert = Order.search_count([
+            ('expected_date', '<', today),
+            ('state', 'not in', ['done', 'cancelled'])
+        ])
+
+        # 10. Top Shippers (Top 5 clients with shipment count & share)
+        top_shippers = []
+        shipper_groups = Order._read_group(
+            active_domain,
+            ['shipper_id'],
+            ['__count']
+        )
+        sorted_shippers = sorted(shipper_groups, key=lambda x: x[1], reverse=True)[:5]
+        total_active_shippers_cnt = sum(x[1] for x in sorted_shippers) or 1
+        for rank, (partner, cnt) in enumerate(sorted_shippers, start=1):
+            pct = round((cnt / total_active_shippers_cnt) * 100)
+            top_shippers.append({
+                'rank': rank,
+                'id': partner.id if partner else False,
+                'name': partner.name if partner else 'Unknown',
+                'count': cnt,
+                'percentage': pct,
+            })
+
         return {
             'orders_by_state': state_counts,
             'total_orders': total_orders,
             'active_orders': active_orders,
+            'in_transit_orders': in_transit_orders,
+            'delivered_orders': delivered_orders,
+            'awaiting_action_orders': awaiting_action_orders,
             'total_revenue': total_revenue,
             'total_expense': total_expense,
             'net_margin': net_margin,
+            'profit_margin_pct': profit_margin_pct,
+            'delivered_rate_pct': delivered_rate_pct,
+            'tracked_states_count': tracked_states_count,
             'currency_symbol': self.env.company.currency_id.symbol or '$',
             'monthly_data': [months_map[k] for k in months_order],
+            'chart_12m': chart_12m,
+            'top_routes': top_routes,
+            'booking_pipeline': booking_pipeline,
+            'recent_shipments': recent_shipments,
+            'recent_clearances': recent_clearances,
+            'alerts': {
+                'draft_clearances': draft_clearances_alert,
+                'overdue_shipments': overdue_orders_alert,
+            },
+            'top_shippers': top_shippers,
         }
