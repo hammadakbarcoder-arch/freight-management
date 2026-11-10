@@ -5,7 +5,7 @@
     'category': 'Logistics',
     'summary': 'End-to-End Master & Operational Demo Data for Freight & Staff Transport',
     'author': 'Hammad Akbar',
-    'website': 'https://github.com/hammadakbarcoder-arch',
+    'website': 'https://apps.odoo.com/apps/modules/browse?author=Hammad%20Akbar',
     'support': 'rrajahammadakbar@gmail.com',
     'license': 'LGPL-3',
     'images': ['static/description/banner.png'],
