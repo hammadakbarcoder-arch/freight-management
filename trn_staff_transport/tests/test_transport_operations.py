@@ -2,6 +2,7 @@
 from datetime import date, datetime
 from odoo.tests.common import TransactionCase, tagged
 from odoo.exceptions import ValidationError, UserError
+from odoo.tools import mute_logger
 
 
 @tagged('post_install', '-at_install')
@@ -165,6 +166,47 @@ class TestTransportOperations(TransactionCase):
         # Completed trip cannot be cancelled
         with self.assertRaises(UserError):
             trip.action_cancel()
+
+        # Constraints validation:
+        # 1. Cannot change employee on already saved passenger
+        with self.assertRaises(ValidationError):
+            passenger.write({'employee_id': self.employee_manager.id})
+
+        # 2. Cannot add employee not assigned to the trip route
+        with self.assertRaises(ValidationError):
+            self.env['logistics.transport.trip.passenger'].create({
+                'trip_id': trip.id,
+                'employee_id': self.employee_manager.id,
+            })
+
+        # 3. Stop must belong to the trip route
+        emp_for_stop_test = self.env['hr.employee'].create({
+            'name': 'Employee For Stop Test',
+            'transport_route_id': self.route.id,
+        })
+        other_route = self.env['logistics.transport.route'].create({'name': 'Other Route Unique'})
+        other_stop = self.env['logistics.transport.stop'].create({
+            'name': 'Other Stop',
+            'route_id': other_route.id,
+            'address_id': self.partner_a.id,
+            'sequence': 99,
+        })
+        with self.assertRaises(ValidationError):
+            self.env['logistics.transport.trip.passenger'].create({
+                'trip_id': trip.id,
+                'employee_id': emp_for_stop_test.id,
+                'pickup_stop_id': other_stop.id,
+            })
+
+        # 4. Duplicate passenger on same trip is forbidden
+        with mute_logger('odoo.sql_db'), self.assertRaises(Exception):
+            with self.cr.savepoint():
+                self.env['logistics.transport.trip.passenger'].create({
+                    'trip_id': trip.id,
+                    'employee_id': self.employee_staff.id,
+                    'pickup_stop_id': self.stop_pickup.id,
+                    'drop_off_stop_id': self.stop_drop.id,
+                })
 
     def test_03_generate_daily_trips_wizard_idempotency(self):
         """Test wizard generates trips for active weekday schedules without duplicates."""

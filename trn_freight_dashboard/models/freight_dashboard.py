@@ -14,8 +14,8 @@ class FreightDashboard(models.AbstractModel):
         Clearance = self.env['custom.clearance']
 
         # Clean filter parameters
-        date_from = date_from or None
-        date_to = date_to or None
+        date_from = date_from if date_from and date_from != 'all' else None
+        date_to = date_to if date_to and date_to != 'all' else None
         transport = transport if transport and transport != 'all' else None
         status = status if status and status != 'all' else None
 
@@ -181,7 +181,7 @@ class FreightDashboard(models.AbstractModel):
         # 5. Shipments by Top Routes (Grouped by loading_port -> discharge_port)
         top_routes = []
         route_palette = ['#f97316', '#3b82f6', '#10b981', '#ea580c', '#8b5cf6']
-        route_groups = Order._read_group(
+        route_groups = Order.sudo()._read_group(
             active_domain,
             ['loading_port', 'discharge_port_id'],
             ['__count']
@@ -189,8 +189,8 @@ class FreightDashboard(models.AbstractModel):
         sorted_routes = sorted(route_groups, key=lambda x: x[2], reverse=True)[:5]
         max_route_count = sorted_routes[0][2] if sorted_routes else 1
         for idx, (l_port, d_port, cnt) in enumerate(sorted_routes):
-            lp_name = l_port.name if l_port else 'Origin'
-            dp_name = d_port.name if d_port else 'Destination'
+            lp_name = l_port.sudo().name if l_port else 'Origin'
+            dp_name = d_port.sudo().name if d_port else 'Destination'
             pct = max(10, min(100, round((cnt / max_route_count) * 100)))
             top_routes.append({
                 'name': f"{lp_name} → {dp_name}",
@@ -218,28 +218,30 @@ class FreightDashboard(models.AbstractModel):
             'pending_clearances': pending_clearances_cnt,
         }
 
-        # 7. Recent Shipments (Scoped to active companies)
+        # 7. Recent Shipments (Scoped to active companies, sudo for safe relational display)
         recent_shipments = []
         for o in Order.search(company_domain, order='id desc', limit=6):
-            lp_str = o.loading_port.name or ''
-            dp_str = o.discharge_port_id.name or ''
+            o_sudo = o.sudo()
+            lp_str = o_sudo.loading_port.name if o_sudo.loading_port else ''
+            dp_str = o_sudo.discharge_port_id.name if o_sudo.discharge_port_id else ''
             r_str = f"{lp_str} → {dp_str}" if (lp_str or dp_str) else 'Direct'
             recent_shipments.append({
                 'id': o.id,
                 'name': o.name,
-                'shipper': o.shipper_id.name or 'Unknown',
+                'shipper': o_sudo.shipper_id.name or 'Unknown',
                 'route': r_str,
                 'state': o.state,
             })
 
-        # 8. Recent Clearances (Scoped to active companies)
+        # 8. Recent Clearances (Scoped to active companies, sudo for safe relational display)
         recent_clearances = []
         for c in Clearance.search(company_domain, order='id desc', limit=6):
+            c_sudo = c.sudo()
             recent_clearances.append({
                 'id': c.id,
                 'name': c.name,
-                'shipment': c.freight_id.name if c.freight_id else 'N/A',
-                'agent': c.agent_id.name or 'N/A',
+                'shipment': c_sudo.freight_id.name if c_sudo.freight_id else 'N/A',
+                'agent': c_sudo.agent_id.name if c_sudo.agent_id else 'N/A',
                 'state': c.state,
             })
 
@@ -252,7 +254,7 @@ class FreightDashboard(models.AbstractModel):
 
         # 10. Top Shippers (Scoped to active companies)
         top_shippers = []
-        shipper_groups = Order._read_group(
+        shipper_groups = Order.sudo()._read_group(
             active_domain,
             ['shipper_id'],
             ['__count']
@@ -264,7 +266,7 @@ class FreightDashboard(models.AbstractModel):
             top_shippers.append({
                 'rank': rank,
                 'id': partner.id if partner else False,
-                'name': partner.name if partner else 'Unknown',
+                'name': partner.sudo().name if partner else 'Unknown',
                 'count': cnt,
                 'percentage': pct,
             })

@@ -1,248 +1,578 @@
-// Executive Trucking & Logistics Dark Dashboard Styling (Matching Reference Layout)
+// Modern Freight Management Executive Dashboard Styling
+// Pixel-perfect match for Freight Dashboard Reference Design
 
 .o_freight_dashboard_container {
     height: 100%;
     min-height: 100vh;
     overflow-y: auto;
-    background-color: #151326; // Deep dark navy-purple background
-    padding: 24px;
-    font-family: inherit;
+    background-color: #f4f6f9;
+    padding: 20px 24px 40px;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    color: #1e293b;
+    transition: background-color 0.3s ease, color 0.3s ease;
 
-    // 1. Header & Filters
+    // 1. Top Header
     .o_dash_header {
-        .o_dash_logo_badge {
-            width: 42px;
-            height: 42px;
+        .o_dash_title_icon {
+            width: 36px;
+            height: 36px;
             border-radius: 10px;
-            background: linear-gradient(135deg, #6366f1, #8b5cf6);
+            background: linear-gradient(135deg, #4f46e5, #6366f1);
             display: flex;
             align-items: center;
             justify-content: center;
-            box-shadow: 0 4px 12px rgba(99, 102, 241, 0.4);
+            color: #ffffff;
+            font-size: 16px;
+            box-shadow: 0 4px 10px rgba(99, 102, 241, 0.3);
         }
 
-        .o_dash_filters_bar {
-            background-color: #211c38;
-            border: 1px solid rgba(255, 255, 255, 0.08);
+        .o_dash_title {
+            font-size: 1.35rem;
+            font-weight: 700;
+            color: #0f172a;
+            letter-spacing: -0.3px;
+        }
 
-            .o_filter_label {
-                display: block;
-                font-size: 10px;
-                font-weight: 700;
-                letter-spacing: 0.8px;
-                color: #94a3b8;
-                margin-bottom: 4px;
-            }
+        .o_date_pill_group {
+            background-color: #ffffff;
+            border: 1px solid #e2e8f0;
+            border-radius: 30px;
+            padding: 3px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
 
-            .o_dash_select {
-                background-color: #2c264a !important;
-                color: #ffffff !important;
-                border: 1px solid rgba(255, 255, 255, 0.12) !important;
-                border-radius: 8px;
-                min-width: 180px;
-                font-size: 13px;
-
-                &:focus {
-                    border-color: #8b5cf6 !important;
-                    box-shadow: 0 0 0 2px rgba(139, 92, 246, 0.25) !important;
-                }
-
-                option {
-                    background-color: #211c38;
-                    color: #ffffff;
-                }
-            }
-
-            .o_dash_date_input {
-                min-width: 140px;
-                color-scheme: dark;
-
-                &::-webkit-calendar-picker-indicator {
-                    filter: invert(0.85);
-                    cursor: pointer;
-                }
-            }
-
-            .o_clear_btn {
-                background-color: #dc2626;
+            .o_pill_btn {
                 border: none;
+                background: transparent;
+                padding: 4px 16px;
+                border-radius: 20px;
                 font-size: 12px;
                 font-weight: 600;
+                color: #64748b;
+                transition: all 0.2s ease;
 
                 &:hover {
-                    background-color: #b91c1c;
+                    color: #0f172a;
+                }
+
+                &.active {
+                    background-color: #7c3aed;
+                    color: #ffffff !important;
+                    box-shadow: 0 2px 6px rgba(124, 58, 237, 0.35);
                 }
             }
         }
-    }
 
-    // 2. Six (6) Dark KPI Cards
-    .o_exec_card {
-        background: #211c38 !important;
-        border: 1px solid rgba(255, 255, 255, 0.07) !important;
-        border-radius: 14px !important;
-        cursor: pointer;
-        transition: transform 0.2s ease, box-shadow 0.2s ease;
-        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25);
-
-        &:hover {
-            transform: translateY(-4px);
-            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.45) !important;
-            border-color: rgba(255, 255, 255, 0.18) !important;
-        }
-
-        .o_icon_badge {
-            width: 36px;
-            height: 36px;
-            border-radius: 8px;
+        .o_theme_toggle_btn {
+            width: 34px;
+            height: 34px;
+            background-color: #ffffff;
+            border: 1px solid #e2e8f0;
+            color: #64748b;
             display: inline-flex;
             align-items: center;
             justify-content: center;
-            font-size: 15px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+            transition: all 0.2s ease;
 
-            &.bg-warning-subtle { background-color: rgba(245, 158, 11, 0.18) !important; color: #fbbf24 !important; }
-            &.bg-success-subtle { background-color: rgba(16, 185, 129, 0.18) !important; color: #34d399 !important; }
-            &.bg-danger-subtle  { background-color: rgba(239, 68, 68, 0.18) !important; color: #f87171 !important; }
-            &.bg-info-subtle    { background-color: rgba(59, 130, 246, 0.18) !important; color: #60a5fa !important; }
-            &.bg-primary-subtle { background-color: rgba(99, 102, 241, 0.18) !important; color: #818cf8 !important; }
-            &.bg-purple-subtle  { background-color: rgba(168, 85, 247, 0.18) !important; color: #c084fc !important; }
-        }
-
-        .o_card_sub {
-            font-size: 10px;
-            font-weight: 700;
-            letter-spacing: 0.6px;
-            color: #94a3b8;
-        }
-
-        .o_card_val {
-            font-size: 1.55rem;
-            font-weight: 800;
-            color: #ffffff;
-            margin-top: 4px;
-            margin-bottom: 2px;
-            line-height: 1.2;
-        }
-
-        .o_card_footer {
-            font-size: 11px;
+            &:hover {
+                color: #0f172a;
+                background-color: #f8fafc;
+            }
         }
     }
 
-    // 3. Bottom White Panels (Revenue Chart + Status Donut)
-    .o_white_panel {
-        background: #ffffff !important;
-        border-radius: 14px !important;
-        box-shadow: 0 6px 20px rgba(0, 0, 0, 0.12) !important;
+    // 2. Grid Layouts Matching Reference Design Exactly
+    .o_dash_kpi_grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 14px;
+        margin-bottom: 18px;
 
-        .o_legend_dot {
-            width: 10px;
-            height: 10px;
-            border-radius: 50%;
+        @media (min-width: 768px) {
+            grid-template-columns: repeat(3, 1fr);
+        }
+
+        @media (min-width: 1200px) {
+            grid-template-columns: repeat(6, 1fr);
+        }
+    }
+
+    .o_dash_middle_grid {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 16px;
+        margin-bottom: 18px;
+
+        @media (min-width: 768px) {
+            grid-template-columns: repeat(2, 1fr);
+        }
+
+        @media (min-width: 1200px) {
+            grid-template-columns: 1.15fr 1.9fr 1.05fr 1.05fr;
+        }
+    }
+
+    .o_dash_bottom_grid {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 16px;
+
+        @media (min-width: 768px) {
+            grid-template-columns: repeat(2, 1fr);
+        }
+
+        @media (min-width: 1200px) {
+            grid-template-columns: 1.35fr 1.35fr 1fr 1fr;
+        }
+    }
+
+    // 3. Top KPI Cards
+    .o_kpi_card {
+        background-color: #ffffff;
+        border-radius: 12px;
+        border: 1px solid #f1f5f9;
+        box-shadow: 0 1px 4px rgba(0, 0, 0, 0.04);
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+        cursor: pointer;
+        height: 100%;
+
+        &:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(0, 0, 0, 0.07);
+        }
+
+        .o_kpi_icon_box {
+            width: 44px;
+            height: 44px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #ffffff;
+            font-size: 18px;
+            flex-shrink: 0;
+
+            &.bg-purple { background-color: #8b5cf6; }
+            &.bg-blue   { background-color: #3b82f6; }
+            &.bg-green  { background-color: #10b981; }
+            &.bg-amber  { background-color: #f59e0b; }
+            &.bg-red    { background-color: #ef4444; }
+            &.bg-teal   { background-color: #06b6d4; }
+        }
+
+        .o_kpi_value {
+            font-size: 1.45rem;
+            font-weight: 800;
+            color: #0f172a;
+            line-height: 1.1;
+        }
+
+        .o_kpi_label {
+            font-size: 11px;
+            font-weight: 600;
+            color: #64748b;
+        }
+    }
+
+    // 4. Analytic & Operational Cards
+    .o_dash_card {
+        background-color: #ffffff;
+        border-radius: 12px;
+        border: 1px solid #f1f5f9;
+        box-shadow: 0 1px 4px rgba(0, 0, 0, 0.04);
+        position: relative;
+        overflow: hidden;
+
+        &::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            display: none;
+        }
+
+        &.o_accent_cyan::before {
+            display: block;
+            background: #38bdf8;
+        }
+
+        &.o_accent_gradient::before {
+            display: block;
+            background: linear-gradient(90deg, #8b5cf6 0%, #f43f5e 50%, #10b981 100%);
+        }
+
+        &.o_accent_orange::before {
+            display: block;
+            background: #f97316;
+        }
+
+        &.o_accent_blue::before {
+            display: block;
+            background: #3b82f6;
+        }
+
+        .o_card_title {
+            font-size: 13px;
+            font-weight: 700;
+            color: #0f172a;
+            letter-spacing: -0.2px;
+        }
+
+        .o_metric_num {
+            letter-spacing: -0.3px;
+        }
+    }
+
+    // 4. Donut Chart Styling
+    .o_donut_box {
+        width: 155px;
+        height: 155px;
+
+        .o_donut_svg {
+            transform: rotate(-90deg);
+            width: 100%;
+            height: 100%;
+
+            .o_donut_seg {
+                cursor: pointer;
+                transition: stroke-width 0.2s ease, opacity 0.2s ease;
+
+                &:hover {
+                    stroke-width: 14;
+                    opacity: 0.9;
+                }
+            }
+        }
+
+        .o_donut_center_text {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            pointer-events: none;
+
+            .o_center_num {
+                line-height: 1;
+            }
+        }
+    }
+
+    .o_dot {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        display: inline-block;
+        flex-shrink: 0;
+    }
+
+    .o_legend_bar {
+        width: 14px;
+        height: 4px;
+        border-radius: 2px;
+        display: inline-block;
+        flex-shrink: 0;
+    }
+
+    .o_sub_metrics_box {
+        background-color: #f8fafc;
+        border: 1px solid #f1f5f9;
+    }
+
+    // 5. Route Progress Bars
+    .o_route_item {
+        transition: transform 0.15s ease;
+
+        &:hover {
+            transform: translateX(2px);
+        }
+
+        .o_route_name {
+            font-size: 11px;
+            font-weight: 600;
+            color: #334155;
+            max-width: 80%;
             display: inline-block;
         }
 
-        // Bar Chart
-        .o_dash_bar_chart {
-            display: flex;
-            align-items: flex-end;
-            justify-content: space-around;
-            height: 250px;
-            padding: 30px 10px 10px;
-            border-bottom: 1px solid #e2e8f0;
-            gap: 12px;
+        .o_progress_track {
+            height: 6px;
+            background-color: #f1f5f9;
+            border-radius: 10px;
+            overflow: hidden;
 
-            .o_bar_col {
-                flex: 1;
-                display: flex;
-                flex-direction: column;
-                align-items: center;
+            .o_progress_fill {
                 height: 100%;
+                border-radius: 10px;
+                transition: width 0.3s ease;
+            }
+        }
+    }
 
-                .o_bars_stack {
-                    flex: 1;
-                    width: 100%;
-                    display: flex;
-                    align-items: flex-end;
-                    justify-content: center;
-                    gap: 8px;
+    // 6. Booking Pipeline
+    .o_pipeline_list {
+        .o_pipe_row {
+            background-color: #f8fafc;
+            border-radius: 8px;
+            border-left: 3px solid transparent;
+            font-size: 12px;
+            font-weight: 600;
+            color: #334155;
+            transition: background 0.15s ease, transform 0.15s ease;
+
+            &:hover {
+                background-color: #f1f5f9;
+                transform: translateX(2px);
+            }
+
+            &.border-gray   { border-left-color: #94a3b8; }
+            &.border-blue   { border-left-color: #3b82f6; }
+            &.border-amber  { border-left-color: #f59e0b; }
+            &.border-purple { border-left-color: #8b5cf6; }
+            &.border-green  { border-left-color: #10b981; }
+        }
+    }
+
+    .o_pipe_footer {
+        background-color: #f8fafc;
+        border: 1px solid #f1f5f9;
+
+        &:hover {
+            background-color: #f1f5f9;
+        }
+    }
+
+    // 7. Tables in Operational Cards
+    .o_view_all_link {
+        color: #6366f1;
+        text-decoration: none;
+        font-size: 11px;
+
+        &:hover {
+            color: #4f46e5;
+            text-decoration: underline;
+        }
+    }
+
+    .o_dash_table {
+        font-size: 11px;
+
+        th {
+            color: #94a3b8;
+            font-weight: 600;
+            padding: 4px 6px;
+            border-bottom: 1px solid #f1f5f9;
+        }
+
+        td {
+            padding: 7px 6px;
+            vertical-align: middle;
+            color: #334155;
+        }
+
+        tbody tr {
+            transition: background 0.15s ease;
+
+            &:hover {
+                background-color: #f8fafc;
+            }
+        }
+    }
+
+    // Soft Badges for State
+    .o_badge_cancelled {
+        background-color: #fee2e2;
+        color: #dc2626;
+        font-size: 10px;
+        font-weight: 600;
+        padding: 3px 8px;
+    }
+    .o_badge_done {
+        background-color: #dcfce7;
+        color: #16a34a;
+        font-size: 10px;
+        font-weight: 600;
+        padding: 3px 8px;
+    }
+    .o_badge_invoiced {
+        background-color: #f3e8ff;
+        color: #9333ea;
+        font-size: 10px;
+        font-weight: 600;
+        padding: 3px 8px;
+    }
+    .o_badge_confirmed {
+        background-color: #dbeafe;
+        color: #2563eb;
+        font-size: 10px;
+        font-weight: 600;
+        padding: 3px 8px;
+    }
+    .o_badge_submitted {
+        background-color: #fef3c7;
+        color: #d97706;
+        font-size: 10px;
+        font-weight: 600;
+        padding: 3px 8px;
+    }
+    .o_badge_draft {
+        background-color: #f1f5f9;
+        color: #64748b;
+        font-size: 10px;
+        font-weight: 600;
+        padding: 3px 8px;
+    }
+
+    // 8. Alerts Box
+    .o_alert_box {
+        background-color: #fff1f2;
+        border: 1px solid #ffe4e6;
+        transition: background 0.15s ease, transform 0.15s ease;
+
+        &:hover {
+            background-color: #ffe4e6;
+            transform: translateY(-1px);
+        }
+
+        .o_alert_icon_danger {
+            width: 26px;
+            height: 26px;
+            border-radius: 50%;
+            background-color: #ef4444;
+            color: #ffffff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            font-weight: bold;
+            flex-shrink: 0;
+        }
+    }
+
+    // 9. Top Shippers
+    .o_shipper_row {
+        background-color: #f8fafc;
+        border: 1px solid #f1f5f9;
+        transition: background 0.15s ease, transform 0.15s ease;
+
+        &:hover {
+            background-color: #f1f5f9;
+            transform: translateY(-1px);
+        }
+
+        .o_rank_box {
+            width: 24px;
+            height: 24px;
+            border-radius: 6px;
+            background-color: #ede9fe;
+            color: #6d28d9;
+            font-weight: 700;
+            font-size: 11px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+        .o_shipper_pct {
+            color: #6366f1;
+        }
+    }
+
+    .cursor-pointer {
+        cursor: pointer;
+    }
+
+    // ========================================================
+    // DARK MODE STYLES
+    // ========================================================
+    &.o_dark_mode {
+        background-color: #0f172a;
+        color: #f8fafc;
+
+        .o_dash_header {
+            .o_dash_title {
+                color: #f8fafc;
+            }
+
+            .o_date_pill_group {
+                background-color: #1e293b;
+                border-color: #334155;
+
+                .o_pill_btn {
+                    color: #94a3b8;
+
+                    &:hover {
+                        color: #ffffff;
+                    }
                 }
+            }
 
-                .o_bar {
-                    width: 30px;
-                    max-width: 42%;
-                    border-radius: 6px 6px 0 0;
-                    position: relative;
-                    transition: height 0.3s ease;
+            .o_theme_toggle_btn {
+                background-color: #1e293b;
+                border-color: #334155;
+                color: #fbbf24;
 
-                    &.o_bar_rev {
-                        background: linear-gradient(180deg, #a78bfa, #7c3aed);
-                    }
-
-                    &.o_bar_exp {
-                        background: linear-gradient(180deg, #f87171, #ef4444);
-                    }
-
-                    .o_tip_label {
-                        position: absolute;
-                        top: -20px;
-                        left: 50%;
-                        transform: translateX(-50%);
-                        font-size: 10px;
-                        font-weight: 700;
-                        white-space: nowrap;
-                        color: #475569;
-                    }
-                }
-
-                .o_month_tag {
-                    font-size: 11px;
-                    font-weight: 600;
-                    margin-top: 8px;
+                &:hover {
+                    background-color: #334155;
                 }
             }
         }
 
-        // Donut Chart
-        .o_donut_wrapper {
-            padding: 10px;
+        .o_kpi_card,
+        .o_dash_card {
+            background-color: #1e293b;
+            border-color: #334155;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.35);
 
-            .o_donut_container {
-                width: 180px;
-                height: 180px;
-
-                .o_donut_svg {
-                    width: 100%;
-                    height: 100%;
-                    transform: rotate(-90deg);
-
-                    .o_donut_segment {
-                        cursor: pointer;
-                        transition: stroke-width 0.2s ease, opacity 0.2s ease;
-
-                        &:hover {
-                            stroke-width: 17;
-                            opacity: 0.9;
-                        }
-                    }
-                }
-
-                .o_donut_center {
-                    position: absolute;
-                    top: 50%;
-                    left: 50%;
-                    transform: translate(-50%, -50%);
-                    pointer-events: none;
-                }
+            .o_card_title,
+            .o_kpi_value,
+            .o_center_num,
+            .o_metric_num {
+                color: #f8fafc !important;
             }
 
-            .cursor-pointer {
-                cursor: pointer;
-                transition: transform 0.15s ease;
+            .text-dark {
+                color: #f8fafc !important;
+            }
+        }
 
-                &:hover {
-                    transform: translateY(-2px);
-                }
+        .o_sub_metrics_box,
+        .o_pipe_footer,
+        .o_pipeline_list .o_pipe_row,
+        .o_shipper_row {
+            background-color: #0f172a;
+            border-color: #334155;
+            color: #f8fafc;
+        }
+
+        .o_dash_table {
+            th {
+                border-color: #334155;
+            }
+            td {
+                color: #e2e8f0;
+            }
+            tbody tr:hover {
+                background-color: #334155;
+            }
+        }
+
+        .o_progress_track {
+            background-color: #334155;
+        }
+
+        .o_route_name {
+            color: #cbd5e1;
+        }
+
+        .o_alert_box {
+            background-color: rgba(239, 68, 68, 0.15);
+            border-color: rgba(239, 68, 68, 0.3);
+
+            .fw-bold {
+                color: #fca5a5 !important;
             }
         }
     }

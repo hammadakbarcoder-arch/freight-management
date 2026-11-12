@@ -6,3 +6,4 @@ from . import hr_employee
 from . import transport_schedule
 from . import transport_trip
 from . import transport_vehicle_request
+from . import transport_dashboard

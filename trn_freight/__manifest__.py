@@ -17,6 +17,7 @@ A complete end-to-end multimodal logistics and shipping management suite.
     """,
     'category': 'Operations/Logistics',
     'author': 'Hammad Akbar',
+    'maintainer': 'Hammad Akbar',
     'website': 'https://hammad-akbar-odoo-store.netlify.app',
     'support': 'rrajahammadakbar@gmail.com',
     'license': 'LGPL-3',

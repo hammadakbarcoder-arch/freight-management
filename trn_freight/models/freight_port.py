@@ -20,5 +20,6 @@ class FreightPort(models.Model):
     company_id = fields.Many2one(
         'res.company',
         string='Company',
-        default=lambda self: self.env.company
+        default=False,
+        help='Leave empty to make this port globally accessible across all companies.'
     )

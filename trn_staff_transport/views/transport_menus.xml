@@ -44,7 +44,15 @@
               parent="menu_staff_transport_operations"
               action="action_logistics_transport_trip"
               sequence="10"/>
-        <!-- Operations -> Generate Trips -->
+
+    <!-- Operations -> Passengers -->
+    <menuitem id="menu_logistics_transport_trip_passenger_operations"
+              name="Passengers"
+              parent="menu_staff_transport_operations"
+              action="action_logistics_transport_trip_passenger"
+              sequence="15"/>
+
+    <!-- Operations -> Generate Trips -->
     <menuitem id="menu_generate_daily_trips_wizard"
               name="Generate Trips"
               parent="menu_staff_transport_operations"
@@ -57,4 +65,17 @@
               parent="menu_staff_transport_operations"
               action="action_logistics_transport_vehicle_request"
               sequence="30"/>
+
+    <!-- Reporting Menu -->
+    <menuitem id="menu_staff_transport_reporting"
+              name="Reporting"
+              parent="menu_staff_transport_root"
+              sequence="20"/>
+
+    <!-- Reporting -> Passengers -->
+    <menuitem id="menu_logistics_transport_trip_passenger_reporting"
+              name="Passengers"
+              parent="menu_staff_transport_reporting"
+              action="action_logistics_transport_trip_passenger"
+              sequence="10"/>
 </odoo>

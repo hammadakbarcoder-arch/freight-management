@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 from odoo import models, fields, api, _
-from odoo.exceptions import UserError
+from odoo.exceptions import UserError, ValidationError
 
 
 class LogisticsTransportTrip(models.Model):
@@ -205,22 +205,30 @@ class LogisticsTransportTrip(models.Model):
 class LogisticsTransportTripPassenger(models.Model):
     _name = 'logistics.transport.trip.passenger'
     _description = 'Transport Trip Passenger'
-    _order = 'trip_id, id'
+    _order = 'trip_id desc, sequence, id'
+
+    _unique_trip_employee = models.Constraint(
+        "UNIQUE (trip_id, employee_id)",
+        "An employee can appear only once on a trip."
+    )
 
     trip_id = fields.Many2one(
         'logistics.transport.trip', string='Trip', required=True, ondelete='cascade'
+    )
+    route_id = fields.Many2one(
+        'logistics.transport.route', string='Route',
+        related='trip_id.route_id', store=True, readonly=True
     )
     employee_id = fields.Many2one(
         'hr.employee', string='Employee', required=True
     )
     pickup_stop_id = fields.Many2one(
-        'logistics.transport.stop', string='Pickup Stop',
-        domain="[('route_id', '=', parent.route_id)]"
+        'logistics.transport.stop', string='Pickup Stop'
     )
     drop_off_stop_id = fields.Many2one(
-        'logistics.transport.stop', string='Drop-off Stop',
-        domain="[('route_id', '=', parent.route_id)]"
+        'logistics.transport.stop', string='Drop-off Stop'
     )
+    sequence = fields.Integer(string='Sequence', default=10)
     status = fields.Selection(
         [
             ('expected', 'Expected'),
@@ -231,12 +239,61 @@ class LogisticsTransportTripPassenger(models.Model):
         ],
         string='Status', default='expected', required=True
     )
-    boarding_time = fields.Datetime(string='Boarding Time', readonly=True)
-    drop_time = fields.Datetime(string='Drop Time', readonly=True)
+    boarding_time = fields.Datetime(string='Boarding Time')
+    drop_time = fields.Datetime(string='Drop Time')
     company_id = fields.Many2one(
         'res.company', string='Company',
         related='trip_id.company_id', store=True, readonly=True
     )
+    notes = fields.Text(string='Notes')
+
+    def _compute_display_name(self):
+        for rec in self:
+            emp_name = rec.employee_id.name if rec.employee_id else 'Passenger'
+            trip_name = rec.trip_id.name if rec.trip_id else ''
+            rec.display_name = f"{emp_name} ({trip_name})" if trip_name else emp_name
+
+    def write(self, vals):
+        if 'employee_id' in vals:
+            for rec in self:
+                if rec.employee_id and vals['employee_id'] != rec.employee_id.id:
+                    raise ValidationError(_("Employee cannot be changed once the passenger record is saved."))
+        if 'trip_id' in vals:
+            for rec in self:
+                if rec.trip_id and vals['trip_id'] != rec.trip_id.id:
+                    raise ValidationError(_("Trip cannot be changed once the passenger record is saved."))
+        return super().write(vals)
+
+    @api.constrains('employee_id', 'trip_id')
+    def _check_employee_belongs_to_trip_route(self):
+        for rec in self:
+            if rec.employee_id and rec.trip_id and rec.trip_id.route_id:
+                if rec.employee_id.transport_route_id != rec.trip_id.route_id:
+                    raise ValidationError(_("Selected employee does not belong to the trip route."))
+
+    @api.constrains('pickup_stop_id', 'trip_id')
+    def _check_pickup_stop_belongs_to_route(self):
+        for rec in self:
+            if rec.pickup_stop_id and rec.trip_id and rec.trip_id.route_id:
+                if rec.pickup_stop_id.route_id != rec.trip_id.route_id:
+                    raise ValidationError(_("Passenger pickup stop must belong to the trip route."))
+
+    @api.constrains('drop_off_stop_id', 'trip_id')
+    def _check_drop_off_stop_belongs_to_route(self):
+        for rec in self:
+            if rec.drop_off_stop_id and rec.trip_id and rec.trip_id.route_id:
+                if rec.drop_off_stop_id.route_id != rec.trip_id.route_id:
+                    raise ValidationError(_("Passenger drop-off stop must belong to the trip route."))
+
+    @api.onchange('trip_id')
+    def _onchange_trip_id(self):
+        domain = {'employee_id': [], 'pickup_stop_id': [], 'drop_off_stop_id': []}
+        if self.trip_id and self.trip_id.route_id:
+            route_id = self.trip_id.route_id.id
+            domain['employee_id'] = [('transport_route_id', '=', route_id)]
+            domain['pickup_stop_id'] = [('route_id', '=', route_id)]
+            domain['drop_off_stop_id'] = [('route_id', '=', route_id)]
+        return {'domain': domain}
 
     @api.onchange('employee_id')
     def _onchange_employee_id(self):

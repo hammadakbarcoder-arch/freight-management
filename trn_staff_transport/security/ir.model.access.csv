@@ -13,4 +13,5 @@ access_generate_daily_trips_wizard_user,generate.daily.trips.wizard.user,model_g
 access_generate_daily_trips_wizard_manager,generate.daily.trips.wizard.manager,model_generate_daily_trips_wizard,group_staff_transport_manager,1,1,1,1
 access_logistics_transport_vehicle_request_user,logistics.transport.vehicle.request.user,model_logistics_transport_vehicle_request,group_staff_transport_user,1,1,1,1
 access_logistics_transport_vehicle_request_manager,logistics.transport.vehicle.request.manager,model_logistics_transport_vehicle_request,group_staff_transport_manager,1,1,1,1
+access_transport_dashboard_user,transport.dashboard.user,model_transport_dashboard,base.group_user,1,0,0,0
 
