@@ -17,9 +17,7 @@ Freight Management Dashboard
     'maintainer': 'Hammad Akbar',
     'website': 'https://hammad-akbar-odoo-store.netlify.app',
     'support': 'rrajahammadakbar@gmail.com',
-    'license': 'OPL-1',
-    'price': 34.00,
-    'currency': 'USD',
+    'license': 'LGPL-3',
     'images': ['static/description/banner.png'],
     'depends': [
         'trn_freight',
